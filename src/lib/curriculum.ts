@@ -5105,7 +5105,397 @@ const DETAILED_LESSONS: Record<number, Partial<Lesson>> = {
       xpReward: 100,
     },
   },
+
+  61: {
+    title: "The Metal Layer",
+    subtitle: "Assembly Genesis — what lies beneath C",
+    tags: ["intro", "genesis", "register-expert"],
+    theory: {
+      sections: [
+        {
+          heading: "Machine Code",
+          content:
+            "Machine code is the raw binary that the CPU executes directly. Each instruction is encoded as a sequence of bytes — opcode bytes specify the operation, while ModRM and SIB bytes encode operands and addressing modes. x86-64 uses a variable-length encoding: common instructions like mov rax, rbx take 3 bytes, while complex ones can stretch to 15 bytes. Disassemblers like objdump reverse this process, translating bytes back into human-readable mnemonics.",
+        },
+        {
+          heading: "Mnemonics",
+          content:
+            "Assembly mnemonics are human-readable abbreviations for machine code instructions. mov, add, sub, jmp each map to specific opcode bytes. NASM (Netwide Assembler) uses Intel syntax: mov rax, rbx means 'move rbx into rax.' The assembler handles the tedious work of computing opcodes, ModRM bytes, and immediate encodings so you can reason at a higher level.",
+          codeExample: `; x86-64 NASM syntax
+section .data
+    msg db 'Hello, registers!', 0
+
+section .text
+global _start
+
+_start:
+    ; System call: write(1, msg, len)
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg
+    mov rdx, 18
+    syscall
+    mov rax, 60
+    xor rdi, rdi
+    syscall`,
+        },
+        {
+          heading: "ISA and the Register Expert Mindset",
+          content:
+            "The Instruction Set Architecture (ISA) is the contract between software and hardware — the complete set of instructions your CPU can execute. x86-64 is a CISC ISA with over 1000 instructions, variable-length encoding, and decades of backward compatibility. As a Register Expert, you no longer take the compiler's word for granted — you read the disassembly, understand each instruction's cost, and write assembly when only the metal will do.",
+        },
+      ],
+    },
+    playground: {
+      defaultCode: `; x86-64 NASM syntax
+section .data
+    msg db 'Hello, registers!', 0
+
+section .text
+global _start
+
+_start:
+    ; System call: write(1, msg, len)
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg
+    mov rdx, 18
+    syscall
+    mov rax, 60
+    xor rdi, rdi
+    syscall`,
+      language: "asm",
+      runnable: true,
+    },
+    exercises: [
+      {
+        id: "d61-q1", type: "quiz", title: "Machine Code",
+        description: "Understanding the binary layer",
+        question: "What determines the variable-length encoding in x86-64 instructions?",
+        options: [
+          { id: "a", text: "The compiler version", correct: false },
+          { id: "b", text: "The opcode, ModRM, and SIB bytes", correct: true },
+          { id: "c", text: "The operating system", correct: false },
+          { id: "d", text: "The number of registers used", correct: false },
+        ],
+        xpReward: 25,
+      },
+      {
+        id: "d61-q2", type: "quiz", title: "NASM Syntax",
+        description: "Intel syntax basics",
+        question: "In NASM Intel syntax, what does 'mov rax, rbx' mean?",
+        options: [
+          { id: "a", text: "Move rax into rbx", correct: false },
+          { id: "b", text: "Move rbx into rax", correct: true },
+          { id: "c", text: "Compare rax to rbx", correct: false },
+          { id: "d", text: "Add rbx to rax", correct: false },
+        ],
+        xpReward: 25,
+      },
+      {
+        id: "d61-c1", type: "code", title: "First System Call",
+        description: "Write a NASM program that calls sys_exit(42)",
+        starterCode: `section .text
+global _start
+
+_start:
+    ; TODO: Set up sys_exit (rax=60) with exit code 42
+    nop`,
+        hints: ["Use mov rax, 60 for sys_exit", "Set rdi to the exit code", "Don't forget syscall"],
+        xpReward: 50,
+      },
+    ],
+    assignment: {
+      id: "d61-a1", title: "Register Expert Boot",
+      description: "Write a NASM program that prints a multi-line banner using only sys_write calls, then exits with code 0.",
+      requirements: [
+        "Print at least 3 lines of text using sys_write (rax=1)",
+        "Use a separate syscall for each line",
+        "Each line must end with a newline (0x0A)",
+        "Exit with code 0 using sys_exit",
+        "Comment each instruction explaining what it does",
+      ],
+      starterCode: `section .data
+    line1 db 'Assembly Genesis', 0xA
+    len1  equ $ - line1
+
+section .text
+global _start
+
+_start:
+    ; Your multi-line banner here
+    nop`,
+      rubric: [
+        { criterion: "Correct sys_write calls (3+ lines)", points: 30 },
+        { criterion: "Correct sys_exit with code 0", points: 20 },
+        { criterion: "Each instruction commented", points: 25 },
+        { criterion: "Clean code and proper section usage", points: 25 },
+      ],
+      xpReward: 100,
+    },
+  },
+
+  81: {
+    title: "C and ASM Unification",
+    subtitle: "Inline assembly, GCC constraints, and the silicon master's toolkit",
+    tags: ["inline", "gcc", "silicon-master"],
+    theory: {
+      sections: [
+        {
+          heading: "GCC Inline Assembly",
+          content:
+            "GCC's __asm__ keyword embeds assembly directly in C code. The basic format is: __asm__(\"instructions\" : outputs : inputs : clobbers). The extended syntax with constraints lets the compiler manage operand placement. Outputs use '=' (write-only) or '+' (read-write). Inputs need no prefix. The compiler generates code to move values between your inline asm operands and the locations the constraints specify.",
+          codeExample: `; In C code:
+; int x = 10;
+; __asm__ volatile(
+;     "add $5, %0"
+;     : "+r"(x)       // output/input
+;     :               // no pure inputs
+;     : "cc"          // clobbered flags
+; );
+; // x is now 15`,
+        },
+        {
+          heading: "Constraints and Clobbers",
+          content:
+            "Constraints tell GCC where operands can live: 'r' (register), 'm' (memory), 'i' (immediate), 'g' (any). The clobber list declares resources the asm corrupts: 'cc' (condition codes), 'memory' (unspecified memory), or specific registers. Getting constraints wrong produces incorrect code silently — one of the most dangerous sharp edges in C.",
+        },
+        {
+          heading: "When to Drop to Assembly",
+          content:
+            "Inline assembly is justified in exactly three scenarios: (1) accessing CPU features the compiler doesn't expose (CPUID, RDTSC), (2) implementing optimized primitives (SIMD math, atomic ops) the compiler can't generate, and (3) interacting with hardware (special instructions, interrupt management). Everywhere else, let the compiler do its job — modern optimizers produce assembly that beats hand-tuned code on most workloads.",
+        },
+      ],
+    },
+    playground: {
+      defaultCode: `#include <stdio.h>
+
+int main(void) {
+    int x = 10, y = 20, result;
+
+    __asm__(
+        "imul %2, %1; mov %1, %0"
+        : "=r"(result)
+        : "r"(x), "r"(y)
+        : "cc"
+    );
+
+    printf("x=%d, y=%d, result=%d\\n", x, y, result);
+    return 0;
+}`,
+      language: "c",
+      runnable: true,
+    },
+    exercises: [
+      {
+        id: "d81-q1", type: "quiz", title: "Inline ASM Format",
+        description: "Understanding the extended asm syntax",
+        question: "In GCC inline assembly, what does constraint 'r' mean?",
+        options: [
+          { id: "a", text: "A memory operand", correct: false },
+          { id: "b", text: "A register operand", correct: true },
+          { id: "c", text: "An immediate value", correct: false },
+          { id: "d", text: "A read-only operand", correct: false },
+        ],
+        xpReward: 25,
+      },
+      {
+        id: "d81-q2", type: "quiz", title: "Clobbers",
+        description: "Understanding the clobber list",
+        question: "Which clobber tells GCC that inline assembly modifies the condition flags?",
+        options: [
+          { id: "a", text: "\"flags\"", correct: false },
+          { id: "b", text: "\"cc\"", correct: true },
+          { id: "c", text: "\"rflags\"", correct: false },
+          { id: "d", text: "\"condition\"", correct: false },
+        ],
+        xpReward: 25,
+      },
+      {
+        id: "d81-c1", type: "code", title: "Inline Sum",
+        description: "Write a C program with inline assembly that sums two integers",
+        starterCode: `#include <stdio.h>
+
+int main(void) {
+    int a = 25, b = 17, sum;
+    /* TODO: Use inline asm to compute a + b, store in sum */
+    printf("sum = %d\\n", sum);
+    return 0;
+}`,
+        hints: ["Use '+r' for input-output operands", "Use imul or add in the asm block", "Don't forget 'cc' clobber"],
+        xpReward: 50,
+      },
+    ],
+    assignment: {
+      id: "d81-a1", title: "Inline Assembly Toolkit",
+      description: "Create a set of C functions that use inline assembly to implement fast bit operations: popcount, bit scan reverse, and rotate left. Each function must be no more than a few lines of C wrapping a single asm block.",
+      requirements: [
+        "Implement popcount using inline asm with 'popcnt' instruction",
+        "Implement bit scan reverse using 'bsr'",
+        "Implement rotate left (no C rotation operator available)",
+        "Write a test harness that validates all three functions",
+        "Include a clobber list for each function",
+      ],
+      starterCode: `#include <stdio.h>
+#include <stdint.h>
+
+int popcount(uint64_t x) {
+    int result;
+    /* TODO: popcnt x, result */
+    return result;
+}
+
+int main(void) {
+    printf("popcount(0xFF) = %d\\n", popcount(0xFF));
+    return 0;
+}`,
+      rubric: [
+        { criterion: "popcount implementation", points: 30 },
+        { criterion: "Bit scan reverse implementation", points: 25 },
+        { criterion: "Rotate left implementation", points: 25 },
+        { criterion: "Test harness with validation", points: 20 },
+      ],
+      xpReward: 100,
+    },
+  },
+
+  100: {
+    title: "The Silicon Masterpiece",
+    subtitle: "100 days of mastery — capstone reflection and the road ahead",
+    tags: ["capstone", "final", "master"],
+    theory: {
+      sections: [
+        {
+          heading: "The Journey Across 100 Days",
+          content:
+            "You began with printf and a blinking cursor. One hundred days later, you've traced the arc from C variables and pointers through dynamic memory, file I/O, data structures, and system calls — then crossed the bridge into bare metal: x86-64 registers, SIMD, paging, interrupts, bootloaders, inline assembly, and performance counter analysis. This is a rare skillset. Few programmers ever understand both C and assembly at this depth. You are now equipped to read the machine's native language.",
+        },
+        {
+          heading: "The Silicon Master's Arsenal",
+          content:
+            "Your toolkit now spans the full stack: C systems programming (memory management, concurrency, networking, embedded patterns) and x86-64 assembly (instruction encoding, ABI, SIMD optimization, kernel interfaces, security analysis). You can read a disassembly and see the compiler's intent, write inline assembly when performance demands it, and communicate with hardware at the port and interrupt level.",
+          codeExample: `; ASM Capstone — Final Project
+; ============================
+;
+; Complete your chosen project.
+; Ensure:
+; - Clean compilation with no errors
+; - Handles edge cases gracefully
+; - Well-commented code
+; - Performance considerations addressed
+;
+; "The metal speaks to those who listen."
+
+section .text
+global _start
+_start:
+    ; Your silicon masterpiece begins here
+    nop`,
+        },
+        {
+          heading: "Beyond Day 100",
+          content:
+            "Mastery is not a finish line — it's a practice. Here are your next frontiers: (1) Write a bootable kernel in NASM that enters 64-bit long mode. (2) Implement a custom memory allocator in C and benchmark it against glibc malloc. (3) Contribute to an open-source project that works close to the metal (kernel, embedded, game engine, browser JS engine). (4) Learn ARM64 assembly — your x86 knowledge transfers directly; the ISA differences will deepen your architectural intuition. (5) Teach someone else: the best way to solidify mastery is to guide another through the first 50 days.",
+        },
+      ],
+    },
+    playground: {
+      defaultCode: `; Choose your capstone:
+; 1. Bootable kernel (protected mode)
+; 2. Custom encryption/compression tool
+; 3. Retro game for boot sector
+; 4. ELF packer/protector
+; 5. Performance-critical library function
+
+section .text
+global _start
+_start:
+    ; Your silicon masterpiece begins here
+    nop`,
+      language: "asm",
+      runnable: true,
+    },
+    exercises: [
+      {
+        id: "d100-q1", type: "quiz", title: "Full Stack",
+        description: "Reflecting on 100 days of learning",
+        question: "Which of the following statements best describes the relationship between C and assembly?",
+        options: [
+          { id: "a", text: "Assembly is obsolete; C compilers always generate better code", correct: false },
+          { id: "b", text: "C provides portable abstractions; assembly gives you the full power and responsibility of the machine", correct: true },
+          { id: "c", text: "They are completely independent languages with no connection", correct: false },
+          { id: "d", text: "Assembly is just C with different syntax", correct: false },
+        ],
+        xpReward: 25,
+      },
+      {
+        id: "d100-q2", type: "quiz", title: "The Expert Mindset",
+        description: "Advanced systems thinking",
+        question: "What is the primary value of knowing assembly for a C programmer?",
+        options: [
+          { id: "a", text: "Being able to write everything in assembly", correct: false },
+          { id: "b", text: "Understanding what the compiler actually does, optimizing smarter, and debugging at the lowest level", correct: true },
+          { id: "c", text: "It looks impressive on a resume", correct: false },
+          { id: "d", text: "Avoiding the need for C altogether", correct: false },
+        ],
+        xpReward: 25,
+      },
+      {
+        id: "d100-c1", type: "code", title: "Silicon Signature",
+        description: "Write a program that prints a multi-line ASCII art sigil and your 100-day achievement using NASM syscalls",
+        starterCode: `section .data
+    ; Your ASCII art here
+
+section .text
+global _start
+
+_start:
+    ; Your masterpiece output
+    nop`,
+        hints: ["Plan your ASCII art carefully", "Use multiple sys_write calls", "End with sys_exit 0"],
+        xpReward: 50,
+      },
+    ],
+    assignment: {
+      id: "d100-a1", title: "The Grand Synthesis",
+      description: "Choose one capstone project from the list and complete it with full documentation: (1) bootable kernel, (2) custom encryption tool, (3) retro boot-sector game, (4) ELF packer, (5) performance-critical library routine. Your submission must compile cleanly, handle edge cases, and include a README explaining the architecture.",
+      requirements: [
+        "Fully working code that compiles and runs without errors",
+        "README with architecture overview, build instructions, and design decisions",
+        "Comments explaining every significant section",
+        "Test cases demonstrating correctness with edge cases",
+        "Performance notes (for optimization-focused projects)",
+      ],
+      starterCode: `; Your Name — Silicon Masterpiece
+; 100-Day Capstone Project
+; ==========================
+;
+; Complete your chosen project.
+;
+; Submission checklist:
+; [ ] Code compiles and runs
+; [ ] README with build instructions
+; [ ] Architecture diagram or explanation
+; [ ] Test results with sample output
+; [ ] Self-assessment: what did you learn?
+
+section .text
+global _start
+_start:
+    ; Your silicon masterpiece begins here
+    nop`,
+      rubric: [
+        { criterion: "Functional code with no errors", points: 30 },
+        { criterion: "Architecture documentation (README)", points: 25 },
+        { criterion: "Code comments and quality", points: 20 },
+        { criterion: "Test cases and edge cases", points: 15 },
+        { criterion: "Self-assessment and reflection", points: 10 },
+      ],
+      xpReward: 100,
+    },
+  },
 };
+
 interface DayBlueprint {
   title: string;
   subtitle: string;
@@ -5222,88 +5612,536 @@ const ASM_CURRICULUM: DayBlueprint[] = [
   { title: "Capstone: ASM Final Project", subtitle: "Complete, document, and present your assembly project", language: "asm", tags: ["capstone"], theoryTopics: ["Implementation", "Testing", "Documentation"], codeTemplate: `; ASM Capstone — Final Project\n; ============================\n;\n; Complete your chosen project.\n; Ensure:\n; - Clean compilation with no errors\n; - Handles edge cases gracefully\n; - Well-commented code\n; - Performance considerations addressed\n;\n; Submission checklist:\n; [ ] Code compiles and runs\n; [ ] README with build instructions\n; [ ] Architecture diagram or explanation\n; [ ] Test results with sample output\n; [ ] Self-assessment: what did you learn?\n;\n; "The metal speaks to those who listen."\n\nsection .text\nglobal _start\n_start:\n    ; Your silicon masterpiece begins here\n    nop` },
 ];
 
-function generateDefaultExercises(day: number, lang: "c" | "asm"): Lesson["exercises"] {
+const TOPIC_CONTENT: Record<string, string> = {
+  // Day 61-80 ASM topics
+  "Machine code": "Machine code is the raw binary that the CPU executes directly. Each instruction is encoded as a sequence of bytes — opcode bytes specify the operation, while ModRM and SIB bytes encode operands and addressing modes. x86-64 uses a variable-length encoding: common instructions like `mov rax, rbx` take 3 bytes, while complex ones can stretch to 15 bytes. Disassemblers like objdump reverse this process, translating bytes back into human-readable mnemonics.",
+  "Mnemonics": "Assembly mnemonics are human-readable abbreviations for machine code instructions. `mov`, `add`, `sub`, `jmp` each map to specific opcode bytes. NASM (Netwide Assembler) uses Intel syntax: `mov rax, rbx` means \"move rbx into rax.\" The assembler handles the tedious work of computing opcodes, ModRM bytes, and immediate encodings so you can reason at a higher level.",
+  "ISA": "The Instruction Set Architecture (ISA) is the contract between software and hardware — the complete set of instructions a CPU can execute. x86-64 is a CISC (Complex Instruction Set Computer) ISA with over 1000 instructions, variable-length encoding, and decades of backward compatibility. Every program, regardless of language, ultimately reduces to ISA instructions executed sequentially by the CPU pipeline.",
+  "Registers": "Registers are the fastest memory in the CPU — tiny storage locations etched directly into the silicon. x86-64 provides 16 general-purpose registers (RAX, RBX, RCX, RDX, RSI, RDI, RBP, RSP, R8–R15), each 64 bits wide. Unlike RAM, register access has zero latency: it takes a single clock cycle. Compilers fight over every register allocation because spilling to memory kills performance.",
+  "ALU": "The Arithmetic Logic Unit (ALU) is the computational heart of the CPU — a circuit that performs arithmetic (add, subtract, multiply, divide) and logical (AND, OR, XOR, NOT, shift) operations on register values. Modern ALUs are pipelined and can often execute multiple operations per cycle. Flag registers (CF, ZF, SF, OF) are set by ALU results and used by conditional jump instructions.",
+  "Pipeline": "CPU pipelining breaks instruction execution into stages: Fetch → Decode → Execute → Memory Access → Writeback. A 5-stage pipeline can have 5 instructions in flight simultaneously, each at a different stage. Hazards (data, control, structural) stall the pipeline; compilers and manual assembly scheduling reorder instructions to minimize these stalls.",
+  "MOV": "The MOV instruction is the workhorse of assembly — it copies data between registers, memory, and immediates. Importantly, MOV does not modify flags. x86-64 supports MOV with various operand sizes: `mov rax, rbx` (64-bit), `mov eax, ebx` (32-bit, zero-extends), `mov ax, bx` (16-bit), `mov al, bl` (8-bit). Writing to a 32-bit register zero-extends to the full 64-bit register in x86-64.",
+  "Immediate values": "Immediates are constant values embedded directly in the instruction encoding. `mov rax, 42` encodes the value 42 within the instruction bytes. x86-64 supports 8-bit (sign-extended), 16-bit, and 32-bit immediates; loading a full 64-bit immediate requires the `mov rax, imm64` mnemonic (10-byte instruction).",
+  "Register sizes": "x86-64 registers support sub-register access: the lower 32 bits of RAX are EAX, lower 16 bits are AX, and AX is split into AH (high byte) and AL (low byte). Partial register writes can cause performance penalties due to false dependencies; prefer `movzx` (move with zero-extend) when combining different sizes.",
+  "ADD/SUB": "ADD and SUB perform integer addition and subtraction on register or memory operands. Both set the flag register based on the result: ZF (zero), SF (sign), CF (carry/borrow), OF (overflow). ADD is the most common instruction in any program; modern x86 CPUs can execute multiple ADD instructions per cycle through pipelining.",
+  "MUL/DIV": "MUL and DIV handle multiplication and division. MUL multiplies RAX by the operand, storing the 128-bit result in RDX:RAX. DIV divides RDX:RAX by the operand, storing quotient in RAX and remainder in RDX. Signed variants IMUL and IDIV handle sign extension. DIV is notoriously slow (~20–40 cycles); compilers replace division by constants with multiplication by reciprocals.",
+  "Overflow flags": "The Overflow Flag (OF) is set when signed arithmetic produces a result outside the representable range. Carry Flag (CF) handles unsigned overflow. Together they let you detect and react to numeric boundaries — critical for security (integer overflow exploits) and correctness in systems code.",
+  "AND/OR/XOR": "AND, OR, and XOR perform bitwise logic on register/memory operands. AND is used for masking bits, OR for setting bits, XOR for toggling. `xor eax, eax` is the canonical way to zero a register — it's smaller and faster than `mov eax, 0` (2 bytes vs 5). XOR of a value with itself always produces zero.",
+  "SHL/SHR": "SHL (shift left) and SHR (shift right) move bits within a register. A left shift by N multiplies by 2^N; a right shift divides by 2^N for unsigned values. Arithmetic shifts (SAR for signed right shift) preserve the sign bit. x86-64 also supports `shld`/`shrd` for double-precision shifts across paired registers.",
+  "Flags": "The RFLAGS register holds condition flags that record the outcome of arithmetic and logical operations: ZF (result zero), SF (result negative), CF (carry/borrow), OF (signed overflow), PF (parity), AF (BCD carry). These flags are read by conditional jump (Jcc), conditional move (CMOVcc), and SETcc instructions to implement branching logic.",
+  "CMP": "CMP subtracts its second operand from the first and discards the result — it only updates the flags register. This is the fundamental comparison primitive in x86; all conditional jumps (JE, JNE, JG, JL, JGE, JLE) test flags set by a preceding CMP. For unsigned comparisons, use JA/JB; for signed, use JG/JL.",
+  "Flags register": "The RFLAGS register is updated by most arithmetic instructions. Conditional jumps inspect specific bits: JZ/JE checks ZF=1, JNZ/JNE checks ZF=0, JG checks ZF=0 and SF=OF, JL checks SF≠OF. Understanding flag behavior is essential for writing correct control flow in assembly — one wrong assumption causes silent logic errors.",
+  "JE/JNE/JG/JL": "Conditional jump instructions transfer control based on flag states. JE (jump if equal) fires when ZF=1 after CMP. JNE (not equal) when ZF=0. JG (signed greater) requires ZF=0 and SF=OF. JL (signed less) when SF≠OF. Each mnemonic has an unsigned counterpart: JA/JB for above/below.",
+  "Loop label": "Loops in assembly are constructed with labels and conditional jumps, not dedicated loop syntax. A typical loop: label at the top, body instructions, decrement counter with `dec rcx`, then `jnz label`. This pattern is the assembly equivalent of C's `while (--counter) { }` and gives you complete control over loop structure.",
+  "DEC/JNZ": "DEC decrements a register by 1 and sets the Zero Flag (ZF) when the result reaches zero. JNZ (jump if not zero) branches when ZF=0. The pair `dec rcx` / `jnz loop_start` creates a counting loop. Note: DEC does not set CF (carry flag), unlike SUB — an important subtlety for multi-precision arithmetic.",
+  "LOOP instruction": "The LOOP instruction is a combined decrement-and-branch: it decrements RCX and jumps to the target label if RCX≠0. While convenient, LOOP is slower than separate DEC/JNZ on modern CPUs (it cannot be micro-fused as efficiently). Modern hand-tuned assembly prefers explicit DEC/JNZ for performance.",
+  "Stack grows down": "The x86-64 stack grows toward lower addresses: PUSH decrements RSP then stores; POP loads then increments RSP. RSP always points to the most recently pushed item. The stack is used for local variables, function return addresses, and caller-saved register preservation. Stack overflow (growing into other memory regions) is a common bug in systems programming.",
+  "PUSH/POP": "PUSH decrements RSP by 8 and stores the operand at the new RSP. POP loads the value at RSP into the operand and increments RSP by 8. In 64-bit mode, PUSH/POP operate on 64-bit values (8 bytes). These instructions implicitly update RSP and are the primary mechanism for saving/restoring state across function calls.",
+  "RSP/RBP": "RSP (Stack Pointer) points to the current top of stack. RBP (Base Pointer) typically holds the previous RSP at function entry, creating a stable reference frame for locals and parameters. Modern compilers optimize with `-fomit-frame-pointer`, using RSP-relative addressing instead, freeing RBP as an extra general-purpose register.",
+  "CALL/RET": "CALL pushes the return address (the instruction after CALL) onto the stack and jumps to the target function. RET pops the return address and jumps to it. This push/pop mechanism enables nested function calls — each CALL pushes a return address, forming a chain that RET unwinds in reverse order.",
+  "Prologue/Epilogue": "The function prologue saves the old base pointer and establishes a new stack frame: `push rbp; mov rbp, rsp`. The epilogue reverses this: `pop rbp; ret`. This pattern creates a linked list of stack frames that debuggers walk for backtraces. Between prologue and epilogue, RBP-relative addressing accesses parameters and locals.",
+  "System V ABI": "The System V AMD64 ABI is the calling convention standard on Linux, macOS, and other Unix-likes. Integer/pointer arguments go in RDI, RSI, RDX, RCX, R8, R9; float arguments in XMM0–XMM7. Return values go in RAX (and RDX for 128-bit). The stack must be 16-byte aligned before CALL. Callee-saved registers: RBX, RBP, R12–R15.",
+  "Direct": "Direct addressing accesses memory at a fixed address: `mov rax, [0x601040]`. The address is encoded in the instruction itself. This is the simplest addressing mode but produces position-dependent code — the absolute address must be known at link time. Direct addressing is common for accessing global variables in non-PIC code.",
+  "Indirect": "Indirect addressing uses a register to hold the memory address: `mov rax, [rbx]`. This enables pointer dereferencing, array traversal, and dynamic memory access. Combined with displacement: `mov rax, [rbx + 8]` accesses a struct field at offset 8 from the pointer in RBX.",
+  "Base+index*scale": "The most powerful x86 addressing mode: `mov rax, [rbx + rcx*8 + disp]`. Base register + index register × scale factor (1, 2, 4, 8) + displacement. This single instruction encodes array indexing with element scaling — `mov eax, [arr + rdi*4]` loads arr[rdi] where each element is 4 bytes. The LEA instruction computes these addresses without accessing memory.",
+  "syscall instruction": "The `syscall` instruction is the gateway from userspace to kernel on x86-64 Linux. RAX holds the syscall number, RDI/RSI/RDX/R10/R8/R9 carry arguments, and after `syscall` returns, RAX contains the return value (or negative errno on error). This is the lowest-level interface to the OS — every I/O, memory allocation, and process operation goes through it.",
+  "Linux x64 ABI": "Linux x86-64 syscall convention: RAX = syscall number, RDI = arg1, RSI = arg2, RDX = arg3, R10 = arg4, R8 = arg5, R9 = arg6. The kernel preserves all registers except RCX (which gets RIP) and R11 (which gets RFLAGS). This differs from the function-call ABI — notably, RCX and R11 are clobbered by syscall itself.",
+  "errno": "The kernel returns error codes as negative values in RAX. The C library wrapper functions check RAX for negative values (typically in the range -1 to -4095), negate them, store the result in errno, and return -1. In raw assembly, you can check the return value directly: `test rax, rax; js error_handler` tests for negative (error) results.",
+  "String instructions": "x86 string instructions process memory with implicit source (RSI) and destination (RDI) pointers. LODSB/W/D/Q loads a byte/word/dword/qword from [RSI] into AL/AX/EAX/RAX. STOSB/W/D/Q stores from AL/AX/EAX/RAX to [RDI]. MOVSB/W/D/Q copies from [RSI] to [RDI]. Each instruction advances RSI/RDI by the operand size.",
+  "Direction flag": "The Direction Flag (DF) in RFLAGS controls whether string instructions increment or decrement RSI/RDI. CLD clears DF (increment forward, default). STD sets DF (decrement backward). Setting DF is useful for reverse string operations, but forgetting to restore it causes subtle bugs in code that assumes forward direction.",
+  "REP prefix": "The REP prefix repeats a string instruction RCX times. `rep movsb` copies RCX bytes from [RSI] to [RDI] — a one-instruction memcpy. REP has variants: REPE/REPZ (repeat while equal/zero) for CMPS/SCAS, REPNE/REPNZ (repeat while not equal) for SCAS. This microcoded loop often outperforms explicit DEC/JNZ for large blocks.",
+  "Register args": "In the System V AMD64 ABI, the first six integer arguments are passed in registers: RDI, RSI, RDX, RCX, R8, R9. Floating-point arguments use XMM0–XMM7. Additional arguments go on the stack. Register-based argument passing is dramatically faster than the 32-bit ABI's stack-based approach — less memory traffic, simpler code.",
+  "Stack alignment": "The x86-64 ABI requires the stack (RSP) to be 16-byte aligned immediately before a CALL instruction. This means at function entry, RSP is 8 mod 16 (because CALL pushed an 8-byte return address). Functions typically `push rbp` to realign to 16 bytes. SSE/AVX instructions may fault on unaligned stack access.",
+  "Red zone": "The red zone is a 128-byte area below RSP that signal handlers and debuggers promise not to touch. Leaf functions (those that call no other functions) can use this space for locals without adjusting RSP — saving two instructions (push/pop of RSP adjustment). The `-mno-red-zone` flag disables this for kernel code where interrupts may overwrite it.",
+  "if/else in ASM": "Conditionals in assembly compile to CMP + conditional jumps. C's `if (x > 0) { y = x; } else { y = -x; }` becomes: load x into register, CMP with 0, JLE to else branch, store x to y, JMP over else, else: negate x, store to y. The inverted condition (JLE instead of JG) is typical — assembly jumps over the if-body when the condition is false.",
+  "Loops in ASM": "Loops in assembly use backward jumps: a label marks the loop top, the body executes, a DEC/JNZ pair or explicit CMP/JNE jumps back. For loops with unknown bounds, use CMP + Jcc at the top (while-loop pattern). For counted loops, use DEC/JNZ. `loop` is available but discouraged for performance.",
+  "Function calls": "Calling a function in assembly means: (1) put arguments in registers (RDI, RSI, etc.), (2) ensure 16-byte stack alignment, (3) CALL which pushes return address, (4) called function's prologue saves RBP, (5) body executes, (6) epilogue undoes prologue, (7) RET pops return address. The contract is defined by the ABI.",
+  "Base address": "An array in memory starts at its base address. In assembly, load the array's address into a register (e.g., `mov rsi, numbers`), then access elements by adding offset: `mov eax, [rsi + 0]` for element 0, `mov eax, [rsi + 4]` for element 1 (32-bit elements). The base address plus size × index gives element location.",
+  "Stride": "Stride is the byte distance between consecutive array elements — typically sizeof(element). For int (4 bytes), stride is 4. For structs, stride includes padding to satisfy alignment requirements. Proper stride calculation is essential for correct memory access; wrong stride causes reads of misaligned or wrong data.",
+  "Bounds": "Array bounds checking prevents access beyond allocated memory. In assembly, bounds checking is manual — the CPU does not check array limits. Accessing array[-1] or array[n] silently reads/writes adjacent memory, causing data corruption, security vulnerabilities (buffer overflow), or segmentation faults. The programmer must validate indices.",
+  "Member offsets": "Struct members are accessed by their offset from the struct's base address. If a struct has fields at offsets 0, 4, 8, you access them as `[base + 0]`, `[base + 4]`, `[base + 8]`. The compiler computes these offsets during compilation. `offsetof(type, member)` in C reveals the assembler-level view.",
+  "Padding": "The compiler adds padding between struct members to satisfy alignment requirements. A `char` followed by an `int` typically gets 3 bytes of padding, making the int accessible at a 4-byte aligned address. This trade-off between space and access speed is critical in systems where struct layouts must match hardware registers or protocol headers.",
+  "Pointer to struct": "A pointer to a struct holds the struct's base address in memory. In assembly, you load this pointer into a register (`mov rbx, [ptr_var]`) and access members via displacement: `mov rax, [rbx + offset]`. Dereferencing a null or invalid pointer causes a segmentation fault — there's no safety net below C.",
+  "Bit test": "The BT (Bit Test) instruction copies a specific bit from the destination operand into the Carry Flag. `bt rax, 3` checks bit 3 of RAX. BTS, BTR, BTC also modify the bit (set, reset, complement respectively). These instructions enable efficient bit-array operations, flag management, and permission checking.",
+  "Set/clear/toggle": "Bit manipulation uses three patterns: set a bit with OR (`or rax, (1 << n)`), clear a bit with AND-NOT (`and rax, ~(1 << n)`), toggle a bit with XOR (`xor rax, (1 << n)`). x86 provides BTS/BTR/BTC as single-instruction alternatives. Test a bit with BT or TEST + conditional jump.",
+  "Masks": "Bit masks are constants used to isolate, set, or clear specific bits. A mask like 0xF0 selects the upper nibble of a byte. Masks are combined with logical operations: `and rax, mask` isolates bits, `or rax, mask` sets bits, `xor rax, mask` flips bits. Well-designed masks eliminate branches and improve performance.",
+  "XMM registers": "XMM registers (XMM0–XMM15) are 128-bit registers in the SSE extension. They hold 4 single-precision floats, 2 double-precision floats, or 16 bytes for SIMD integer operations. x86-64 guarantees SSE support; all floating-point arithmetic in modern x86-64 uses XMM registers (not the legacy x87 stack).",
+  "movss/addss": "MOVSS moves a scalar single-precision float (32-bit) between XMM registers or memory. ADDSS adds two scalar floats in XMM registers. The 'ss' suffix means scalar single — it operates on the lowest 32 bits of the XMM register, leaving the upper bits unchanged. These are the assembly primitives for float arithmetic.",
+  "cvt": "CVT instructions convert between integer and floating-point formats. CVTSI2SS converts a signed integer to scalar single-precision float. CVTSS2SI converts float to integer (truncation). CVTSD2SI converts double to integer. These conversions are explicit in assembly — unlike C where the compiler inserts them automatically.",
+  "Parallel ops": "SIMD (Single Instruction, Multiple Data) performs the same operation on multiple data elements simultaneously. ADDPS adds 4 packed single-precision floats in parallel. A single SIMD instruction can do 4×, 8×, or even 16× the work of a scalar loop. Vectorizing compilers (GCC with -O3 -march=native) automatically generate SIMD code from loops.",
+  "128/256-bit": "SSE operates on 128-bit XMM registers. AVX2 extends this to 256-bit YMM registers (YMM0–YMM15, which overlay XMM registers). AVX-512 pushes to 512-bit ZMM registers. Wider registers mean more parallelism — a 256-bit add can process 8 ints or 4 doubles in one instruction. The trade-off: wider SIMD increases power and heat.",
+  "Use cases": "SIMD excels at data-parallel workloads: audio/video processing (FFT, filtering), graphics (matrix transforms, pixel operations), cryptography (AES-NI), scientific computing (matrix multiplication), and machine learning (GEMM kernels). Any hot loop operating on contiguous data without branches is a candidate for SIMD optimization.",
+  "IDT": "The Interrupt Descriptor Table (IDT) maps interrupt vectors (0–255) to handler addresses. Each entry is 16 bytes: offset (handler address), segment selector, and gate type (interrupt/trap). On x86-64, the IDT is pointed to by the IDTR register (lidt instruction). Each CPU core has its own IDT.",
+  "ISR": "An Interrupt Service Routine (ISR) is a special function that handles hardware interrupts or CPU exceptions. ISRs must save all registers, handle the event, acknowledge the interrupt (via the PIC or APIC), and return with IRETQ (which restores RFLAGS and RSP in addition to RIP). Kernel ISRs run in a restricted context — no sleeping, no page faults.",
+  "Exception vectors": "CPU exceptions are numbered: Vector 0 (Divide Error), 6 (Invalid Opcode), 13 (General Protection Fault), 14 (Page Fault). Each has a handler in the IDT. Page faults are particularly informative — CR2 holds the faulting address, and the error code on the stack tells you access type (read/write/execute) and protection level.",
+  "Constraints": "GCC inline assembly constraints describe operand locations. 'r' = any register, 'm' = memory, 'i' = immediate, 'g' = general (register/memory/immediate). Output operands use '=' (write-only) or '+' (read-write). Input operands need no prefix. Correct constraints are essential; wrong ones produce incorrect code without warning.",
+  "Clobbers": "The clobber list tells GCC which registers and memory the inline assembly modifies. Common clobbers: 'cc' (condition codes/flags), 'memory' (memory beyond listed operands). Listing a clobber forces GCC to save and restore the register around the asm block. Omitting a clobber causes subtle corruption — GCC reuses the clobbered register.",
+  "Volatility": "The `volatile` keyword on inline assembly tells GCC: \"don't move, duplicate, or eliminate this block.\" Without volatile, GCC may optimize away asm with no visible outputs. Use volatile when the asm has side effects (writing to hardware, triggering interrupts, altering memory not listed as outputs).",
+  "Pipeline stalls": "A pipeline stall occurs when the CPU cannot execute the next instruction immediately. Load-use stalls happen when an instruction uses a value right after a load from memory. Branch mispredictions flush the entire pipeline (15+ cycle penalty). Instruction scheduling — reordering independent instructions — reduces stalls.",
+  "Branch prediction": "Modern CPUs predict whether a conditional jump will be taken using history tables and pattern matching. A misprediction costs 10–20 cycles as the pipeline flushes and refills. Well-predicted branches (always taken, always not-taken, or following a regular pattern) execute as fast as no branch at all. Profile-guided optimization helps compilers generate predictable code.",
+  "Loop unrolling": "Loop unrolling duplicates the loop body multiple times, reducing the number of iterations and the overhead of loop control (DEC/JNZ or CMP/JNE). The trade-off: larger code size (instruction cache pressure) vs. fewer branches (better prediction) and more instruction-level parallelism. Modern compilers unroll automatically at -O3.",
+  "objdump": "objdump -d disassembles an object file, showing memory addresses, machine code bytes, and assembly mnemonics. It's the first tool for reverse engineering: `objdump -d binary | less`. Add `-M intel` for Intel syntax, `-S` to interleave source lines, `-C` to demangle C++ names.",
+  "Ghidra": "Ghidra is a reverse engineering framework with a decompiler — it turns assembly back into structured C-like code. Developed by the NSA, it supports x86-64, ARM, and dozens of other architectures. Ghidra's decompiler produces readable output by recognizing calling conventions, switch constructs, and common compiler idioms.",
+  "Pattern recognition": "Reverse engineers identify code patterns: function prologues (`push rbp; mov rbp, rsp`), system calls (`mov rax, NR; syscall`), switch tables (jump targets from a base address), and loop idioms (backward jumps). Recognizing these patterns lets you mentally decompile assembly faster than any automated tool.",
+  "PIC": "Position-Independent Code uses relative addressing instead of absolute addresses, allowing the code to run at any memory address. In x86-64, RIP-relative addressing (`mov rax, [rip + offset]`) makes PIC natural and efficient. PIC is essential for shared libraries (loaded at arbitrary addresses) and shellcode (must run no matter where it lands in memory).",
+  "No null bytes": "Shellcode must avoid null bytes (0x00) because string-based exploits (e.g., gets() buffer overflow) stop copying at the first null. Techniques: use `xor eax, eax` instead of `mov eax, 0` (no nulls), `push byte 0x90; pop rax` for small constants, and `shl`/`add` to construct larger values without embedding nulls in the instruction stream.",
+  "Payload structure": "Shellcode typically has three parts: (1) the decoder stub (for encoded payloads), (2) the main body (e.g., execve /bin/sh), and (3) the trigger (e.g., overwritten return address pointing to the stub). Modern systems use NX, ASLR, and stack canaries to prevent shellcode execution — exploit development is an arms race.",
+  "BIOS/UEFI": "BIOS (Legacy) initializes hardware, runs POST, and loads the first 512 bytes (MBR) from the boot device to 0x7C00. UEFI is the modern replacement: it operates in 64-bit mode, uses the EFI System Partition (FAT32), and loads PE-format executables. UEFI supports Secure Boot, network boot, and a graphical configuration interface.",
+  "Real mode": "Real mode is the 16-bit x86 startup mode: segmented memory (64KB limit per segment), no memory protection, direct hardware access via IN/OUT instructions, and a 1MB addressable memory space. The CPU starts in real mode; the bootloader must switch to protected mode and then to 64-bit long mode.",
+  "Stage loaders": "The MBR (stage 1) is limited to 512 bytes — too small for a full kernel. Stage loaders solve this: stage 1 loads stage 2 (typically from disk sectors), stage 2 sets up protected mode and loads the kernel. GRUB uses this pattern with stage 1 (boot.img, 512B), stage 1.5 (core.img), and stage 2.",
+  "GDT": "The Global Descriptor Table (GDT) defines memory segments with base addresses, limits, and access permissions (code/data, privilege level, read/write, conforming). In 64-bit mode, segmentation is largely vestigial — the GDT is still required for transitioning to/from protected mode but base/limit are ignored.",
+  "Segments": "Segmentation divides memory into segments with different access permissions. In protected mode, CS (code segment), DS (data segment), SS (stack segment), ES/FS/GS (extra segments) each reference a GDT entry. x86-64 uses FS and GS for thread-local storage; CS.D and L flags select between 32-bit compatibility mode and 64-bit long mode.",
+  "Protected mode": "Protected mode is the 32-bit x86 operating mode with hardware memory protection (segment-level, then page-level), privilege rings (0 = kernel, 3 = user), and multitasking support. Switching from real to protected mode requires: (1) set up GDT, (2) set PE bit in CR0, (3) far jump to flush prefetch queue.",
+  "Page tables": "x86-64 uses 4-level page tables for virtual-to-physical address translation. The CPU walks: CR3 → PML4 (512 entries) → PDPT (512) → PD (512) → PT (512) → 4KB page. Each level maps 9 bits of the virtual address. Huge pages (2MB, 1GB) reduce TLB pressure by skipping intermediate levels.",
+  "TLB": "The Translation Lookaside Buffer (TLB) caches recent virtual-to-physical page mappings. A TLB miss forces a page table walk (up to 4 memory accesses) — expensive. TLB pressure is a common performance bottleneck; huge pages reduce entries needed, and explicit prefetching can warm the TLB before hot loops execute.",
+  "CR3 register": "CR3 holds the physical address of the top-level page table (PML4). Each process has its own CR3 value — switching CR3 (on context switch) isolates address spaces. Reading CR3 yields the current page table base; writing it flushes the TLB (except for global pages marked with PGE in EFER).",
+  "clone syscall": "The Linux clone() syscall creates threads (as opposed to fork() which creates processes). Flags control resource sharing: CLONE_VM shares memory space, CLONE_FS shares filesystem info, CLONE_FILES shares file descriptors, CLONE_SIGHAND shares signal handlers. The child gets its own stack (passed in RSP) and starts at the specified RIP.",
+  "Thread stacks": "Each thread requires its own private stack, typically 1–8 MB. The stack pointer (RSP) is set before the thread starts executing. Stack overflow — one thread's stack colliding with another's or with the heap — is a common multithreading bug. Guard pages (protected memory regions at stack boundaries) detect overflow.",
+  "TLS": "Thread-Local Storage (TLS) gives each thread its own copy of global/static variables. On x86-64 Linux, TLS is accessed via the FS segment base: `mov rax, [fs:0]` loads a thread-local value. The kernel sets FS.base (via WRMSR to MSR_FS_BASE) during thread creation. TLS is essential for thread-safe singletons and per-thread caches.",
+  "Port I/O": "Port-mapped I/O uses dedicated x86 instructions IN/OUT to communicate with hardware devices. Ports are addressed with a 16-bit port number (0–65535). `in al, 0x60` reads the keyboard scancode; `out 0x80, al` writes to the diagnostic port. Port I/O requires privilege level 0 — userspace cannot use it directly.",
+  "MMIO": "Memory-Mapped I/O maps device registers into the physical address space. Reading or writing a specific address communicates with the hardware. Example: the VGA text buffer at 0xB8000 — writing bytes there directly draws characters on screen. MMIO accesses must use `volatile` to prevent compiler optimization from removing repeated reads.",
+  "Interrupt handlers": "Hardware interrupt handlers respond to device signals (keyboard press, disk completion, network packet arrival). The handler saves registers, services the device, sends EOI (End of Interrupt) to the PIC/APIC, and returns with IRETQ. Minimal handlers use bottom halves/deferred work to avoid spending too long in interrupt context.",
+  "XOR loops": "XOR-based encryption loops combine a key with plaintext: `for (i = 0; i < len; i++) cipher[i] = plain[i] ^ key`. In assembly, this is LODSB + XOR with key byte + STOSB, repeated in a loop. XOR is its own inverse: `text XOR key XOR key = text`, making encryption and decryption identical operations.",
+  "AES-NI": "AES-NI (AES New Instructions) is a set of x86 instructions that accelerate AES encryption in hardware. `aesenc xmm0, xmm1` performs one AES round, `aeskeygenassist` generates round keys. AES-NI is ~10x faster than pure-software AES and is resistant to timing side-channel attacks — critical for secure implementations.",
+  "Timing attacks": "Timing attacks measure how long an operation takes to infer secret data. Variable-time comparisons, cache-timing differences, and data-dependent execution times leak information. Constant-time programming (no branches on secret data, no memory accesses indexed by secrets, using CMOV over conditional jumps) defeats timing attacks.",
+  "RDTSC": "RDTSC (Read Time-Stamp Counter) returns the CPU's 64-bit cycle counter in EDX:EAX. It counts since processor reset. On modern out-of-order CPUs, RDTSC may execute before preceding instructions complete. The serializing variant RDTSCP (with `lfence`) ensures accurate measurement. Use for microbenchmarking and performance monitoring.",
+  "Performance counters": "Hardware performance counters track microarchitectural events: cache misses, branch mispredictions, TLB misses, stalled cycles. Accessed via RDPMC (Read Performance Monitor Counter) or the `perf` tool on Linux. They reveal why code is slow beyond what profilers show — measuring actual cache misses pinpoints memory bottlenecks.",
+  "CPUID": "CPUID queries CPU capabilities. With RAX=0, it returns vendor string and max leaf. RAX=1 returns family/model/stepping and feature flags (SSE, AVX, AES-NI, etc.). RAX=7 (subleaf 0) returns AVX2/AVX-512 support. Check CPUID before using ISA extensions to ensure compatibility — executing AVX-512 on an old CPU raises #UD (illegal instruction).",
+  "Structured Exception Handling": "Windows SEH (Structured Exception Handling) uses per-function unwind tables stored in .xdata sections. When an exception occurs, the OS walks the call stack, finds the appropriate exception handler, and either proceeds or stops. SEH interacts with assembly via try/except blocks and custom filter expressions.",
+  "Fault handlers": "Fault handlers intercept CPU exceptions like page faults (#PF) and general protection faults (#GP). In Linux, signal handlers for SIGSEGV can inspect the faulting address (via siginfo) and modify the saved context (ucontext) to alter RIP — enabling techniques like transparent page allocation and emulation.",
+  "Recovery": "Fault recovery allows a program to continue after an otherwise fatal exception. Example: a signal handler for SIGSEGV allocates the faulting page, modifies the context to retry the faulting instruction, and returns — the instruction re-executes successfully. This pattern powers automatic stack growth and copy-on-write semantics.",
+  "GOT": "The Global Offset Table (GOT) holds absolute addresses of global symbols for position-independent code. Each external data symbol entry in the GOT is filled by the dynamic linker at load time. Code accesses globals via GOT: `mov rax, [rip + GOT_entry]`. This indirection enables shared libraries to be loaded at any address.",
+  "PLT": "The Procedure Linkage Table (PLT) enables lazy binding of function calls. The first call to a PLT entry jumps to the dynamic linker, which resolves the function address and updates the GOT. Subsequent calls go directly to the resolved function. PLT adds minimal overhead but defeats some branch prediction patterns.",
+  "ELF sections": "ELF object files are divided into sections: .text (executable code), .data (initialized data), .bss (uninitialized data, zero-filled at load), .rodata (read-only data, strings), .symtab (symbol table), .rela.text (relocation entries). The linker merges sections from all input files into output segments.",
+  "Linker scripts": "Linker scripts give you precise control over the output ELF layout. They specify section placement, memory regions, entry point, and alignment. Bootloaders and kernel developers use custom linker scripts to place code at specific addresses, create multiboot headers, and control symbol visibility.",
+  "Symbol resolution": "The linker resolves symbols by searching all input object files and libraries. Strong symbols (non-inline functions, global variables) override weak symbols. Multiple strong definitions cause a linker error. Common symbols (tentative definitions) merge. The linker's behavior is governed by the `-fcommon`/`-fno-common` compiler flags.",
+  "Layout asm": "GDB's `layout asm` splits the terminal into a disassembly window and command window. It auto-updates as you step through instructions, showing RIP, current instruction highlighted, and surrounding code. `layout regs` adds a register pane. These layouts make assembly debugging visual and significantly faster than raw disassembly.",
+  "Watchpoints": "Watchpoints break execution when a memory address is read or written. `watch *0x601040` catches writes to that address; `rwatch` catches reads; `awatch` catches both. Hardware watchpoints (limited to 4 on x86) are fast — they use debug registers — while software watchpoints (single-step + check) are slower.",
+  "Reverse debugging": "GDB's reverse debugging lets you step backward through execution. Use `record` to start recording, then `reverse-stepi` (step back one instruction), `reverse-next` (step back over call), `reverse-continue` (continue until reverse breakpoint). Essential for finding \"how did we get here?\" bugs.",
+  "Calling C from ASM": "To call a C function from assembly: follow the System V ABI (args in RDI, RSI, RDX, RCX, R8, R9), ensure 16-byte stack alignment, then CALL. The C function expects the stack to be aligned per ABI. Return values come back in RAX (and RDX for 128-bit).",
+  "ASM from C": "Calling assembly functions from C is straightforward — declare the function as extern in C, implement it in a .S file following the ABI, and link them together. The C compiler generates a CALL instruction and expects the assembly function to preserve callee-saved registers (RBX, RBP, R12–R15).",
+  "Name mangling": "C does not mangle names — an ASM function called `my_func` is visible in C as `my_func`. C++ mangles names (e.g., `_Z7my_funci` for `my_func(int)`), which must be accounted for in assembly. Use `extern \"C\"` in C++ to suppress mangling for interop.",
+  "LOCK prefix": "The LOCK prefix makes an instruction atomic on SMP systems: it asserts the LOCK# signal on the bus (or uses cache locking on modern CPUs). `lock inc qword [counter]` atomically increments a counter. LOCK is only valid with read-modify-write instructions (ADD, SUB, INC, DEC, XADD, CMPXCHG, AND, OR, XOR, etc.).",
+  "CMPXCHG": "CMPXCHG (compare-and-exchange) is the fundamental atomic CAS primitive: compare RAX with destination, if equal store RBX to destination (set ZF), else load destination into RAX (clear ZF). `lock cmpxchg` makes it atomic across cores. CMPXCHG8B and CMPXCHG16B operate on 8/16-byte values using RDX:RAX.",
+  "Atomic ops": "Atomic operations complete without interference from other threads or cores. x86 provides: atomic increment (LOCK INC/DEC), atomic exchange (LOCK XADD/XCHG), atomic CAS (LOCK CMPXCHG). Hardware atomicity is the foundation of mutexes, semaphores, lock-free data structures, and reference counting.",
+  "Memory ordering": "x86 uses Total Store Order (TSO): stores are buffered and become visible to other cores in program order, but loads may bypass earlier stores (store forwarding). This means a store on another core may not be immediately visible. Fence instructions enforce ordering constraints for correct concurrent algorithms.",
+  "Fence instructions": "MFENCE orders all memory operations (loads and stores) — all preceding accesses complete before subsequent ones begin. SFENCE orders only stores (completing prior stores before any following store). LFENCE orders only loads. Use SFENCE in producer-consumer patterns (write data, then write flag) and MFENCE for full barriers.",
+  "Store buffer": "Each CPU core has a store buffer that holds committed stores before they drain to the cache hierarchy. The store buffer enables fast store-to-load forwarding (reading a value right after writing it). On TSO x86, stores from different cores are globally ordered but a core can see its own earlier stores before other cores do.",
+  "AVX-512": "AVX-512 extends SIMD to 512-bit ZMM registers (32 in number), with 8 mask registers (k0–k7), embedded rounding, and new operations (scatter/gather, conflict detection, compress/expand). Mask registers control per-element operation — operations can selectively affect only elements where the corresponding mask bit is 1.",
+  "Mask registers": "AVX-512 mask registers (k0–k7) are 16-bit (128-bit SIMD) or 64-bit (512-bit SIMD) bitmasks that control per-element operation. Operations with `{k1}` only affect elements where the mask bit is 1. `kortestq k1, k2` tests mask bits for branch decisions. Masks eliminate branches for data-dependent processing.",
+  "Packed ops": "Packed SIMD operations process multiple data elements in one instruction. `vpaddd zmm0, zmm1, zmm2` adds 16 32-bit ints in parallel. `vfmadd132ps` performs 16 fused multiply-adds (a*b+c). Packed ops convert sequential loops into single instructions — the heart of vectorization. Each generation adds wider registers and more operations.",
+
+  // Day 51-60 C bridge topics (asm-bridge area)
+  "gcc -S": "Running `gcc -S` (or `clang -S`) outputs assembly instead of an object file. This is the best way to learn how C constructs compile to machine code. Use `-O0` for readable (but verbose) output, `-O2` for optimized (but complex) output, and `-fno-asynchronous-unwind-tables` to remove CFI directives.",
+  "Reading ASM output": "Reading compiler-generated assembly reveals how high-level patterns translate. Look for: function labels, stack frame setup/teardown, argument register usage, the core algorithm loop, and optimization decisions (inlining, hoisting, unrolling). Compare `-O0` vs `-O2` output to see what optimizers actually do.",
+  "Calling conventions": "Calling conventions define the interface between caller and callee: argument passing (registers vs stack), register preservation rules, stack alignment, and return value location. System V (Linux/macOS) and Microsoft x64 (Windows) differ in register ordering and which registers are callee-saved — important when mixing ASM with C.",
+  "__asm__ keyword": "GCC's `__asm__` keyword embeds assembly directly in C code. Basic format: `__asm__(\"instructions\" : outputs : inputs : clobbers)`. The extended syntax with constraints lets the compiler manage operand placement. `__asm__ volatile` prevents the compiler from optimizing away the block — essential for side-effecting operations.",
+};
+
+function generateTopicContent(topic: string, title: string, day: number, lang: "c" | "asm"): string {
+  const cached = TOPIC_CONTENT[topic];
+  if (cached) return cached;
+
+  const level = getLevelForDay(day);
+  const field = lang === "c" ? "C systems programming" : "x86-64 Assembly";
+
+  return `Day ${day} introduces "${topic}" within the broader context of ${title}. ` +
+    `This concept is central to ${field} at the ${level} proficiency tier. ` +
+    `Understanding it requires both theoretical knowledge and hands-on practice with the instruction set. ` +
+    `Focus on how ${topic} interacts with surrounding system concepts — memory layout, register utilization, and performance characteristics. ` +
+    `Experiment with the code template to see it in action, then extend it to deepen your understanding.`;
+}
+
+function generateTopicExercises(day: number, blueprint: DayBlueprint, lang: "c" | "asm"): Lesson["exercises"] {
   const prefix = `d${day}`;
-  return [
-    {
-      id: `${prefix}-q1`,
-      type: "quiz" as const,
-      title: "Concept Check",
-      description: `Verify your understanding of Day ${day} concepts`,
-      question: lang === "c"
-        ? "Which header provides printf() and other I/O functions?"
-        : "Which register typically holds the return value in x86-64 System V ABI?",
-      options: lang === "c"
-        ? [
-            { id: "a", text: "<stdlib.h>", correct: false },
-            { id: "b", text: "<stdio.h>", correct: true },
-            { id: "c", text: "<string.h>", correct: false },
-            { id: "d", text: "<math.h>", correct: false },
-          ]
-        : [
-            { id: "a", text: "RBX", correct: false },
-            { id: "b", text: "RAX", correct: true },
-            { id: "c", text: "RCX", correct: false },
-            { id: "d", text: "RSP", correct: false },
-          ],
-      xpReward: 25,
+  const topics = blueprint.theoryTopics;
+
+  const quizMap: Record<string, { q: string; opts: { id: string; text: string; correct: boolean }[] }> = {
+    "Machine code": {
+      q: "What determines the variable-length encoding in x86-64 instructions?",
+      opts: [
+        { id: "a", text: "The compiler version", correct: false },
+        { id: "b", text: "The opcode, ModRM, and SIB bytes", correct: true },
+        { id: "c", text: "The operating system", correct: false },
+        { id: "d", text: "The number of registers used", correct: false },
+      ],
     },
-    {
-      id: `${prefix}-q2`,
-      type: "quiz" as const,
-      title: "Deep Dive",
-      description: "Advanced concept verification",
+    "Registers": {
+      q: "How many general-purpose 64-bit registers does x86-64 provide?",
+      opts: [
+        { id: "a", text: "8", correct: false },
+        { id: "b", text: "16", correct: true },
+        { id: "c", text: "32", correct: false },
+        { id: "d", text: "4", correct: false },
+      ],
+    },
+    "MOV": {
+      q: "Which register size write in x86-64 zero-extends to the full 64-bit register?",
+      opts: [
+        { id: "a", text: "8-bit (AL)", correct: false },
+        { id: "b", text: "16-bit (AX)", correct: false },
+        { id: "c", text: "32-bit (EAX)", correct: true },
+        { id: "d", text: "All of the above", correct: false },
+      ],
+    },
+    "ADD/SUB": {
+      q: "Which flag is set when signed addition overflows?",
+      opts: [
+        { id: "a", text: "ZF (Zero Flag)", correct: false },
+        { id: "b", text: "CF (Carry Flag)", correct: false },
+        { id: "c", text: "OF (Overflow Flag)", correct: true },
+        { id: "d", text: "SF (Sign Flag)", correct: false },
+      ],
+    },
+    "AND/OR/XOR": {
+      q: "Why is 'xor eax, eax' preferred over 'mov eax, 0' for zeroing a register?",
+      opts: [
+        { id: "a", text: "It's more readable", correct: false },
+        { id: "b", text: "It's smaller and faster (no null bytes, encoding is 2 bytes)", correct: true },
+        { id: "c", text: "It preserves the old value", correct: false },
+        { id: "d", text: "It sets the overflow flag", correct: false },
+      ],
+    },
+    "CMP": {
+      q: "What does the CMP instruction do with its operands?",
+      opts: [
+        { id: "a", text: "Compares and stores the result in RAX", correct: false },
+        { id: "b", text: "Subtracts the second from the first, sets flags, discards the result", correct: true },
+        { id: "c", text: "Adds both operands and sets flags", correct: false },
+        { id: "d", text: "Moves the larger operand to RAX", correct: false },
+      ],
+    },
+    "PUSH/POP": {
+      q: "What happens to RSP when PUSH executes in 64-bit mode?",
+      opts: [
+        { id: "a", text: "RSP is incremented by 16", correct: false },
+        { id: "b", text: "RSP is decremented by 8", correct: true },
+        { id: "c", text: "RSP is unchanged", correct: false },
+        { id: "d", text: "RSP is set to the pushed value", correct: false },
+      ],
+    },
+    "CALL/RET": {
+      q: "What does CALL push onto the stack before jumping?",
+      opts: [
+        { id: "a", text: "The current value of RAX", correct: false },
+        { id: "b", text: "The return address (instruction after CALL)", correct: true },
+        { id: "c", text: "The base pointer", correct: false },
+        { id: "d", text: "Nothing — it only jumps", correct: false },
+      ],
+    },
+    "System V ABI": {
+      q: "How many integer arguments are passed in registers (System V AMD64 ABI)?",
+      opts: [
+        { id: "a", text: "4 (RCX, RDX, R8, R9)", correct: false },
+        { id: "b", text: "6 (RDI, RSI, RDX, RCX, R8, R9)", correct: true },
+        { id: "c", text: "8 (RDI-R15)", correct: false },
+        { id: "d", text: "3 (RAX, RBX, RCX)", correct: false },
+      ],
+    },
+    "syscall instruction": {
+      q: "Which register holds the syscall number in Linux x86-64?",
+      opts: [
+        { id: "a", text: "RAX", correct: true },
+        { id: "b", text: "RDI", correct: false },
+        { id: "c", text: "RCX", correct: false },
+        { id: "d", text: "RIP", correct: false },
+      ],
+    },
+    "String instructions": {
+      q: "Which register pair is used implicitly by string instructions (MOVS, LODS, STOS)?",
+      opts: [
+        { id: "a", text: "RAX and RBX", correct: false },
+        { id: "b", text: "RDI as source, RSI as destination", correct: false },
+        { id: "c", text: "RSI as source, RDI as destination", correct: true },
+        { id: "d", text: "RSP and RBP", correct: false },
+      ],
+    },
+    "REP prefix": {
+      q: "Which register serves as the counter for the REP prefix?",
+      opts: [
+        { id: "a", text: "RAX", correct: false },
+        { id: "b", text: "RCX", correct: true },
+        { id: "c", text: "RDX", correct: false },
+        { id: "d", text: "R8", correct: false },
+      ],
+    },
+    "Stack grows down": {
+      q: "When you pop from the stack, RSP:",
+      opts: [
+        { id: "a", text: "Increments (moves to higher address)", correct: true },
+        { id: "b", text: "Decrements (moves to lower address)", correct: false },
+        { id: "c", text: "Stays the same", correct: false },
+        { id: "d", text: "Depends on the direction flag", correct: false },
+      ],
+    },
+    "Base+index*scale": {
+      q: "What does the LEA instruction compute?",
+      opts: [
+        { id: "a", text: "The length of a string", correct: false },
+        { id: "b", text: "An effective address without accessing memory", correct: true },
+        { id: "c", text: "The value at a memory address", correct: false },
+        { id: "d", text: "A logical exclusive-or", correct: false },
+      ],
+    },
+    "XMM registers": {
+      q: "How wide are x86-64 XMM registers?",
+      opts: [
+        { id: "a", text: "64 bits", correct: false },
+        { id: "b", text: "128 bits", correct: true },
+        { id: "c", text: "256 bits", correct: false },
+        { id: "d", text: "512 bits", correct: false },
+      ],
+    },
+    "IDT": {
+      q: "What register points to the Interrupt Descriptor Table on x86-64?",
+      opts: [
+        { id: "a", text: "CR3", correct: false },
+        { id: "b", text: "IDTR", correct: true },
+        { id: "c", text: "GDTR", correct: false },
+        { id: "d", text: "RFLAGS", correct: false },
+      ],
+    },
+    "Constraints": {
+      q: "In GCC inline assembly, what does constraint 'r' mean?",
+      opts: [
+        { id: "a", text: "A memory operand", correct: false },
+        { id: "b", text: "A register operand", correct: true },
+        { id: "c", text: "An immediate value", correct: false },
+        { id: "d", text: "A read-only operand", correct: false },
+      ],
+    },
+    "Branch prediction": {
+      q: "What is the approximate cost of a branch misprediction on modern x86?",
+      opts: [
+        { id: "a", text: "0-2 cycles", correct: false },
+        { id: "b", text: "10-20 cycles", correct: true },
+        { id: "c", text: "100-200 cycles", correct: false },
+        { id: "d", text: "1000+ cycles", correct: false },
+      ],
+    },
+    "PIC": {
+      q: "Why is Position-Independent Code essential for shared libraries?",
+      opts: [
+        { id: "a", text: "It runs faster than non-PIC code", correct: false },
+        { id: "b", text: "Libraries are loaded at arbitrary addresses at runtime", correct: true },
+        { id: "c", text: "It uses less memory", correct: false },
+        { id: "d", text: "It supports more registers", correct: false },
+      ],
+    },
+    "ELF sections": {
+      q: "Which ELF section typically holds executable code?",
+      opts: [
+        { id: "a", text: ".data", correct: false },
+        { id: "b", text: ".text", correct: true },
+        { id: "c", text: ".bss", correct: false },
+        { id: "d", text: ".rodata", correct: false },
+      ],
+    },
+    "LOCK prefix": {
+      q: "Which x86 instruction prefix makes read-modify-write operations atomic across cores?",
+      opts: [
+        { id: "a", text: "REP", correct: false },
+        { id: "b", text: "LOCK", correct: true },
+        { id: "c", text: "SEGMENT", correct: false },
+        { id: "d", text: "ADDR", correct: false },
+      ],
+    },
+    "AVX-512": {
+      q: "How wide are AVX-512 ZMM registers?",
+      opts: [
+        { id: "a", text: "128 bits", correct: false },
+        { id: "b", text: "256 bits", correct: false },
+        { id: "c", text: "512 bits", correct: true },
+        { id: "d", text: "1024 bits", correct: false },
+      ],
+    },
+    "clone syscall": {
+      q: "Which Linux syscall creates threads (not processes)?",
+      opts: [
+        { id: "a", text: "fork()", correct: false },
+        { id: "b", text: "clone()", correct: true },
+        { id: "c", text: "thread()", correct: false },
+        { id: "d", text: "execve()", correct: false },
+      ],
+    },
+    "Port I/O": {
+      q: "Which x86 instructions perform port-mapped I/O?",
+      opts: [
+        { id: "a", text: "LOAD and STORE", correct: false },
+        { id: "b", text: "IN and OUT", correct: true },
+        { id: "c", text: "MOV to port addresses", correct: false },
+        { id: "d", text: "PEEK and POKE", correct: false },
+      ],
+    },
+    "No null bytes": {
+      q: "Why must shellcode avoid null bytes (0x00)?",
+      opts: [
+        { id: "a", text: "Null bytes crash the CPU", correct: false },
+        { id: "b", text: "String-based exploits stop copying at null bytes", correct: true },
+        { id: "c", text: "The assembler rejects null bytes", correct: false },
+        { id: "d", text: "Null bytes trigger anti-virus", correct: false },
+      ],
+    },
+    "GDT": {
+      q: "What does the Global Descriptor Table (GDT) define?",
+      opts: [
+        { id: "a", text: "A list of active processes", correct: false },
+        { id: "b", text: "Memory segments with base, limit, and access permissions", correct: true },
+        { id: "c", text: "The page table hierarchy", correct: false },
+        { id: "d", text: "Interrupt handler addresses", correct: false },
+      ],
+    },
+    "Page tables": {
+      q: "How many levels does x86-64 paging use for standard 4KB pages?",
+      opts: [
+        { id: "a", text: "2 levels", correct: false },
+        { id: "b", text: "3 levels", correct: false },
+        { id: "c", text: "4 levels", correct: true },
+        { id: "d", text: "5 levels", correct: false },
+      ],
+    },
+    "Prologue/Epilogue": {
+      q: "What is the purpose of the function prologue (push rbp; mov rbp, rsp)?",
+      opts: [
+        { id: "a", text: "To allocate heap memory", correct: false },
+        { id: "b", text: "To create a stable stack frame for locals and backtraces", correct: true },
+        { id: "c", text: "To zero-out local variables", correct: false },
+        { id: "d", text: "To enable SIMD instructions", correct: false },
+      ],
+    },
+    "Pipeline stalls": {
+      q: "What causes a load-use stall in the CPU pipeline?",
+      opts: [
+        { id: "a", text: "A branch that is always taken", correct: false },
+        { id: "b", text: "An instruction that uses a value immediately after a memory load", correct: true },
+        { id: "c", text: "Too many instructions in the pipeline", correct: false },
+        { id: "d", text: "A TLB cache miss", correct: false },
+      ],
+    },
+    "RDTSC": {
+      q: "What does the RDTSC instruction return?",
+      opts: [
+        { id: "a", text: "The current system time in nanoseconds", correct: false },
+        { id: "b", text: "The CPU's 64-bit cycle counter since reset", correct: true },
+        { id: "c", text: "The number of instructions executed", correct: false },
+        { id: "d", text: "The current stack pointer value", correct: false },
+      ],
+    },
+    "Fence instructions": {
+      q: "Which fence instruction orders both loads and stores on x86?",
+      opts: [
+        { id: "a", text: "SFENCE", correct: false },
+        { id: "b", text: "LFENCE", correct: false },
+        { id: "c", text: "MFENCE", correct: true },
+        { id: "d", text: "FFENCE", correct: false },
+      ],
+    },
+    "Memory ordering": {
+      q: "What memory ordering model does x86-64 implement?",
+      opts: [
+        { id: "a", text: "Weak ordering", correct: false },
+        { id: "b", text: "Total Store Order (TSO)", correct: true },
+        { id: "c", text: "Release Consistency", correct: false },
+        { id: "d", text: "Sequential Consistency only", correct: false },
+      ],
+    },
+  };
+
+  const quizzes: Lesson["exercises"] = [];
+  const usedTopics = new Set<string>();
+
+  for (let i = 0; i < Math.min(topics.length, 2); i++) {
+    const topic = topics[i];
+    const entry = quizMap[topic];
+    if (entry && !usedTopics.has(topic)) {
+      usedTopics.add(topic);
+      quizzes.push({
+        id: `${prefix}-q${i + 1}`,
+        type: "quiz",
+        title: i === 0 ? "Concept Check" : "Deep Dive",
+        description: `Day ${day}: ${topic}`,
+        question: entry.q,
+        options: entry.opts,
+        xpReward: 25,
+      });
+    }
+  }
+
+  if (quizzes.length < 2) {
+    quizzes.push({
+      id: `${prefix}-q${quizzes.length + 1}`,
+      type: "quiz",
+      title: "Knowledge Check",
+      description: `Day ${day} core concept`,
       question: lang === "c"
-        ? "What is undefined behavior in C?"
-        : "What does the CMP instruction do?",
+        ? "What does undefined behavior mean in C?"
+        : "Which flag does CMP use to indicate equality?",
       options: lang === "c"
         ? [
             { id: "a", text: "A compiler warning", correct: false },
-            { id: "b", text: "Behavior not specified by the C standard — anything can happen", correct: true },
-            { id: "c", text: "A runtime error that always crashes", correct: false },
+            { id: "b", text: "Behavior not specified — anything can happen", correct: true },
+            { id: "c", text: "A guaranteed crash", correct: false },
             { id: "d", text: "Code that won't compile", correct: false },
           ]
         : [
-            { id: "a", text: "Copies one register to another", correct: false },
-            { id: "b", text: "Subtracts second operand from first, sets flags without storing", correct: true },
-            { id: "c", text: "Compares and stores result in RAX", correct: false },
-            { id: "d", text: "Multiplies two values", correct: false },
+            { id: "a", text: "CF (Carry Flag)", correct: false },
+            { id: "b", text: "ZF (Zero Flag)", correct: true },
+            { id: "c", text: "AF (Auxiliary Flag)", correct: false },
+            { id: "d", text: "OF (Overflow Flag)", correct: false },
           ],
       xpReward: 25,
-    },
-    {
-      id: `${prefix}-c1`,
-      type: "code" as const,
-      title: "Code Challenge",
-      description: `Apply Day ${day} concepts in the playground`,
-      starterCode: lang === "c"
-        ? `#include <stdio.h>\n\nint main(void) {\n    /* TODO: Implement today's concept */\n    return 0;\n}`
-        : `section .text\nglobal _start\n\n_start:\n    ; TODO: Implement today's concept\n    nop`,
-      hints: ["Review the theory section", "Use the playground to experiment", "Check expected output carefully"],
-      xpReward: 50,
-    },
-  ];
+    });
+  }
+
+  quizzes.push({
+    id: `${prefix}-c1`,
+    type: "code",
+    title: "Code Challenge",
+    description: `Practice ${blueprint.title} — implement the core concept`,
+    starterCode: blueprint.codeTemplate.includes("TODO")
+      ? blueprint.codeTemplate
+      : lang === "c"
+        ? `#include <stdio.h>\n\nint main(void) {\n    /* TODO: Implement ${blueprint.title} concepts */\n    return 0;\n}`
+        : `section .text\nglobal _start\n\n_start:\n    ; TODO: Implement ${blueprint.title}\n    nop`,
+    hints: [
+      "Review the theory section for each topic",
+      "Use the playground to experiment with the code template",
+      "Consider edge cases and boundary conditions",
+    ],
+    xpReward: 50,
+  });
+
+  return quizzes;
 }
 
-function generateDefaultAssignment(day: number, title: string, lang: "c" | "asm"): Lesson["assignment"] {
+function generateTopicAssignment(day: number, blueprint: DayBlueprint, lang: "c" | "asm"): Lesson["assignment"] {
+  const { title, theoryTopics } = blueprint;
+  const topicBasedReqs: string[] = theoryTopics.slice(0, 3).map(t => `Demonstrate understanding of ${t}`);
+  const expOutput = lang === "c"
+    ? "Expected output matching the problem specification"
+    : "Expected register values or memory state per problem spec";
+
   return {
     id: `d${day}-a1`,
     title: `${title} — Assignment`,
-    description: `Complete this assignment to master Day ${day} concepts. Apply everything you've learned in theory and exercises.`,
+    description: `Apply Day ${day} concepts by building a solution that exercises ${theoryTopics.join(", ")}. Focus on correctness, edge cases, and clean code.`,
     requirements: [
-      "Write clean, compilable code",
-      "Include meaningful comments",
-      "Handle edge cases",
-      "Test with multiple inputs",
+      ...topicBasedReqs,
+      "Write clean, compilable code with meaningful comments",
+      "Handle at least two edge cases",
+      "Verify output matches expected results",
     ],
-    starterCode: lang === "c"
-      ? `#include <stdio.h>\n\nint main(void) {\n    /* Assignment: ${title} */\n    return 0;\n}`
-      : `section .text\nglobal _start\n\n_start:\n    ; Assignment: ${title}\n    nop`,
+    starterCode: blueprint.codeTemplate.includes("TODO") || blueprint.codeTemplate.includes("nop")
+      ? blueprint.codeTemplate
+      : lang === "c"
+        ? `#include <stdio.h>\n\nint main(void) {\n    /* Assignment: ${title} */\n    return 0;\n}`
+        : `section .text\nglobal _start\n\n_start:\n    ; Assignment: ${title}\n    nop`,
     rubric: [
-      { criterion: "Correct implementation", points: 40 },
-      { criterion: "Code quality and comments", points: 30 },
-      { criterion: "Edge case handling", points: 20 },
-      { criterion: "Output correctness", points: 10 },
+      { criterion: `${theoryTopics[0] ?? "Core concept"} implementation`, points: 30 },
+      { criterion: `${theoryTopics[1] ?? "Supporting concept"} implementation`, points: 25 },
+      { criterion: "Code quality and comments", points: 20 },
+      { criterion: "Edge case handling", points: 15 },
+      { criterion: expOutput, points: 10 },
     ],
     xpReward: 100,
   };
@@ -5344,7 +6182,7 @@ function buildLesson(day: number): Lesson {
     theory: {
       sections: blueprint.theoryTopics.map((topic, i) => ({
         heading: topic,
-        content: `Day ${day}: ${topic} — a core concept in ${lang === "c" ? "C systems programming" : "x86-64 Assembly"}. Master this to advance your ${getLevelForDay(day)} tier skills.`,
+        content: generateTopicContent(topic, blueprint.title, day, lang),
         codeExample: i === 0 ? blueprint.codeTemplate : undefined,
       })),
     },
@@ -5353,8 +6191,8 @@ function buildLesson(day: number): Lesson {
       language: lang,
       runnable: true,
     },
-    exercises: generateDefaultExercises(day, lang),
-    assignment: generateDefaultAssignment(day, blueprint.title, lang),
+    exercises: generateTopicExercises(day, blueprint, lang),
+    assignment: generateTopicAssignment(day, blueprint, lang),
   };
 }
 

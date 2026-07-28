@@ -96,7 +96,6 @@ function FloatingCode() {
             color="#00e673"
             anchorX="center"
             anchorY="middle"
-            font="/fonts/jetbrains-mono.woff"
           >
             {s.text}
           </Text>
