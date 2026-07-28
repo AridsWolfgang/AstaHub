@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useState, useCallback } from "react";
-import { Play, RotateCcw, Copy, Check, Terminal } from "lucide-react";
+import { Play, RotateCcw, Copy, Check, Terminal, Cpu } from "lucide-react";
 import CyberPanel from "./CyberPanel";
 import { cn } from "@/lib/utils";
 
@@ -24,74 +24,19 @@ interface CodePlaygroundProps {
   onRun?: (code: string) => void;
 }
 
-function simulateExecution(code: string, language: "c" | "asm"): string {
-  const output: string[] = [];
-  output.push(`// ASTA Code Runner v1.0`);
-  output.push(`// Language: ${language === "c" ? "C (C11)" : "x86-64 NASM"}`);
-  output.push(`// ─────────────────────────────`);
-  output.push(``);
+async function executeCode(code: string, language: "c" | "asm") {
+  const res = await fetch("/api/execute", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, language }),
+  });
 
-  if (language === "c") {
-    const printfMatches = code.match(/printf\s*\(\s*"([^"\\]|\\.)*"/g);
-    if (printfMatches) {
-      for (const match of printfMatches) {
-        const strMatch = match.match(/"((?:[^"\\]|\\.)*)"/);
-        if (strMatch) {
-          let formatted = strMatch[1]
-            .replace(/\\n/g, "\n")
-            .replace(/\\t/g, "\t")
-            .replace(/\\"/g, '"');
-          const varMatch = formatted.match(/%[dfsc]/g);
-          if (varMatch) {
-            formatted = formatted.replace(/%[dfsc]/g, () => {
-              const numMatch = code.match(/=\s*(\d+)/);
-              return numMatch ? numMatch[1] : "?";
-            });
-          }
-          output.push(formatted);
-        }
-      }
-    }
-
-    if (code.includes("sizeof")) {
-      const types: Record<string, number> = {
-        int: 4, char: 1, float: 4, double: 8, long: 8, "long long": 8,
-      };
-      for (const [type, size] of Object.entries(types)) {
-        if (code.includes(type)) {
-          output.push(`${type}: ${size} bytes`);
-        }
-      }
-    }
-
-    if (output.length <= 4) {
-      output.push(`// Program compiled successfully.`);
-      output.push(`// Return value: 0 (success)`);
-      output.push(`//`);
-      output.push(`// Note: Full C compilation requires a backend compiler.`);
-      output.push(`// This sandbox simulates output for learning purposes.`);
-    }
-  } else {
-    output.push(`; NASM Assembly — simulated execution`);
-    if (code.includes("mov rax, 1") || code.includes("sys_write")) {
-      const msgMatch = code.match(/db\s+'([^']+)'/);
-      if (msgMatch) output.push(msgMatch[1]);
-    }
-    if (code.includes("mov rax,")) {
-      const movMatch = code.match(/mov\s+r(a|b|c|d|i|x),\s*(\d+)/g);
-      if (movMatch) {
-        for (const m of movMatch) {
-          const parts = m.match(/mov\s+(r\w+),\s*(\d+)/);
-          if (parts) output.push(`; ${parts[1]} = ${parts[2]}`);
-        }
-      }
-    }
-    output.push(`; Program halted. Exit code: 0`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "Execution failed" }));
+    throw new Error(err.error || `HTTP ${res.status}`);
   }
 
-  output.push(``);
-  output.push(`// Process finished — exit code 0`);
-  return output.join("\n");
+  return res.json();
 }
 
 export default function CodePlayground({
@@ -106,13 +51,25 @@ export default function CodePlayground({
   const [output, setOutput] = useState("");
   const [running, setRunning] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [executionMode, setExecutionMode] = useState<"idle" | "real" | "simulated" | "error">("idle");
 
   const handleRun = useCallback(async () => {
     setRunning(true);
     setOutput("");
-    await new Promise((r) => setTimeout(r, 600));
-    const result = simulateExecution(code, language);
-    setOutput(result);
+    setExecutionMode("idle");
+
+    try {
+      const result = await executeCode(code, language);
+      setOutput(result.output);
+      setExecutionMode(result.real ? "real" : "simulated");
+      if (result.error && !result.real) {
+        console.warn(result.error);
+      }
+    } catch (err) {
+      setOutput(`// Execution error:\n// ${err instanceof Error ? err.message : "Unknown error"}`);
+      setExecutionMode("error");
+    }
+
     setRunning(false);
     onRun?.(code);
   }, [code, language, onRun]);
@@ -120,6 +77,7 @@ export default function CodePlayground({
   const handleReset = () => {
     setCode(defaultCode);
     setOutput("");
+    setExecutionMode("idle");
   };
 
   const handleCopy = async () => {
@@ -130,10 +88,24 @@ export default function CodePlayground({
 
   const monacoLang = language === "c" ? "c" : "plaintext";
 
+  const modeColor = {
+    idle: "text-gray-500",
+    real: "text-matrix-500",
+    simulated: "text-cyber-amber",
+    error: "text-cyber-red",
+  }[executionMode];
+
+  const modeLabel = {
+    idle: "Ready",
+    real: "Live Execution",
+    simulated: "Simulated",
+    error: "Error",
+  }[executionMode];
+
   return (
     <CyberPanel glow="green" title="Code Playground" icon={<Terminal className="h-4 w-4" />}>
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <span className={cn(
               "rounded px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider",
@@ -143,6 +115,12 @@ export default function CodePlayground({
             )}>
               {language === "c" ? "C11" : "x86-64 NASM"}
             </span>
+            {executionMode !== "idle" && (
+              <span className={cn("flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-mono border", modeColor)}>
+                {executionMode === "real" && <Cpu className="h-3 w-3" />}
+                {modeLabel}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -164,7 +142,7 @@ export default function CodePlayground({
               disabled={running}
               className="flex items-center gap-2 rounded-lg bg-matrix-500/20 border border-matrix-500/30 px-4 py-2 text-sm font-mono text-matrix-500 hover:bg-matrix-500/30 transition-all disabled:opacity-50"
             >
-              <Play className="h-4 w-4" />
+              <Play className={cn("h-4 w-4", running && "animate-pulse")} />
               {running ? "Running..." : "Run"}
             </button>
           </div>
@@ -192,19 +170,25 @@ export default function CodePlayground({
           />
         </div>
 
-        {(output || expectedOutput) && (
-          <div className="rounded-lg border border-white/5 bg-black/40 p-4">
-            <div className="mb-2 flex items-center gap-2">
-              <Terminal className="h-3 w-3 text-matrix-500" />
-              <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">
-                Output
+        <div className="rounded-lg border border-white/5 bg-black/40 p-4">
+          <div className="mb-2 flex items-center gap-2">
+            <Terminal className="h-3 w-3 text-matrix-500" />
+            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">
+              Output
+            </span>
+            {expectedOutput && output && (
+              <span className={cn(
+                "text-[10px] font-mono ml-auto",
+                output.includes(expectedOutput) ? "text-matrix-500" : "text-cyber-red"
+              )}>
+                {output.includes(expectedOutput) ? "✓ Expected output matched" : "✗ Output mismatch"}
               </span>
-            </div>
-            <pre className="font-mono text-sm text-matrix-500 whitespace-pre-wrap">
-              {output || "// Click Run to execute"}
-            </pre>
+            )}
           </div>
-        )}
+          <pre className="font-mono text-sm text-matrix-500 whitespace-pre-wrap min-h-[40px]">
+            {output || "// Click Run to execute"}
+          </pre>
+        </div>
       </div>
     </CyberPanel>
   );

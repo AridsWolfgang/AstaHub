@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useParams, notFound } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { useParams, notFound, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -14,6 +14,9 @@ import {
   XCircle,
   Lightbulb,
   Trophy,
+  StickyNote,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import CyberPanel from "@/components/CyberPanel";
 import CodePlayground from "@/components/CodePlayground";
@@ -27,6 +30,7 @@ type Tab = "theory" | "playground" | "exercises" | "assignment";
 
 export default function LessonPage() {
   const params = useParams();
+  const router = useRouter();
   const day = Number(params.day);
   const lesson = getLesson(day);
 
@@ -34,6 +38,8 @@ export default function LessonPage() {
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
   const [quizResults, setQuizResults] = useState<Record<string, boolean>>({});
   const [showHints, setShowHints] = useState<Record<string, boolean>>({});
+  const [noteInput, setNoteInput] = useState("");
+  const [noteMinimized, setNoteMinimized] = useState(true);
 
   const {
     completeDay,
@@ -42,7 +48,27 @@ export default function LessonPage() {
     completedDays,
     completedExercises,
     completedAssignments,
+    notes,
+    addNote,
   } = useProgressStore();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "ArrowLeft" && day > 1) router.push(`/lesson/${day - 1}`);
+      if (e.key === "ArrowRight" && day < 100) router.push(`/lesson/${day + 1}`);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [day, router]);
+
+  useEffect(() => {
+    setNoteInput(notes[day] || "");
+    setQuizAnswers({});
+    setQuizResults({});
+    setShowHints({});
+    setActiveTab("theory");
+  }, [day, notes]);
 
   if (!lesson || isNaN(day) || day < 1 || day > 100) {
     notFound();
@@ -82,6 +108,10 @@ export default function LessonPage() {
     if (!isAssignmentComplete && lesson.assignment) {
       completeAssignment(day, lesson.assignment.xpReward);
     }
+  };
+
+  const handleSaveNote = () => {
+    addNote(day, noteInput);
   };
 
   return (
@@ -378,19 +408,57 @@ export default function LessonPage() {
         </motion.div>
       </AnimatePresence>
 
+      {/* Notes */}
+      <div className="mt-8">
+        <button
+          onClick={() => setNoteMinimized(!noteMinimized)}
+          className="flex items-center gap-2 text-xs font-mono text-gray-500 hover:text-cyber-cyan transition-colors mb-2"
+        >
+          <StickyNote className="h-3.5 w-3.5" />
+          {noteMinimized ? "Show notes" : "Hide notes"}
+          {noteMinimized ? <Maximize2 className="h-3 w-3" /> : <Minimize2 className="h-3 w-3" />}
+        </button>
+        {!noteMinimized && (
+          <div className="rounded-xl border border-white/5 bg-cyber-panel/40 p-4">
+            <textarea
+              value={noteInput}
+              onChange={(e) => setNoteInput(e.target.value)}
+              placeholder="Write your notes for this lesson..."
+              className="w-full min-h-[100px] bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-gray-300 font-mono placeholder:text-gray-600 focus:outline-none focus:border-cyber-cyan/30 resize-y"
+            />
+            <button
+              onClick={handleSaveNote}
+              className="btn-cyber text-xs mt-2"
+            >
+              <StickyNote className="h-3 w-3" />
+              Save Note
+            </button>
+            {notes[day] && (
+              <span className="text-[10px] font-mono text-matrix-500 ml-3">
+                ✓ Saved
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Navigation */}
       <div className="flex justify-between mt-10 pt-6 border-t border-white/5">
         {day > 1 ? (
-          <Link href={`/lesson/${day - 1}`} className="btn-cyber text-xs">
+          <Link href={`/lesson/${day - 1}`} className="btn-cyber text-xs group">
             <ArrowLeft className="h-3 w-3" />
-            Day {day - 1}
+            <span className="hidden sm:inline">Day {day - 1}</span>
+            <span className="sm:hidden">Prev</span>
+            <kbd className="ml-1 rounded border border-white/10 px-1 text-[8px] text-gray-500 hidden sm:inline">←</kbd>
           </Link>
         ) : (
           <div />
         )}
         {day < 100 && (
-          <Link href={`/lesson/${day + 1}`} className="btn-cyber text-xs">
-            Day {day + 1}
+          <Link href={`/lesson/${day + 1}`} className="btn-cyber text-xs group">
+            <span className="hidden sm:inline">Day {day + 1}</span>
+            <span className="sm:hidden">Next</span>
+            <kbd className="mr-1 rounded border border-white/10 px-1 text-[8px] text-gray-500 hidden sm:inline">→</kbd>
             <ArrowRight className="h-3 w-3" />
           </Link>
         )}

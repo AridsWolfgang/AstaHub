@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { CheckCircle2, Lock, Filter } from "lucide-react";
+import { CheckCircle2, Lock, Filter, Search, BookOpen, Cpu } from "lucide-react";
 import CyberPanel from "@/components/CyberPanel";
 import { CURRICULUM } from "@/lib/curriculum";
 import { useProgressStore, isDayUnlocked } from "@/lib/store";
@@ -16,12 +16,33 @@ export default function CurriculumPage() {
   const { completedDays } = useProgressStore();
   const [filter, setFilter] = useState<FilterLang>("all");
   const [activeTier, setActiveTier] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filtered = CURRICULUM.filter((l) => {
-    if (filter !== "all" && l.language !== filter) return false;
-    if (activeTier && l.level !== activeTier) return false;
-    return true;
-  });
+  const filtered = useMemo(() => {
+    let list = CURRICULUM;
+    if (filter !== "all") list = list.filter((l) => l.language === filter);
+    if (activeTier) list = list.filter((l) => l.level === activeTier);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (l) =>
+          l.title.toLowerCase().includes(q) ||
+          l.subtitle.toLowerCase().includes(q) ||
+          l.tags.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [filter, activeTier, searchQuery]);
+
+  const stats = useMemo(() => {
+    const total = CURRICULUM.length;
+    const completed = completedDays.length;
+    const cDone = CURRICULUM.filter((l) => l.language === "c" && completedDays.includes(l.day)).length;
+    const asmDone = CURRICULUM.filter((l) => l.language === "asm" && completedDays.includes(l.day)).length;
+    const cTotal = CURRICULUM.filter((l) => l.language === "c").length;
+    const asmTotal = CURRICULUM.filter((l) => l.language === "asm").length;
+    return { total, completed, cDone, asmDone, cTotal, asmTotal };
+  }, [completedDays]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
@@ -34,9 +55,37 @@ export default function CurriculumPage() {
         </p>
       </motion.div>
 
+      {/* Stats bar */}
+      <div className="flex flex-wrap gap-4 mb-6 text-xs font-mono">
+        <span className="text-gray-400">
+          <span className="text-white font-semibold">{stats.completed}</span>/{stats.total} days
+        </span>
+        <span className="text-cyber-cyan">
+          C: {stats.cDone}/{stats.cTotal}
+        </span>
+        <span className="text-cyber-purple">
+          ASM: {stats.asmDone}/{stats.asmTotal}
+        </span>
+        <span className="text-cyber-amber">
+          {Math.round((stats.completed / stats.total) * 100)}% complete
+        </span>
+      </div>
+
+      {/* Search */}
+      <div className="relative mb-6">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search lessons by title, description, or tag..."
+          className="w-full rounded-lg border border-white/5 bg-cyber-panel/40 pl-10 pr-4 py-2.5 text-sm font-mono text-gray-300 placeholder:text-gray-600 focus:outline-none focus:border-cyber-cyan/30 transition-colors"
+        />
+      </div>
+
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-8">
-        <Filter className="h-4 w-4 text-gray-500" />
+        <Filter className="h-4 w-4 text-gray-500 shrink-0" />
         {(["all", "c", "asm"] as FilterLang[]).map((f) => (
           <button
             key={f}
@@ -48,10 +97,13 @@ export default function CurriculumPage() {
                 : "text-gray-500 hover:text-white border border-transparent"
             )}
           >
-            {f === "all" ? "All" : f === "c" ? "C Language" : "Assembly"}
+            <span className="flex items-center gap-1.5">
+              {f === "c" ? <BookOpen className="h-3 w-3" /> : f === "asm" ? <Cpu className="h-3 w-3" /> : null}
+              {f === "all" ? "All" : f === "c" ? "C Language" : "Assembly"}
+            </span>
           </button>
         ))}
-        <div className="h-4 w-px bg-cyber-border mx-2" />
+        <div className="h-4 w-px bg-cyber-border mx-2 shrink-0" />
         {PROFICIENCY_TIERS.map((tier) => (
           <button
             key={tier.id}
@@ -72,6 +124,13 @@ export default function CurriculumPage() {
           </button>
         ))}
       </div>
+
+      {/* Results count */}
+      {searchQuery && (
+        <p className="text-xs font-mono text-gray-500 mb-4">
+          {filtered.length} result{filtered.length !== 1 ? "s" : ""} for &ldquo;{searchQuery}&rdquo;
+        </p>
+      )}
 
       {/* Tier Headers + Lessons */}
       {PROFICIENCY_TIERS.map((tier) => {
@@ -159,6 +218,20 @@ export default function CurriculumPage() {
           </div>
         );
       })}
+
+      {filtered.length === 0 && (
+        <div className="text-center py-20">
+          <p className="text-gray-500 font-mono text-sm">
+            No lessons match your search criteria.
+          </p>
+          <button
+            onClick={() => { setSearchQuery(""); setFilter("all"); setActiveTier(null); }}
+            className="btn-cyber text-xs mt-4"
+          >
+            Clear filters
+          </button>
+        </div>
+      )}
     </div>
   );
 }

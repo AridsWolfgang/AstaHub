@@ -79,7 +79,7 @@ export default function HomePage() {
               </span>
             </div>
 
-            <h1 className="font-display text-5xl md:text-7xl font-black tracking-tight leading-none mb-6">
+            <h1 className="font-display text-3xl sm:text-5xl md:text-7xl font-black tracking-tight leading-none mb-6">
               <span className="text-white">MASTER </span>
               <span className="text-glow-cyan text-cyber-cyan">C</span>
               <span className="text-white"> & </span>

@@ -54,7 +54,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Stats Row */}
-      <div className="grid gap-6 md:grid-cols-4 mb-8">
+      <div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-4 mb-8">
         <CyberPanel glow="cyan">
           <ProgressRing
             percent={overallPercent}
