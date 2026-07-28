@@ -32,7 +32,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-cyber-border/50 bg-cyber-dark/80 backdrop-blur-xl">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-cyber-border/50 bg-cyber-dark/95 md:bg-cyber-dark/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-3 group shrink-0">
           <div className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-cyber-cyan/30 bg-cyber-cyan/5 group-hover:border-cyber-cyan/60 transition-colors">
