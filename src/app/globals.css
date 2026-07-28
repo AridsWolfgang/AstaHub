@@ -1,0 +1,100 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 240, 255, 0.2) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(0, 240, 255, 0.2);
+    border-radius: 3px;
+  }
+
+  body {
+    @apply bg-cyber-dark text-gray-200 font-mono antialiased;
+  }
+
+  ::selection {
+    @apply bg-cyber-cyan/30 text-white;
+  }
+}
+
+@layer components {
+  .grid-bg {
+    background-image: linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  .scanline::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(transparent, rgba(0, 240, 255, 0.08), transparent);
+    animation: scan-line 8s linear infinite;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .text-glow-cyan {
+    text-shadow: 0 0 20px rgba(0, 240, 255, 0.5), 0 0 40px rgba(0, 240, 255, 0.2);
+  }
+
+  .text-glow-purple {
+    text-shadow: 0 0 20px rgba(191, 0, 255, 0.5), 0 0 40px rgba(191, 0, 255, 0.2);
+  }
+
+  .btn-cyber {
+    @apply relative inline-flex items-center gap-2 rounded-lg border border-cyber-cyan/30 bg-cyber-cyan/5 px-6 py-3 font-mono text-sm text-cyber-cyan transition-all hover:bg-cyber-cyan/15 hover:border-cyber-cyan/50 hover:shadow-[0_0_20px_rgba(0,240,255,0.15)];
+  }
+
+  .btn-cyber-solid {
+    @apply relative inline-flex items-center gap-2 rounded-lg bg-cyber-cyan px-6 py-3 font-mono text-sm font-semibold text-cyber-dark transition-all hover:shadow-[0_0_30px_rgba(0,240,255,0.4)] hover:brightness-110;
+  }
+
+  .theory-content h2 {
+    @apply text-lg font-display font-bold text-white mb-3 mt-6;
+  }
+
+  .theory-content p {
+    @apply text-gray-400 leading-relaxed mb-4;
+  }
+
+  .theory-content pre {
+    @apply rounded-lg border border-white/5 bg-black/40 p-4 font-mono text-sm text-matrix-500 overflow-x-auto mb-4;
+  }
+}
+
+@layer utilities {
+  .animate-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
