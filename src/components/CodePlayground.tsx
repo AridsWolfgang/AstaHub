@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Play, RotateCcw, Copy, Check, Terminal, Cpu } from "lucide-react";
 import CyberPanel from "./CyberPanel";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,22 @@ const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
     </div>
   ),
 });
+
+function EditorFallback() {
+  return (
+    <div className="flex h-full items-center justify-center font-mono text-sm text-gray-500">
+      Loading editor...
+    </div>
+  );
+}
+
+async function runWhenIdle(cb: () => void) {
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(cb, { timeout: 2000 });
+  } else {
+    setTimeout(cb, 1000);
+  }
+}
 
 interface CodePlaygroundProps {
   defaultCode: string;
@@ -51,7 +67,22 @@ export default function CodePlayground({
   const [output, setOutput] = useState("");
   const [running, setRunning] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [editorReady, setEditorReady] = useState(false);
   const [executionMode, setExecutionMode] = useState<"idle" | "real" | "simulated" | "error">("idle");
+
+  useEffect(() => {
+    let disposed = false;
+    const start = () => runWhenIdle(() => !disposed && setEditorReady(true));
+    if (document.readyState === "complete") {
+      start();
+    } else {
+      window.addEventListener("load", start, { once: true });
+    }
+    return () => {
+      disposed = true;
+      window.removeEventListener("load", start);
+    };
+  }, []);
 
   const handleRun = useCallback(async () => {
     setRunning(true);
@@ -90,8 +121,8 @@ export default function CodePlayground({
 
   const modeColor = {
     idle: "text-gray-500",
-    real: "text-matrix-500",
-    simulated: "text-cyber-amber",
+    real: "text-cyber-cyan",
+    simulated: "text-gray-300",
     error: "text-cyber-red",
   }[executionMode];
 
@@ -103,7 +134,7 @@ export default function CodePlayground({
   }[executionMode];
 
   return (
-    <CyberPanel glow="green" title="Code Playground" icon={<Terminal className="h-4 w-4" />}>
+    <CyberPanel title="Code Playground" icon={<Terminal className="h-4 w-4" />}>
       <div className="space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
@@ -111,7 +142,7 @@ export default function CodePlayground({
               "rounded px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider",
               language === "c"
                 ? "bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/20"
-                : "bg-cyber-purple/10 text-cyber-purple border border-cyber-purple/20"
+                : "bg-white/5 text-gray-300 border border-white/10"
             )}>
               {language === "c" ? "C11" : "x86-64 NASM"}
             </span>
@@ -128,7 +159,7 @@ export default function CodePlayground({
               className="rounded-lg p-2 text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
               title="Copy code"
             >
-              {copied ? <Check className="h-4 w-4 text-matrix-500" /> : <Copy className="h-4 w-4" />}
+              {copied ? <Check className="h-4 w-4 text-cyber-cyan" /> : <Copy className="h-4 w-4" />}
             </button>
             <button
               onClick={handleReset}
@@ -140,7 +171,7 @@ export default function CodePlayground({
             <button
               onClick={handleRun}
               disabled={running}
-              className="flex items-center gap-2 rounded-lg bg-matrix-500/20 border border-matrix-500/30 px-4 py-2 text-sm font-mono text-matrix-500 hover:bg-matrix-500/30 transition-all disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg bg-cyber-cyan px-4 py-2 text-sm font-mono text-cyber-dark font-semibold hover:bg-cyber-cyan/90 transition-colors disabled:opacity-50"
             >
               <Play className={cn("h-4 w-4", running && "animate-pulse")} />
               {running ? "Running..." : "Run"}
@@ -149,43 +180,47 @@ export default function CodePlayground({
         </div>
 
         <div className="rounded-lg border border-white/5 overflow-hidden" style={{ height }}>
-          <MonacoEditor
-            language={monacoLang}
-            value={code}
-            onChange={(v) => !readOnly && setCode(v ?? "")}
-            theme="vs-dark"
-            options={{
-              readOnly,
-              minimap: { enabled: false },
-              fontSize: 14,
-              fontFamily: "JetBrains Mono, Fira Code, Consolas, monospace",
-              lineNumbers: "on",
-              scrollBeyondLastLine: false,
-              padding: { top: 12 },
-              renderLineHighlight: "line",
-              cursorBlinking: "smooth",
-              smoothScrolling: true,
-              tabSize: 4,
-            }}
-          />
+          {editorReady ? (
+            <MonacoEditor
+              language={monacoLang}
+              value={code}
+              onChange={(v) => !readOnly && setCode(v ?? "")}
+              theme="vs-dark"
+              options={{
+                readOnly,
+                minimap: { enabled: false },
+                fontSize: 14,
+                fontFamily: "JetBrains Mono, Fira Code, Consolas, monospace",
+                lineNumbers: "on",
+                scrollBeyondLastLine: false,
+                padding: { top: 12 },
+                renderLineHighlight: "line",
+                cursorBlinking: "smooth",
+                smoothScrolling: true,
+                tabSize: 4,
+              }}
+            />
+          ) : (
+            <EditorFallback />
+          )}
         </div>
 
         <div className="rounded-lg border border-white/5 bg-black/40 p-4">
           <div className="mb-2 flex items-center gap-2">
-            <Terminal className="h-3 w-3 text-matrix-500" />
+            <Terminal className="h-3 w-3 text-cyber-cyan" />
             <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">
               Output
             </span>
             {expectedOutput && output && (
               <span className={cn(
                 "text-[10px] font-mono ml-auto",
-                output.includes(expectedOutput) ? "text-matrix-500" : "text-cyber-red"
+                output.includes(expectedOutput) ? "text-cyber-cyan" : "text-cyber-red"
               )}>
                 {output.includes(expectedOutput) ? "✓ Expected output matched" : "✗ Output mismatch"}
               </span>
             )}
           </div>
-          <pre className="font-mono text-sm text-matrix-500 whitespace-pre-wrap min-h-[40px]">
+          <pre className="font-mono text-sm text-gray-200 whitespace-pre-wrap min-h-[40px]">
             {output || "// Click Run to execute"}
           </pre>
         </div>

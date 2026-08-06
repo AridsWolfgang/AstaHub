@@ -16,7 +16,7 @@ export default function ProgressRing({
   percent,
   size = 120,
   strokeWidth = 6,
-  color = "#00f0ff",
+  color = "#ffffff",
   label,
   className,
 }: ProgressRingProps) {
@@ -40,14 +40,13 @@ export default function ProgressRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={color}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
+          style={{ stroke: color }}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
           transition={{ duration: 1.5, ease: "easeOut" }}
-          style={{ filter: `drop-shadow(0 0 6px ${color}40)` }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">

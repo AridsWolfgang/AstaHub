@@ -11,11 +11,11 @@ interface CyberPanelProps {
 }
 
 const glowColors = {
-  cyan: "border-cyber-cyan/20 hover:border-cyber-cyan/40 shadow-[0_0_30px_rgba(0,240,255,0.05)]",
-  purple: "border-cyber-purple/20 hover:border-cyber-purple/40 shadow-[0_0_30px_rgba(191,0,255,0.05)]",
-  amber: "border-cyber-amber/20 hover:border-cyber-amber/40 shadow-[0_0_30px_rgba(255,176,0,0.05)]",
-  red: "border-cyber-red/20 hover:border-cyber-red/40 shadow-[0_0_30px_rgba(255,0,64,0.05)]",
-  green: "border-matrix-500/20 hover:border-matrix-500/40 shadow-[0_0_30px_rgba(0,230,115,0.05)]",
+  cyan: "border-white/10 hover:border-cyber-cyan/40",
+  purple: "border-white/10 hover:border-cyber-cyan/40",
+  amber: "border-white/10 hover:border-cyber-cyan/40",
+  red: "border-white/10 hover:border-cyber-cyan/40",
+  green: "border-white/10 hover:border-cyber-cyan/40",
 };
 
 export default function CyberPanel({
@@ -28,7 +28,7 @@ export default function CyberPanel({
   return (
     <div
       className={cn(
-        "relative rounded-xl border bg-cyber-panel/60 backdrop-blur-sm transition-all duration-300",
+        "relative rounded-xl border bg-white/[0.02] transition-colors duration-300",
         glowColors[glow],
         className
       )}
@@ -44,7 +44,6 @@ export default function CyberPanel({
         </div>
       )}
       <div className="p-5">{children}</div>
-      <div className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-white/[0.02] to-transparent" />
     </div>
   );
 }

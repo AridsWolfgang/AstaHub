@@ -8,7 +8,7 @@ export default function Loading() {
           <div className="absolute inset-4 animate-pulse rounded-full bg-cyber-cyan/10" />
         </div>
         <p className="font-mono text-sm text-gray-500 animate-pulse">
-          Loading module...
+          Loading...
         </p>
       </div>
     </div>

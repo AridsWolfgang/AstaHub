@@ -2,7 +2,7 @@
 
 import { Suspense, useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Stars, Text, MeshDistortMaterial } from "@react-three/drei";
+import { Float, Stars, Text } from "@react-three/drei";
 import * as THREE from "three";
 
 function HexGrid() {
@@ -10,9 +10,9 @@ function HexGrid() {
 
   const hexes = useMemo(() => {
     const items: { position: [number, number, number]; scale: number }[] = [];
-    for (let x = -8; x <= 8; x += 1.5) {
-      for (let z = -8; z <= 8; z += 1.3) {
-        if (Math.random() > 0.6) {
+    for (let x = -8; x <= 8; x += 2.4) {
+      for (let z = -8; z <= 8; z += 2.1) {
+        if (Math.random() > 0.5) {
           items.push({
             position: [x, -2 + Math.random() * 0.3, z],
             scale: 0.3 + Math.random() * 0.4,
@@ -25,7 +25,7 @@ function HexGrid() {
 
   useFrame((state) => {
     if (ref.current) {
-      ref.current.rotation.y = state.clock.elapsedTime * 0.02;
+      ref.current.rotation.y = state.clock.elapsedTime * 0.01;
     }
   });
 
@@ -35,9 +35,9 @@ function HexGrid() {
         <mesh key={i} position={hex.position} scale={hex.scale}>
           <cylinderGeometry args={[1, 1, 0.1, 6]} />
           <meshStandardMaterial
-            color="#00f0ff"
+            color="#ffffff"
             transparent
-            opacity={0.08}
+            opacity={0.04}
             wireframe
           />
         </mesh>
@@ -51,22 +51,21 @@ function CoreSphere() {
 
   useFrame((state) => {
     if (ref.current) {
-      ref.current.rotation.x = state.clock.elapsedTime * 0.15;
-      ref.current.rotation.y = state.clock.elapsedTime * 0.2;
+      ref.current.rotation.x = state.clock.elapsedTime * 0.08;
+      ref.current.rotation.y = state.clock.elapsedTime * 0.1;
     }
   });
 
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+    <Float speed={1} rotationIntensity={0.3} floatIntensity={0.6}>
       <mesh ref={ref}>
         <icosahedronGeometry args={[1.2, 1]} />
-        <MeshDistortMaterial
-          color="#00f0ff"
-          emissive="#004466"
-          roughness={0.2}
-          metalness={0.8}
-          distort={0.3}
-          speed={2}
+        <meshStandardMaterial
+          color="#ffffff"
+          emissive="#1a1a1a"
+          emissiveIntensity={0.6}
+          roughness={0.6}
+          metalness={0.4}
           wireframe
         />
       </mesh>
@@ -89,11 +88,11 @@ function FloatingCode() {
   return (
     <>
       {snippets.map((s, i) => (
-        <Float key={i} speed={1 + i * 0.3} floatIntensity={0.5}>
+        <Float key={i} speed={0.5 + i * 0.2} floatIntensity={0.3}>
           <Text
             position={s.pos}
             fontSize={0.15}
-            color="#00e673"
+            color="#8a8a8a"
             anchorX="center"
             anchorY="middle"
           >
@@ -108,10 +107,9 @@ function FloatingCode() {
 function SceneContent() {
   return (
     <>
-      <ambientLight intensity={0.2} />
-      <pointLight position={[10, 10, 10]} intensity={1} color="#00f0ff" />
-      <pointLight position={[-10, -5, -10]} intensity={0.5} color="#bf00ff" />
-      <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
+      <ambientLight intensity={0.4} />
+      <pointLight position={[10, 10, 10]} intensity={0.7} color="#ffffff" />
+      <Stars radius={100} depth={50} count={260} factor={2.5} saturation={0} fade speed={0.4} />
       <CoreSphere />
       <HexGrid />
     </>
@@ -129,7 +127,8 @@ export default function Scene3D({ className, interactive = false }: Scene3DProps
       <Canvas
         camera={{ position: [0, 2, 6], fov: 60 }}
         style={{ background: "transparent" }}
-        dpr={[1, 1.5]}
+        dpr={[1, 1.25]}
+        gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
       >
         <Suspense fallback={null}>
           <SceneContent />

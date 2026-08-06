@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  name               String
+  email              String   @unique
+  passwordHash       String
+  image              String?
+  bio                String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Progress + gamification
+  currentDay         Int      @default(1)
+  totalXp            Int      @default(0)
+  level              String   @default("initiate")
+  streak             Int      @default(0)
+  lastActiveDate     String?
+  completedDays      Int[]    @default([])
+  completedExercises Json     @default("{}")
+  completedAssignments Int[]  @default([])
+  notes              Json     @default("{}")
+
+  certificates       Certificate[]
+}
+
+model Certificate {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  day       Int
+  xp        Int
+  issuedAt  DateTime @default(now())
+
+  @@index([userId])
+}

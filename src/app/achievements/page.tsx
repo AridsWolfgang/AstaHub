@@ -1,7 +1,24 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Trophy, Lock, Star } from "lucide-react";
+import {
+  Trophy,
+  Lock,
+  Star,
+  Zap,
+  Flame,
+  Pointer,
+  Layers,
+  Package,
+  Mountain,
+  Cog,
+  Cpu,
+  Signal,
+  Rocket,
+  Gem,
+  Crown,
+  ClipboardList,
+} from "lucide-react";
 import CyberPanel from "@/components/CyberPanel";
 import { useProgressStore } from "@/lib/store";
 import { PROFICIENCY_TIERS } from "@/lib/types";
@@ -11,7 +28,7 @@ interface Achievement {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: React.ElementType;
   condition: (state: ReturnType<typeof useProgressStore.getState>) => boolean;
   xp: number;
   rarity: "common" | "rare" | "epic" | "legendary";
@@ -22,7 +39,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "first-boot",
     title: "First Boot",
     description: "Complete Day 1",
-    icon: "⚡",
+    icon: Zap,
     condition: (s) => s.completedDays.includes(1),
     xp: 50,
     rarity: "common",
@@ -31,7 +48,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "week-one",
     title: "Week One Survivor",
     description: "Complete 7 days",
-    icon: "🔥",
+    icon: Flame,
     condition: (s) => s.completedDays.length >= 7,
     xp: 100,
     rarity: "common",
@@ -40,7 +57,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "pointer-fearless",
     title: "Pointer Fearless",
     description: "Reach Day 10 (Pointer Arithmetic)",
-    icon: "👉",
+    icon: Pointer,
     condition: (s) => s.completedDays.includes(10),
     xp: 150,
     rarity: "rare",
@@ -49,7 +66,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "stack-apprentice",
     title: "Stack Apprentice",
     description: "Reach the Apprentice tier (Day 21)",
-    icon: "◆",
+    icon: Layers,
     condition: (s) => s.completedDays.some((d) => d >= 21),
     xp: 200,
     rarity: "rare",
@@ -58,7 +75,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "malloc-master",
     title: "Heap Walker",
     description: "Complete Day 13 (Dynamic Memory)",
-    icon: "🧱",
+    icon: Package,
     condition: (s) => s.completedDays.includes(13),
     xp: 150,
     rarity: "rare",
@@ -67,7 +84,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "halfway",
     title: "Halfway There",
     description: "Complete 50 days",
-    icon: "🏔️",
+    icon: Mountain,
     condition: (s) => s.completedDays.length >= 50,
     xp: 500,
     rarity: "epic",
@@ -76,7 +93,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "asm-genesis",
     title: "Assembly Genesis",
     description: "Start the Assembly track (Day 51)",
-    icon: "⚙️",
+    icon: Cog,
     condition: (s) => s.completedDays.includes(51),
     xp: 200,
     rarity: "rare",
@@ -85,7 +102,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "register-expert",
     title: "Register Expert",
     description: "Reach the Expert tier (Day 61)",
-    icon: "◉",
+    icon: Cpu,
     condition: (s) => s.completedDays.some((d) => d >= 61),
     xp: 300,
     rarity: "epic",
@@ -94,7 +111,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "streak-7",
     title: "Consistent Operator",
     description: "Maintain a 7-day streak",
-    icon: "📡",
+    icon: Signal,
     condition: (s) => s.streak >= 7,
     xp: 200,
     rarity: "rare",
@@ -103,7 +120,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "streak-30",
     title: "Daily Driver",
     description: "Maintain a 30-day streak",
-    icon: "🚀",
+    icon: Rocket,
     condition: (s) => s.streak >= 30,
     xp: 500,
     rarity: "legendary",
@@ -112,7 +129,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "xp-1000",
     title: "XP Collector",
     description: "Earn 1,000 total XP",
-    icon: "💎",
+    icon: Gem,
     condition: (s) => s.totalXp >= 1000,
     xp: 100,
     rarity: "common",
@@ -121,7 +138,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "xp-5000",
     title: "XP Hoarder",
     description: "Earn 5,000 total XP",
-    icon: "👑",
+    icon: Crown,
     condition: (s) => s.totalXp >= 5000,
     xp: 300,
     rarity: "epic",
@@ -130,7 +147,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "silicon-master",
     title: "Silicon Master",
     description: "Complete all 100 days",
-    icon: "★",
+    icon: Star,
     condition: (s) => s.completedDays.length >= 100,
     xp: 1000,
     rarity: "legendary",
@@ -139,7 +156,7 @@ const ACHIEVEMENTS: Achievement[] = [
     id: "assignment-10",
     title: "Assignment Grinder",
     description: "Complete 10 assignments",
-    icon: "📝",
+    icon: ClipboardList,
     condition: (s) => s.completedAssignments.length >= 10,
     xp: 200,
     rarity: "rare",
@@ -149,15 +166,15 @@ const ACHIEVEMENTS: Achievement[] = [
 const rarityColors = {
   common: "border-gray-500/20 text-gray-400",
   rare: "border-cyber-cyan/20 text-cyber-cyan",
-  epic: "border-cyber-purple/20 text-cyber-purple",
-  legendary: "border-cyber-amber/20 text-cyber-amber",
+  epic: "border-white/20 text-gray-200",
+  legendary: "border-white/40 text-white",
 };
 
 const rarityBg = {
   common: "bg-gray-500/5",
   rare: "bg-cyber-cyan/5",
-  epic: "bg-cyber-purple/5",
-  legendary: "bg-cyber-amber/5",
+  epic: "bg-white/5",
+  legendary: "bg-white/10",
 };
 
 export default function AchievementsPage() {
@@ -211,7 +228,7 @@ export default function AchievementsPage() {
       {unlocked.length > 0 && (
         <div className="mb-8">
           <h2 className="font-display text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-cyber-amber" />
+            <Trophy className="h-5 w-5 text-cyber-cyan" />
             Unlocked
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -228,8 +245,8 @@ export default function AchievementsPage() {
                 )}
               >
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-3xl">{a.icon}</span>
-                  <Star className="h-4 w-4 text-cyber-amber" />
+                  <a.icon className="h-8 w-8 text-white" strokeWidth={1.5} />
+                  <Star className="h-4 w-4 text-cyber-cyan" />
                 </div>
                 <h3 className="font-display text-sm font-bold text-white mb-1">
                   {a.title}
@@ -258,7 +275,7 @@ export default function AchievementsPage() {
                 className="rounded-xl border border-white/5 bg-white/[0.01] p-5 opacity-40"
               >
                 <div className="flex items-start justify-between mb-3">
-                  <span className="text-3xl grayscale">🔒</span>
+                  <Lock className="h-8 w-8 text-gray-600" strokeWidth={1.5} />
                 </div>
                 <h3 className="font-display text-sm font-bold text-gray-500 mb-1">
                   {a.title}

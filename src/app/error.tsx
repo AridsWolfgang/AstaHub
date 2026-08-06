@@ -21,17 +21,17 @@ export default function Error({
         </span>
       </div>
       <h1 className="font-display text-3xl font-bold text-white mb-3">
-        Kernel Panic
+        Something went wrong
       </h1>
       <p className="text-gray-400 font-mono text-sm mb-8 max-w-md">
-        Something went wrong. The system encountered an unrecoverable error.
+        An unexpected error occurred while rendering this page.
         <br />
         <code className="mt-2 block text-cyber-red text-[10px]">
           {error.message}
         </code>
       </p>
       <button onClick={reset} className="btn-cyber-solid">
-        Reboot
+        Try again
       </button>
     </div>
   );

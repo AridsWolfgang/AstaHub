@@ -9,14 +9,13 @@ export default function NotFound() {
         </span>
       </div>
       <h1 className="font-display text-3xl font-bold text-white mb-3">
-        Segmentation Fault
+        Page not found
       </h1>
       <p className="text-gray-400 font-mono text-sm mb-8 max-w-md">
-        The page you&apos;re looking for has been paged out. It doesn&apos;t
-        exist in any memory segment.
+        The page you&apos;re looking for doesn&apos;t exist or has moved.
       </p>
       <Link href="/dashboard" className="btn-cyber-solid">
-        Return to Command Center
+        Go to Dashboard
       </Link>
     </div>
   );

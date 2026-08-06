@@ -1,25 +1,40 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { CheckCircle2, Lock, Filter, Search, BookOpen, Cpu } from "lucide-react";
 import CyberPanel from "@/components/CyberPanel";
-import { CURRICULUM } from "@/lib/curriculum";
+import { getLessons } from "@/lib/curriculum";
 import { useProgressStore, isDayUnlocked } from "@/lib/store";
 import { PROFICIENCY_TIERS } from "@/lib/types";
+import type { Lesson } from "@/lib/types";
 import { formatDay, cn } from "@/lib/utils";
 
 type FilterLang = "all" | "c" | "asm";
 
 export default function CurriculumPage() {
   const { completedDays } = useProgressStore();
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterLang>("all");
   const [activeTier, setActiveTier] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  useEffect(() => {
+    let cancelled = false;
+    getLessons().then((list) => {
+      if (cancelled) return;
+      setLessons(list);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const filtered = useMemo(() => {
-    let list = CURRICULUM;
+    let list = lessons;
     if (filter !== "all") list = list.filter((l) => l.language === filter);
     if (activeTier) list = list.filter((l) => l.level === activeTier);
     if (searchQuery.trim()) {
@@ -32,26 +47,26 @@ export default function CurriculumPage() {
       );
     }
     return list;
-  }, [filter, activeTier, searchQuery]);
+  }, [lessons, filter, activeTier, searchQuery]);
 
   const stats = useMemo(() => {
-    const total = CURRICULUM.length;
+    const total = lessons.length;
     const completed = completedDays.length;
-    const cDone = CURRICULUM.filter((l) => l.language === "c" && completedDays.includes(l.day)).length;
-    const asmDone = CURRICULUM.filter((l) => l.language === "asm" && completedDays.includes(l.day)).length;
-    const cTotal = CURRICULUM.filter((l) => l.language === "c").length;
-    const asmTotal = CURRICULUM.filter((l) => l.language === "asm").length;
+    const cDone = lessons.filter((l) => l.language === "c" && completedDays.includes(l.day)).length;
+    const asmDone = lessons.filter((l) => l.language === "asm" && completedDays.includes(l.day)).length;
+    const cTotal = lessons.filter((l) => l.language === "c").length;
+    const asmTotal = lessons.filter((l) => l.language === "asm").length;
     return { total, completed, cDone, asmDone, cTotal, asmTotal };
-  }, [completedDays]);
+  }, [lessons, completedDays]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <h1 className="font-display text-3xl font-bold text-white mb-2">
-          100-Day Curriculum
+          The tracks
         </h1>
         <p className="text-sm text-gray-500 font-mono">
-          50 days of C mastery → 50 days of Assembly domination
+          Where it starts — one honest road to the metal.
         </p>
       </motion.div>
 
@@ -63,10 +78,10 @@ export default function CurriculumPage() {
         <span className="text-cyber-cyan">
           C: {stats.cDone}/{stats.cTotal}
         </span>
-        <span className="text-cyber-purple">
+        <span className="text-white/80">
           ASM: {stats.asmDone}/{stats.asmTotal}
         </span>
-        <span className="text-cyber-amber">
+        <span className="text-gray-300">
           {Math.round((stats.completed / stats.total) * 100)}% complete
         </span>
       </div>
@@ -116,7 +131,11 @@ export default function CurriculumPage() {
             )}
             style={
               activeTier === tier.id
-                ? { color: tier.color, borderColor: `${tier.color}40`, background: `${tier.color}10` }
+                ? {
+                    color: tier.color,
+                    borderColor: `color-mix(in srgb, ${tier.color} 40%, transparent)`,
+                    background: `color-mix(in srgb, ${tier.color} 10%, transparent)`,
+                  }
                 : undefined
             }
           >
@@ -133,7 +152,17 @@ export default function CurriculumPage() {
       )}
 
       {/* Tier Headers + Lessons */}
-      {PROFICIENCY_TIERS.map((tier) => {
+      {loading ? (
+        <div className="grid gap-2">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-14 animate-pulse rounded-lg border border-white/5 bg-white/[0.02]"
+            />
+          ))}
+        </div>
+      ) : (
+        PROFICIENCY_TIERS.map((tier) => {
         const tierLessons = filtered.filter(
           (l) => l.day >= tier.dayRange[0] && l.day <= tier.dayRange[1]
         );
@@ -153,7 +182,7 @@ export default function CurriculumPage() {
                   DAYS {tier.dayRange[0]}–{tier.dayRange[1]} · {tier.name}
                 </p>
               </div>
-              <div className="flex-1 h-px" style={{ background: `${tier.color}20` }} />
+              <div className="flex-1 h-px" style={{ background: `color-mix(in srgb, ${tier.color} 20%, transparent)` }} />
             </div>
 
             <div className="grid gap-2">
@@ -171,9 +200,9 @@ export default function CurriculumPage() {
                     <Link
                       href={unlocked ? `/lesson/${lesson.day}` : "#"}
                       className={cn(
-                        "flex items-center gap-4 rounded-lg border px-4 py-3 transition-all",
+                        "flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors",
                         done
-                          ? "border-matrix-500/15 bg-matrix-500/5"
+                          ? "border-cyber-cyan/15 bg-cyber-cyan/5"
                           : unlocked
                           ? "border-white/5 hover:border-white/10 hover:bg-white/[0.02]"
                           : "border-white/5 opacity-30 cursor-not-allowed"
@@ -195,7 +224,7 @@ export default function CurriculumPage() {
                           "rounded px-2 py-0.5 text-[10px] font-mono uppercase shrink-0",
                           lesson.language === "c"
                             ? "text-cyber-cyan bg-cyber-cyan/5"
-                            : "text-cyber-purple bg-cyber-purple/5"
+                            : "text-gray-300 bg-white/5"
                         )}
                       >
                         {lesson.language}
@@ -204,7 +233,7 @@ export default function CurriculumPage() {
                         {lesson.durationMinutes}m
                       </span>
                       {done ? (
-                        <CheckCircle2 className="h-4 w-4 text-matrix-500 shrink-0" />
+                        <CheckCircle2 className="h-4 w-4 text-cyber-cyan shrink-0" />
                       ) : !unlocked ? (
                         <Lock className="h-4 w-4 text-gray-600 shrink-0" />
                       ) : (
@@ -217,7 +246,7 @@ export default function CurriculumPage() {
             </div>
           </div>
         );
-      })}
+      }))}
 
       {filtered.length === 0 && (
         <div className="text-center py-20">

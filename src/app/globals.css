@@ -1,13 +1,123 @@
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: dark;
+  --bg: 0 0 0;
+  --fg: 255 255 255;
+  --text-a: 229 229 229;
+  --text-b: 163 163 163;
+  --text-c: 107 107 107;
+  --surface: 26 26 26;
+  --line: 38 38 38;
+  --danger: 248 113 113;
+  --tier-1: #4a4a4a;
+  --tier-2: #6e6e6e;
+  --tier-3: #9a9a9a;
+  --tier-4: #c9c9c9;
+  --tier-5: #ffffff;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: 255 255 255;
+  --fg: 17 17 17;
+  --text-a: 42 42 42;
+  --text-b: 84 84 84;
+  --text-c: 122 122 122;
+  --surface: 245 245 245;
+  --line: 230 230 230;
+  --danger: 220 38 38;
+  --tier-1: #7a7a7a;
+  --tier-2: #5f5f5f;
+  --tier-3: #4b4b4b;
+  --tier-4: #333333;
+  --tier-5: #000000;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/space-grotesk-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/space-grotesk-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("/fonts/space-grotesk-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/space-grotesk-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/inter-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/inter-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("/fonts/inter-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/inter-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/jetbrains-mono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/jetbrains-mono-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/jetbrains-mono-700.woff2") format("woff2");
+}
+
 @layer base {
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(0, 240, 255, 0.2) transparent;
+    scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
   }
 
   *::-webkit-scrollbar {
@@ -20,53 +130,51 @@
   }
 
   *::-webkit-scrollbar-thumb {
-    background: rgba(0, 240, 255, 0.2);
+    background: rgba(148, 163, 184, 0.2);
     border-radius: 3px;
   }
 
   body {
-    @apply bg-cyber-dark text-gray-200 font-mono antialiased;
+    @apply bg-cyber-dark text-gray-200 font-sans antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   }
 
   ::selection {
-    @apply bg-cyber-cyan/30 text-white;
+    @apply bg-white/25 text-black;
   }
 }
 
 @layer components {
-  .grid-bg {
-    background-image: linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
+  .hairline {
+    @apply border border-white/5;
   }
 
-  .scanline::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(transparent, rgba(0, 240, 255, 0.08), transparent);
-    animation: scan-line 8s linear infinite;
-    pointer-events: none;
-    z-index: 9999;
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-white/10 px-4 py-2 text-sm font-medium text-gray-200 transition-colors hover:border-white/25 hover:bg-white/5;
   }
 
-  .text-glow-cyan {
-    text-shadow: 0 0 20px rgba(0, 240, 255, 0.5), 0 0 40px rgba(0, 240, 255, 0.2);
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-cyber-cyan px-4 py-2 text-sm font-semibold text-cyber-dark transition-colors hover:bg-cyber-cyan/90;
   }
 
-  .text-glow-purple {
-    text-shadow: 0 0 20px rgba(191, 0, 255, 0.5), 0 0 40px rgba(191, 0, 255, 0.2);
+  .input {
+    @apply w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-gray-200 placeholder:text-gray-600 focus:border-cyber-cyan/40 focus:outline-none transition-colors;
   }
 
   .btn-cyber {
-    @apply relative inline-flex items-center gap-2 rounded-lg border border-cyber-cyan/30 bg-cyber-cyan/5 px-6 py-3 font-mono text-sm text-cyber-cyan transition-all hover:bg-cyber-cyan/15 hover:border-cyber-cyan/50 hover:shadow-[0_0_20px_rgba(0,240,255,0.15)];
+    @apply inline-flex items-center gap-2 rounded-md border border-white/10 px-4 py-2 text-sm text-gray-200 transition-colors hover:border-white/25 hover:bg-white/5;
   }
 
   .btn-cyber-solid {
-    @apply relative inline-flex items-center gap-2 rounded-lg bg-cyber-cyan px-6 py-3 font-mono text-sm font-semibold text-cyber-dark transition-all hover:shadow-[0_0_30px_rgba(0,240,255,0.4)] hover:brightness-110;
+    @apply inline-flex items-center gap-2 rounded-md bg-cyber-cyan px-4 py-2 text-sm font-semibold text-cyber-dark transition-colors hover:bg-cyber-cyan/90;
+  }
+
+  .text-glow-cyan {
+    @apply text-cyber-cyan;
+  }
+
+  .text-glow-purple {
+    @apply text-cyber-purple;
   }
 
   .theory-content h2 {
@@ -78,23 +186,29 @@
   }
 
   .theory-content pre {
-    @apply rounded-lg border border-white/5 bg-black/40 p-4 font-mono text-sm text-matrix-500 overflow-x-auto mb-4;
+    @apply rounded-lg border border-white/5 bg-black/40 p-4 font-mono text-sm text-matrix-400 overflow-x-auto mb-4;
   }
 }
 
 @layer utilities {
   .animate-in {
-    animation: fadeInUp 0.6s ease-out forwards;
+    animation: fadeInUp 0.5s ease-out forwards;
   }
 
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hero-glow {
+    background: radial-gradient(
+      60% 55% at 50% 0%,
+      rgb(var(--fg) / 0.06),
+      transparent
+    );
   }
 }

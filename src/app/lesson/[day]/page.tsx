@@ -24,7 +24,7 @@ import { getLesson } from "@/lib/curriculum";
 import { useProgressStore } from "@/lib/store";
 import { getTierByLevel } from "@/lib/types";
 import { formatDay, cn } from "@/lib/utils";
-import type { Exercise } from "@/lib/types";
+import type { Exercise, Lesson } from "@/lib/types";
 
 type Tab = "theory" | "playground" | "exercises" | "assignment";
 
@@ -32,8 +32,9 @@ export default function LessonPage() {
   const params = useParams();
   const router = useRouter();
   const day = Number(params.day);
-  const lesson = getLesson(day);
 
+  const [lesson, setLesson] = useState<Lesson | null>(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("theory");
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
   const [quizResults, setQuizResults] = useState<Record<string, boolean>>({});
@@ -53,6 +54,23 @@ export default function LessonPage() {
   } = useProgressStore();
 
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    getLesson(day).then((l) => {
+      if (cancelled) return;
+      if (!l || isNaN(day) || day < 1 || day > 100) {
+        notFound();
+        return;
+      }
+      setLesson(l);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [day]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === "ArrowLeft" && day > 1) router.push(`/lesson/${day - 1}`);
@@ -70,7 +88,18 @@ export default function LessonPage() {
     setActiveTab("theory");
   }, [day, notes]);
 
-  if (!lesson || isNaN(day) || day < 1 || day > 100) {
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-8">
+        <div className="h-4 w-32 animate-pulse rounded bg-white/5 mb-6" />
+        <div className="h-8 w-2/3 animate-pulse rounded bg-white/5 mb-2" />
+        <div className="h-4 w-1/2 animate-pulse rounded bg-white/5 mb-8" />
+        <div className="h-64 animate-pulse rounded-xl border border-white/5 bg-white/[0.02]" />
+      </div>
+    );
+  }
+
+  if (!lesson) {
     notFound();
   }
 
@@ -135,19 +164,19 @@ export default function LessonPage() {
               "rounded px-2 py-0.5 text-[10px] font-mono uppercase",
               lesson.language === "c"
                 ? "bg-cyber-cyan/10 text-cyber-cyan"
-                : "bg-cyber-purple/10 text-cyber-purple"
+                : "bg-white/5 text-gray-300"
             )}
           >
             {lesson.language}
           </span>
           <span
             className="rounded px-2 py-0.5 text-[10px] font-mono"
-            style={{ color: tier.color, background: `${tier.color}10` }}
+            style={{ color: tier.color, background: `color-mix(in srgb, ${tier.color} 10%, transparent)` }}
           >
             {tier.icon} {tier.name}
           </span>
           {isDayComplete && (
-            <span className="flex items-center gap-1 text-[10px] font-mono text-matrix-500">
+            <span className="flex items-center gap-1 text-[10px] font-mono text-cyber-cyan">
               <CheckCircle2 className="h-3 w-3" /> Complete
             </span>
           )}
@@ -239,7 +268,6 @@ export default function LessonPage() {
                 return (
                   <CyberPanel
                     key={exercise.id}
-                    glow={done ? "green" : "amber"}
                     title={`Exercise ${i + 1}: ${exercise.title}`}
                   >
                     <p className="text-sm text-gray-400 mb-4">{exercise.description}</p>
@@ -272,7 +300,7 @@ export default function LessonPage() {
                           <div
                             className={cn(
                               "flex items-center gap-2 text-sm mb-3",
-                              result ? "text-matrix-500" : "text-cyber-red"
+                              result ? "text-cyber-cyan" : "text-cyber-red"
                             )}
                           >
                             {result ? (
@@ -293,7 +321,7 @@ export default function LessonPage() {
                           </button>
                         )}
                         {done && (
-                          <span className="text-xs font-mono text-matrix-500">
+                          <span className="text-xs font-mono text-cyber-cyan">
                             ✓ Completed (+{exercise.xpReward} XP)
                           </span>
                         )}
@@ -317,7 +345,7 @@ export default function LessonPage() {
                                   [exercise.id]: !prev[exercise.id],
                                 }))
                               }
-                              className="flex items-center gap-1 text-xs font-mono text-cyber-amber hover:underline"
+                              className="flex items-center gap-1 text-xs font-mono text-gray-400 hover:text-cyber-cyan hover:underline"
                             >
                               <Lightbulb className="h-3 w-3" />
                               {showHints[exercise.id] ? "Hide hints" : "Show hints"}
@@ -342,7 +370,7 @@ export default function LessonPage() {
                           </button>
                         )}
                         {done && (
-                          <span className="text-xs font-mono text-matrix-500 mt-3 block">
+                          <span className="text-xs font-mono text-cyber-cyan mt-3 block">
                             ✓ Completed (+{exercise.xpReward} XP)
                           </span>
                         )}
@@ -356,7 +384,7 @@ export default function LessonPage() {
 
           {activeTab === "assignment" && lesson.assignment && (
             <div className="space-y-6">
-              <CyberPanel glow="purple" title={lesson.assignment.title}>
+              <CyberPanel title={lesson.assignment.title}>
                 <p className="text-sm text-gray-400 mb-4">{lesson.assignment.description}</p>
 
                 <h4 className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-2">
@@ -378,7 +406,7 @@ export default function LessonPage() {
                   {lesson.assignment.rubric.map((r, i) => (
                     <div key={i} className="flex justify-between text-sm">
                       <span className="text-gray-400">{r.criterion}</span>
-                      <span className="text-cyber-amber font-mono">{r.points}pts</span>
+                      <span className="text-cyber-cyan font-mono">{r.points}pts</span>
                     </div>
                   ))}
                 </div>
@@ -398,7 +426,7 @@ export default function LessonPage() {
                     Submit Assignment (+{lesson.assignment.xpReward} XP)
                   </button>
                 ) : (
-                  <span className="text-sm font-mono text-matrix-500 mt-4 block">
+                  <span className="text-sm font-mono text-cyber-cyan mt-4 block">
                     ✓ Assignment submitted (+{lesson.assignment.xpReward} XP)
                   </span>
                 )}
@@ -434,7 +462,7 @@ export default function LessonPage() {
               Save Note
             </button>
             {notes[day] && (
-              <span className="text-[10px] font-mono text-matrix-500 ml-3">
+              <span className="text-[10px] font-mono text-cyber-cyan ml-3">
                 ✓ Saved
               </span>
             )}

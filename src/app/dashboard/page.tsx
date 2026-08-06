@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -15,7 +16,8 @@ import ProgressRing from "@/components/ProgressRing";
 import CyberPanel from "@/components/CyberPanel";
 import { useProgressStore, getOverallProgress, isDayUnlocked } from "@/lib/store";
 import { getTierByLevel, PROFICIENCY_TIERS } from "@/lib/types";
-import { CURRICULUM, getLesson } from "@/lib/curriculum";
+import { getLessonRange } from "@/lib/curriculum";
+import type { Lesson } from "@/lib/types";
 import { formatDay, cn } from "@/lib/utils";
 
 export default function DashboardPage() {
@@ -29,12 +31,28 @@ export default function DashboardPage() {
     completedAssignments,
   } = useProgressStore();
 
+  const [recentLessons, setRecentLessons] = useState<Lesson[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    getLessonRange(currentDay - 2, currentDay + 4).then((list) => {
+      if (cancelled) return;
+      setRecentLessons(list);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentDay]);
+
   const tier = getTierByLevel(level);
   const overallPercent = getOverallProgress(completedDays);
-  const todayLesson = getLesson(currentDay);
+  const todayLesson = recentLessons.find((l) => l.day === currentDay);
   const nextTier = PROFICIENCY_TIERS.find((t) => t.dayRange[0] > currentDay);
 
-  const recentDays = CURRICULUM.filter(
+  const recentDays = recentLessons.filter(
     (l) => l.day >= currentDay - 2 && l.day <= currentDay + 4
   );
 
@@ -46,10 +64,10 @@ export default function DashboardPage() {
         className="mb-8"
       >
         <h1 className="font-display text-3xl font-bold text-white mb-2">
-          Command Center
+          Dashboard
         </h1>
         <p className="text-sm text-gray-500 font-mono">
-          Welcome back, operator. Your systems training continues.
+          Welcome back. Today is your next day.
         </p>
       </motion.div>
 
@@ -67,19 +85,19 @@ export default function DashboardPage() {
           </p>
         </CyberPanel>
 
-        <CyberPanel glow="amber" title="Total XP">
+        <CyberPanel title="Total XP">
           <div className="text-center py-4">
-            <span className="font-display text-4xl font-bold text-cyber-amber">
+            <span className="font-display text-4xl font-bold text-cyber-cyan">
               {totalXp}
             </span>
             <p className="text-xs text-gray-500 mt-2 font-mono">EXPERIENCE POINTS</p>
           </div>
         </CyberPanel>
 
-        <CyberPanel glow="red" title="Streak">
+        <CyberPanel title="Streak">
           <div className="text-center py-4">
             <div className="flex items-center justify-center gap-2">
-              <Flame className="h-8 w-8 text-cyber-red" />
+              <Flame className="h-8 w-8 text-white/70" />
               <span className="font-display text-4xl font-bold text-white">
                 {streak}
               </span>
@@ -88,7 +106,7 @@ export default function DashboardPage() {
           </div>
         </CyberPanel>
 
-        <CyberPanel glow="purple" title="Current Tier">
+        <CyberPanel title="Current Tier">
           <div className="text-center py-4">
             <span className="text-3xl" style={{ color: tier.color }}>
               {tier.icon}
@@ -120,7 +138,7 @@ export default function DashboardPage() {
                     "rounded px-2 py-0.5 text-[10px] font-mono uppercase",
                     todayLesson.language === "c"
                       ? "bg-cyber-cyan/10 text-cyber-cyan"
-                      : "bg-cyber-purple/10 text-cyber-purple"
+                      : "bg-white/5 text-gray-300"
                   )}>
                     {todayLesson.language}
                   </span>
@@ -148,7 +166,7 @@ export default function DashboardPage() {
                 href={`/lesson/${currentDay}`}
                 className="btn-cyber-solid whitespace-nowrap"
               >
-                Continue Learning
+                Continue your journey
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -157,9 +175,16 @@ export default function DashboardPage() {
       )}
 
       {/* Day Grid */}
-      <CyberPanel glow="cyan" title="Mission Timeline" className="mb-8">
+      <CyberPanel title="Your Days" className="mb-8">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {recentDays.map((lesson) => {
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-28 animate-pulse rounded-lg border border-white/5 bg-white/[0.02]"
+                />
+              ))
+            : recentDays.map((lesson) => {
             const unlocked = isDayUnlocked(lesson.day, completedDays);
             const done = completedDays.includes(lesson.day);
             const exCount = (completedExercises[lesson.day] ?? []).length;
@@ -170,9 +195,9 @@ export default function DashboardPage() {
                 key={lesson.day}
                 href={unlocked ? `/lesson/${lesson.day}` : "#"}
                 className={cn(
-                  "group relative rounded-lg border p-4 transition-all",
+                  "group relative rounded-lg border p-4 transition-colors",
                   done
-                    ? "border-matrix-500/20 bg-matrix-500/5"
+                    ? "border-cyber-cyan/20 bg-cyber-cyan/5"
                     : unlocked
                     ? "border-white/5 bg-white/[0.02] hover:border-cyber-cyan/20 hover:bg-cyber-cyan/5"
                     : "border-white/5 bg-white/[0.01] opacity-40 cursor-not-allowed"
@@ -183,7 +208,7 @@ export default function DashboardPage() {
                     {formatDay(lesson.day)}
                   </span>
                   {done ? (
-                    <CheckCircle2 className="h-4 w-4 text-matrix-500" />
+                    <CheckCircle2 className="h-4 w-4 text-cyber-cyan" />
                   ) : !unlocked ? (
                     <Lock className="h-4 w-4 text-gray-600" />
                   ) : null}
@@ -215,7 +240,7 @@ export default function DashboardPage() {
 
       {/* Next Tier Preview */}
       {nextTier && (
-        <CyberPanel glow="purple" title="Next Tier">
+        <CyberPanel title="Next Tier">
           <div className="flex items-center gap-4">
             <span className="text-2xl" style={{ color: nextTier.color }}>
               {nextTier.icon}

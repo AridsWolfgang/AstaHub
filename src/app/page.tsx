@@ -1,225 +1,272 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useInView, useMotionValue, animate } from "framer-motion";
 import {
   ArrowRight,
-  Code2,
-  Cpu,
-  Layers,
-  Target,
-  Zap,
   BookOpen,
-  Terminal,
+  Hammer,
+  Infinity as InfinityIcon,
+  Lightbulb,
 } from "lucide-react";
-import { PROFICIENCY_TIERS } from "@/lib/types";
+import HeroTerminal from "@/components/HeroTerminal";
+import { TRACK_GROUPS } from "@/lib/tracks";
+import { cn } from "@/lib/utils";
 
-const Scene3D = dynamic(() => import("@/components/Scene3D"), { ssr: false });
-
-const FEATURES = [
+const PRINCIPLES = [
   {
     icon: BookOpen,
-    title: "Deep Theory",
-    desc: "Memory layouts, calling conventions, and silicon-level concepts explained clearly.",
-    color: "#00f0ff",
+    title: "Learn by doing",
+    line: "You write it, break it, and fix it until it's yours — every concept is a working program in your hands.",
   },
   {
-    icon: Terminal,
-    title: "Live Playground",
-    desc: "Write and run C and Assembly code in-browser with instant feedback.",
-    color: "#00e673",
+    icon: Lightbulb,
+    title: "A coach, never an oracle",
+    line: "When you're stuck you're guided, never handed the answer. The struggle is where the skill lives.",
   },
   {
-    icon: Target,
-    title: "Exercises & Assignments",
-    desc: "Quizzes, code challenges, and capstone projects to cement every concept.",
-    color: "#ffb000",
+    icon: Hammer,
+    title: "Prove it by building",
+    line: "Mastery is a portfolio of things you built from a blank page — not a row of click-through checkmarks.",
   },
   {
-    icon: Layers,
-    title: "5 Proficiency Tiers",
-    desc: "From Memory Initiate to Silicon Master — track your evolution.",
-    color: "#bf00ff",
-  },
-  {
-    icon: Zap,
-    title: "XP & Streaks",
-    desc: "Earn XP, maintain daily streaks, and unlock achievements.",
-    color: "#ff0040",
-  },
-  {
-    icon: Cpu,
-    title: "C → Assembly Bridge",
-    desc: "Days 1–50 in C, Days 51–100 in x86-64 ASM. See how high-level becomes machine code.",
-    color: "#00f0ff",
+    icon: InfinityIcon,
+    title: "Free, forever",
+    line: "No paywalls, no trials, no credit card. Knowledge is a right, not a product — for everyone, anywhere.",
   },
 ];
 
+function Stat({ to, prefix = "", label }: { to: number; prefix?: string; label: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const mv = useMotionValue(0);
+  const [display, setDisplay] = useState("0");
+
+  useEffect(() => {
+    if (!inView) return;
+    const controls = animate(mv, to, { duration: 1.6, ease: "easeOut" });
+    return () => controls.stop();
+  }, [inView, mv, to]);
+
+  useEffect(() => mv.on("change", (v) => setDisplay(String(Math.round(v)))), [mv]);
+
+  return (
+    <div ref={ref}>
+      <p className="font-display text-2xl font-bold text-white">
+        {prefix}
+        {display}
+      </p>
+      <p className="text-xs text-gray-500">{label}</p>
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
-    <div className="relative overflow-hidden">
-      {/* Hero */}
-      <section className="relative min-h-[90vh] flex items-center">
-        <div className="absolute inset-0 z-0">
-          <Scene3D className="h-full w-full opacity-60" interactive />
-        </div>
+    <section className="relative overflow-hidden">
+      <div
+        aria-hidden
+        className="hero-glow pointer-events-none absolute inset-x-0 top-0 h-[520px]"
+      />
 
-        <div className="relative z-10 mx-auto max-w-7xl px-4 py-20">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        {/* Hero */}
+        <div className="grid items-center gap-12 py-16 sm:py-24 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-3xl"
+            transition={{ duration: 0.7 }}
           >
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyber-cyan/20 bg-cyber-cyan/5 px-4 py-1.5">
-              <Code2 className="h-4 w-4 text-cyber-cyan" />
-              <span className="text-xs font-mono text-cyber-cyan tracking-wider">
-                100-DAY SYSTEMS PROGRAMMING BOOTCAMP
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-white" />
+              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-gray-400">
+                AstaHub — free technical education
               </span>
             </div>
 
-            <h1 className="font-display text-3xl sm:text-5xl md:text-7xl font-black tracking-tight leading-none mb-6">
-              <span className="text-white">MASTER </span>
-              <span className="text-glow-cyan text-cyber-cyan">C</span>
-              <span className="text-white"> & </span>
-              <span className="text-glow-purple text-cyber-purple">ASM</span>
+            <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Learn to build.
+              <br />
+              Free. Forever.
             </h1>
 
-            <p className="text-lg text-gray-400 max-w-xl mb-8 leading-relaxed">
-              100 days. Two languages that run the world. From your first{" "}
-              <code className="text-cyber-cyan">printf</code> to bare-metal{" "}
-              <code className="text-cyber-purple">syscall</code> — become a
-              systems programmer the interactive way.
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-gray-400 sm:text-lg">
+              Hands-on courses that take you from first command to real skill — no
+              paywalls, no lectures, no credit card. Start on the phone in your
+              pocket. The knowledge stays yours.
             </p>
 
-            <div className="flex flex-wrap gap-4">
-              <Link href="/dashboard" className="btn-cyber-solid">
-                Start Day 001
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <Link href="/dashboard" className="btn-primary text-base">
+                Start learning
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/curriculum" className="btn-cyber">
-                View Curriculum
+              <Link href="/tracks" className="btn text-base">
+                Explore the tracks
               </Link>
             </div>
 
-            <div className="mt-12 flex gap-8 text-sm font-mono">
-              <div>
-                <span className="text-2xl font-display font-bold text-white">100</span>
-                <p className="text-gray-500">Days</p>
-              </div>
-              <div>
-                <span className="text-2xl font-display font-bold text-cyber-cyan">50</span>
-                <p className="text-gray-500">C Lessons</p>
-              </div>
-              <div>
-                <span className="text-2xl font-display font-bold text-cyber-purple">50</span>
-                <p className="text-gray-500">ASM Lessons</p>
-              </div>
-              <div>
-                <span className="text-2xl font-display font-bold text-cyber-amber">5</span>
-                <p className="text-gray-500">Tiers</p>
-              </div>
+            <div className="mt-10 flex flex-wrap gap-x-10 gap-y-6">
+              <Stat to={100} label="days" />
+              <Stat to={2} label="languages" />
+              <Stat to={0} prefix="$" label="forever" />
+              <Stat to={1} label="builder — you" />
             </div>
           </motion.div>
-        </div>
-      </section>
 
-      {/* Proficiency Tiers */}
-      <section className="relative py-24 border-t border-white/5">
-        <div className="mx-auto max-w-7xl px-4">
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
           >
-            <h2 className="font-display text-3xl font-bold text-white mb-4">
-              Proficiency Progression
-            </h2>
-            <p className="text-gray-500 font-mono text-sm">
-              Five tiers. One journey from initiate to master.
+            <HeroTerminal />
+            <p className="mt-4 text-center font-mono text-xs text-gray-500">
+              A live look at how learning works — click to advance
             </p>
           </motion.div>
+        </div>
 
-          <div className="grid gap-4 md:grid-cols-5">
-            {PROFICIENCY_TIERS.map((tier, i) => (
-              <motion.div
-                key={tier.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group relative rounded-xl border border-white/5 bg-cyber-panel/40 p-6 hover:border-white/10 transition-all"
-                style={{ borderColor: `${tier.color}15` }}
+        {/* Principles */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="border-t border-white/5 py-16 sm:py-20"
+        >
+          <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <h2 className="font-display text-3xl font-bold text-white">
+              How you learn here
+            </h2>
+            <p className="text-sm text-gray-500">
+              No lectures to watch. No paywall to pass. Just a method that works.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {PRINCIPLES.map((p) => (
+              <div
+                key={p.title}
+                className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 transition-colors hover:border-white/25"
               >
-                <div
-                  className="text-3xl mb-3"
-                  style={{ color: tier.color }}
-                >
-                  {tier.icon}
+                <p.icon className="h-6 w-6 text-white" strokeWidth={1.5} />
+                <h3 className="mt-4 font-display text-lg font-bold text-white">
+                  {p.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-400">{p.line}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* The tracks */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="border-t border-white/5 py-16 sm:py-20"
+        >
+          <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="font-display text-3xl font-bold text-white">
+                One school. Every skill.
+              </h2>
+              <p className="mt-2 max-w-xl text-sm text-gray-500">
+                A living body of technical knowledge, built so a beginner climbs it
+                like a staircase and a professional uses it like a library. Each
+                track runs the same engine — day-by-day lessons, XP, playground,
+                capstone.
+              </p>
+            </div>
+            <Link href="/tracks" className="btn text-sm">
+              Explore all tracks
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="space-y-8">
+            {TRACK_GROUPS.map((group) => (
+              <div key={group.id}>
+                <div className="mb-3 flex items-baseline justify-between gap-4">
+                  <h3 className="font-display text-lg font-bold text-white">
+                    {group.title}
+                  </h3>
+                  <p className="hidden text-sm text-gray-500 sm:block">{group.tagline}</p>
                 </div>
-                <h3 className="font-display text-sm font-bold text-white mb-1">
-                  {tier.title}
-                </h3>
-                <p className="text-[10px] font-mono text-gray-500 mb-3">
-                  DAYS {tier.dayRange[0]}–{tier.dayRange[1]}
-                </p>
-                <p className="text-xs text-gray-400 leading-relaxed">
-                  {tier.description}
-                </p>
-                <div
-                  className="absolute bottom-0 left-0 right-0 h-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ background: tier.color }}
-                />
-              </motion.div>
+                <ul className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+                  {group.tracks.map((track) => {
+                    const inner = (
+                      <>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-display text-base font-bold text-white">
+                            {track.name}
+                          </p>
+                          <p className="mt-0.5 text-sm text-gray-400">{track.outcome}</p>
+                        </div>
+                        <span
+                          className={cn(
+                            "shrink-0 font-mono text-[10px] uppercase tracking-widest",
+                            track.status === "live"
+                              ? "text-white"
+                              : track.status === "coming"
+                                ? "text-gray-300"
+                                : "text-gray-500"
+                          )}
+                        >
+                          {track.status === "live"
+                            ? "Live"
+                            : track.status === "coming"
+                              ? "Coming soon"
+                              : "Planned"}
+                        </span>
+                      </>
+                    );
+                    return (
+                      <li
+                        key={track.slug}
+                        className="border-t border-white/5 first:border-t-0"
+                      >
+                        <Link
+                          href={`/tracks/${track.slug}`}
+                          className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
+                        >
+                          {inner}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </motion.div>
 
-      {/* Features */}
-      <section className="relative py-24 border-t border-white/5">
-        <div className="mx-auto max-w-7xl px-4">
-          <h2 className="font-display text-3xl font-bold text-white text-center mb-16">
-            Built for Serious Learners
-          </h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="rounded-xl border border-white/5 bg-cyber-panel/30 p-6 hover:bg-cyber-panel/50 transition-all"
-              >
-                <f.icon className="h-8 w-8 mb-4" style={{ color: f.color }} />
-                <h3 className="font-display text-sm font-bold text-white mb-2">
-                  {f.title}
-                </h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{f.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="relative py-24 border-t border-white/5">
-        <div className="mx-auto max-w-3xl px-4 text-center">
-          <h2 className="font-display text-4xl font-bold text-white mb-4">
-            Ready to speak to the machine?
-          </h2>
-          <p className="text-gray-400 mb-8 font-mono text-sm">
-            No frameworks. No abstractions. Just you, the compiler, and the silicon.
+        {/* Closing */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="border-t border-white/5 py-20 text-center sm:py-28"
+        >
+          <p className="font-display text-3xl font-bold leading-tight text-white sm:text-5xl">
+            Learning should be fun.
+            <br />
+            And it should be for everyone.
           </p>
-          <Link href="/dashboard" className="btn-cyber-solid text-base px-8 py-4">
-            Initialize Boot Sequence
-            <ArrowRight className="h-5 w-5" />
-          </Link>
-        </div>
-      </section>
-    </div>
+          <div className="mt-10 flex justify-center">
+            <Link href="/dashboard" className="btn-primary text-base">
+              Begin your journey
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <p className="mt-8 font-mono text-[11px] uppercase tracking-[0.2em] text-gray-500">
+            Free forever · Every person on Earth
+          </p>
+        </motion.div>
+      </div>
+    </section>
   );
 }

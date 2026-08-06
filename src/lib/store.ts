@@ -57,7 +57,7 @@ export const useProgressStore = create<ProgressState>()(
             ? state.completedDays
             : [...state.completedDays, day];
           const totalXp = state.totalXp + xp;
-          return {
+          const next = {
             completedDays,
             totalXp,
             level: levelFromXp(totalXp),
@@ -65,6 +65,8 @@ export const useProgressStore = create<ProgressState>()(
             streak: calcStreak(state.lastActiveDate, state.streak),
             lastActiveDate: todayString(),
           };
+          queueSync(next);
+          return next;
         }),
 
       completeExercise: (day, exerciseId, xp) =>
@@ -72,7 +74,7 @@ export const useProgressStore = create<ProgressState>()(
           const dayExercises = state.completedExercises[day] ?? [];
           if (dayExercises.includes(exerciseId)) return state;
           const totalXp = state.totalXp + xp;
-          return {
+          const next = {
             completedExercises: {
               ...state.completedExercises,
               [day]: [...dayExercises, exerciseId],
@@ -82,33 +84,43 @@ export const useProgressStore = create<ProgressState>()(
             streak: calcStreak(state.lastActiveDate, state.streak),
             lastActiveDate: todayString(),
           };
+          queueSync(next);
+          return next;
         }),
 
       completeAssignment: (day, xp) =>
         set((state) => {
           if (state.completedAssignments.includes(day)) return state;
           const totalXp = state.totalXp + xp;
-          return {
+          const next = {
             completedAssignments: [...state.completedAssignments, day],
             totalXp,
             level: levelFromXp(totalXp),
             streak: calcStreak(state.lastActiveDate, state.streak),
             lastActiveDate: todayString(),
           };
+          queueSync(next);
+          return next;
         }),
 
       setCurrentDay: (day) => set({ currentDay: day }),
 
       addNote: (day, note) =>
-        set((state) => ({
-          notes: { ...state.notes, [day]: note },
-        })),
+        set((state) => {
+          const next = { notes: { ...state.notes, [day]: note } };
+          queueSync(next);
+          return next;
+        }),
 
       updateStreak: () =>
-        set((state) => ({
-          streak: calcStreak(state.lastActiveDate, state.streak),
-          lastActiveDate: todayString(),
-        })),
+        set((state) => {
+          const next = {
+            streak: calcStreak(state.lastActiveDate, state.streak),
+            lastActiveDate: todayString(),
+          };
+          queueSync(next);
+          return next;
+        }),
 
       resetProgress: () => set(initialState),
 
@@ -132,6 +144,71 @@ export const useProgressStore = create<ProgressState>()(
     { name: "asta-100days-progress" }
   )
 );
+
+let syncTimer: ReturnType<typeof setTimeout> | null = null;
+
+function queueSync(state: Partial<ProgressState>): void {
+  if (typeof window === "undefined") return;
+  if (!window.localStorage.getItem("asta-100days-synced")) return;
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    const {
+      currentDay, totalXp, level, streak, lastActiveDate,
+      completedDays, completedExercises, completedAssignments, notes,
+    } = useProgressStore.getState();
+    fetch("/api/progress", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        currentDay, totalXp, level, streak, lastActiveDate,
+        completedDays, completedExercises, completedAssignments, notes,
+      }),
+    }).catch(() => {
+      // Silent: auth token may have expired; progress stays local.
+    });
+  }, 800);
+}
+
+export function markSynced(): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem("asta-100days-synced", "1");
+}
+
+export function markUnsynced(): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem("asta-100days-synced");
+}
+
+export async function hydrateFromServer(): Promise<boolean> {
+  try {
+    const res = await fetch("/api/me", { cache: "no-store" });
+    if (!res.ok) {
+      markUnsynced();
+      return false;
+    }
+    const { user } = await res.json();
+    if (!user) {
+      markUnsynced();
+      return false;
+    }
+    useProgressStore.setState({
+      currentDay: user.currentDay ?? 1,
+      totalXp: user.totalXp ?? 0,
+      level: user.level ?? "initiate",
+      streak: user.streak ?? 0,
+      lastActiveDate: user.lastActiveDate ?? null,
+      completedDays: user.completedDays ?? [],
+      completedExercises: user.completedExercises ?? {},
+      completedAssignments: user.completedAssignments ?? [],
+      notes: user.notes ?? {},
+    });
+    markSynced();
+    return true;
+  } catch {
+    markUnsynced();
+    return false;
+  }
+}
 
 export function isDayUnlocked(day: number, completedDays: number[]): boolean {
   if (day === 1) return true;

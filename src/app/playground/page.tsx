@@ -43,10 +43,10 @@ export default function PlaygroundPage() {
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold text-white mb-2">
-          Free Playground
+          Playground
         </h1>
         <p className="text-sm text-gray-500 font-mono">
-          Experiment with C and x86-64 Assembly outside the curriculum
+          A free workbench for C and x86-64 Assembly — outside the curriculum
         </p>
       </div>
 
@@ -58,9 +58,7 @@ export default function PlaygroundPage() {
             className={cn(
               "rounded-lg px-4 py-2 text-xs font-mono uppercase tracking-wider transition-all",
               lang === l
-                ? l === "c"
-                  ? "bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/20"
-                  : "bg-cyber-purple/10 text-cyber-purple border border-cyber-purple/20"
+                ? "bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/20"
                 : "text-gray-500 hover:text-white border border-transparent"
             )}
           >
@@ -92,7 +90,7 @@ export default function PlaygroundPage() {
         height="500px"
       />
 
-      <CyberPanel glow="cyan" title="Quick Reference" className="mt-6">
+      <CyberPanel title="Quick Reference" className="mt-6">
         <div className="grid gap-4 md:grid-cols-2 text-xs font-mono">
           {lang === "c" ? (
             <>
@@ -113,7 +111,7 @@ echo $?    # exit code`}</pre>
           ) : (
             <>
               <div>
-                <p className="text-cyber-purple mb-2">Key Registers</p>
+                <p className="text-cyber-cyan mb-2">Key Registers</p>
                 <pre className="text-gray-400">{`RAX — accumulator / return
 RBX — base / callee-saved
 RCX — counter / 4th arg
@@ -124,7 +122,7 @@ RSP — stack pointer
 RBP — base pointer`}</pre>
               </div>
               <div>
-                <p className="text-cyber-purple mb-2">Assemble & Link</p>
+                <p className="text-cyber-cyan mb-2">Assemble & Link</p>
                 <pre className="text-gray-400">{`nasm -f elf64 program.asm
 ld -o program program.o
 ./program`}</pre>
