@@ -84,13 +84,13 @@ export interface ProficiencyTier {
 export interface UserProgress {
   currentDay: number;
   completedDays: number[];
-  completedExercises: Record<number, string[]>;
+  completedExercises: Record<string, string[]>;
   completedAssignments: number[];
   totalXp: number;
   streak: number;
   lastActiveDate: string | null;
   level: ProficiencyLevel;
-  notes: Record<number, string>;
+  notes: Record<string, string>;
 }
 
 export const PROFICIENCY_TIERS: ProficiencyTier[] = [

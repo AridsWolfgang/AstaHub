@@ -29,6 +29,27 @@ model User {
   notes              Json     @default("{}")
 
   certificates       Certificate[]
+  trackProgress      UserTrackProgress[]
+}
+
+model UserTrackProgress {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track              String
+  currentDay         Int      @default(1)
+  totalXp            Int      @default(0)
+  level              String   @default("initiate")
+  streak             Int      @default(0)
+  lastActiveDate     String?
+  completedDays      Int[]    @default([])
+  completedExercises Json     @default("{}")
+  completedAssignments Int[]  @default([])
+  notes              Json     @default("{}")
+  updatedAt          DateTime @updatedAt
+
+  @@unique([userId, track])
+  @@index([userId])
 }
 
 model Certificate {

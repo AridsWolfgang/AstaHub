@@ -48,7 +48,7 @@ export default function DashboardPage() {
   }, [currentDay]);
 
   const tier = getTierByLevel(level);
-  const overallPercent = getOverallProgress(completedDays);
+  const overallPercent = getOverallProgress(completedDays, 100);
   const todayLesson = recentLessons.find((l) => l.day === currentDay);
   const nextTier = PROFICIENCY_TIERS.find((t) => t.dayRange[0] > currentDay);
 

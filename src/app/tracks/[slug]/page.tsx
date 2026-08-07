@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, CheckCircle2, Clock3, Compass, Hammer } from "lucide-react";
 import { getTrack } from "@/lib/tracks";
 import type { TrackStatus } from "@/lib/tracks";
+import TrackJourney from "@/components/TrackJourney";
 import { cn } from "@/lib/utils";
 
 const STATUS_META: Record<TrackStatus, { label: string; icon: typeof CheckCircle2 }> = {
@@ -116,6 +117,8 @@ export default async function TrackPage({
           </div>
         )}
       </div>
+
+      {(slug === "python" || slug === "cpp") && <TrackJourney track={slug} />}
     </div>
   );
 }

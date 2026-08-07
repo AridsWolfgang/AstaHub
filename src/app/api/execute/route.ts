@@ -134,22 +134,12 @@ export async function POST(request: NextRequest) {
       real = result.real;
     } catch (e) {
       console.warn("Piston API failed, falling back:", e);
-      if (language === "python") {
-        output = "// Python has no in-browser simulator yet.\n// Set PISTON_AUTH_TOKEN to enable real execution.";
-        error = "(Piston API unavailable — no simulated fallback for Python)";
-      } else {
-        output = simulateAnsi(code, language);
-        error = "(Piston API unavailable — using simulated execution)";
-      }
+      output = simulateAnsi(code, language);
+      error = "(Piston API unavailable — using simulated execution)";
     }
   } else {
-    if (language === "python") {
-      output = "// Python has no in-browser simulator yet.\n// Set PISTON_AUTH_TOKEN to enable real execution.";
-      error = "(Simulated execution unavailable for Python — set PISTON_AUTH_TOKEN for real compilation)";
-    } else {
-      output = simulateAnsi(code, language);
-      error = "(Simulated execution — set PISTON_AUTH_TOKEN for real compilation)";
-    }
+    output = simulateAnsi(code, language);
+    error = "(Simulated execution — set PISTON_AUTH_TOKEN for real compilation)";
   }
 
   return NextResponse.json({ output, error, real });
