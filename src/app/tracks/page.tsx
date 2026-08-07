@@ -97,12 +97,12 @@ export default function TracksPage() {
             Not sure where to start?
           </h3>
           <p className="mt-1 max-w-md text-sm leading-relaxed text-gray-400">
-            C and Assembly are live today — one honest road from first variable to bare
-            metal. Start there; every other track will wait for you.
+            C, Assembly, Python, and C++ are live today. Start wherever you are — every
+            track is free, and every track builds on the same hands-on engine.
           </p>
         </div>
         <Link href="/curriculum" className="btn-primary whitespace-nowrap">
-          Start the live track
+          Start a live track
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>

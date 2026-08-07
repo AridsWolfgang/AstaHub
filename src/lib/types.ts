@@ -1,4 +1,7 @@
-export type Language = "c" | "asm";
+export type Language = "c" | "asm" | "python" | "cpp";
+
+/** Track keys used in lesson routing and progress namespacing. */
+export type TrackKey = "c" | "python" | "cpp";
 
 export type ProficiencyLevel =
   | "initiate"
@@ -46,6 +49,8 @@ export interface Lesson {
   title: string;
   subtitle: string;
   language: Language;
+  /** Track namespace ("c" = C/Assembly day engine, "python" = Python). */
+  track: TrackKey;
   level: ProficiencyLevel;
   durationMinutes: number;
   xpTotal: number;
@@ -59,7 +64,7 @@ export interface Lesson {
   };
   playground: {
     defaultCode: string;
-    language: "c" | "asm";
+    language: Language;
     runnable: boolean;
   };
   exercises: Exercise[];

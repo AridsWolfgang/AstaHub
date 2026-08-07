@@ -9,6 +9,8 @@ export interface Track {
   outcome: string;
   description: string;
   href?: string;
+  /** Number of days available in the live track. */
+  days?: number;
 }
 
 export interface TrackGroup {
@@ -32,6 +34,7 @@ export const TRACK_GROUPS: TrackGroup[] = [
         description:
           "The first track, live today. A hundred days from your first variable to the metal.",
         href: "/curriculum",
+        days: 100,
       },
       {
         slug: "assembly",
@@ -45,10 +48,22 @@ export const TRACK_GROUPS: TrackGroup[] = [
       {
         slug: "python",
         name: "Python",
-        status: "coming",
+        status: "live",
         outcome: "Automation, data, and AI",
         description:
-          "The first language for automation, data, and AI — same engine, new track.",
+          "The first language for automation, data, and AI — live on the same engine. Forty days from your first print to classes, decorators, and generators.",
+        href: "/lesson/python/1",
+        days: 40,
+      },
+      {
+        slug: "cpp",
+        name: "C++",
+        status: "live",
+        outcome: "Objects, templates, and the STL",
+        description:
+          "C with ergonomics and a standard library that scales from systems to games. Forty days from your first std::cout to classes, smart pointers, and the STL.",
+        href: "/lesson/cpp/1",
+        days: 40,
       },
       {
         slug: "javascript",

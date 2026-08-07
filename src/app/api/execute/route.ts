@@ -44,6 +44,8 @@ const AUTH_TOKEN = process.env.PISTON_AUTH_TOKEN || "";
 function getPistonLanguage(lang: string): { language: string; version: string } {
   if (lang === "c") return { language: "c", version: "10.2.0" };
   if (lang === "asm") return { language: "nasm", version: "2.15.05" };
+  if (lang === "python") return { language: "python", version: "*" };
+  if (lang === "cpp") return { language: "c++", version: "*" };
   return { language: lang, version: "*" };
 }
 
@@ -113,9 +115,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (language !== "c" && language !== "asm") {
+  if (language !== "c" && language !== "asm" && language !== "python" && language !== "cpp") {
     return NextResponse.json(
-      { error: "Language must be 'c' or 'asm'" },
+      { error: "Language must be 'c', 'asm', 'python', or 'cpp'" },
       { status: 400 }
     );
   }
@@ -131,13 +133,23 @@ export async function POST(request: NextRequest) {
       error = result.error;
       real = result.real;
     } catch (e) {
-      console.warn("Piston API failed, falling back to simulation:", e);
-      output = simulateAnsi(code, language);
-      error = "(Piston API unavailable — using simulated execution)";
+      console.warn("Piston API failed, falling back:", e);
+      if (language === "python") {
+        output = "// Python has no in-browser simulator yet.\n// Set PISTON_AUTH_TOKEN to enable real execution.";
+        error = "(Piston API unavailable — no simulated fallback for Python)";
+      } else {
+        output = simulateAnsi(code, language);
+        error = "(Piston API unavailable — using simulated execution)";
+      }
     }
   } else {
-    output = simulateAnsi(code, language);
-    error = "(Simulated execution — set PISTON_AUTH_TOKEN for real compilation)";
+    if (language === "python") {
+      output = "// Python has no in-browser simulator yet.\n// Set PISTON_AUTH_TOKEN to enable real execution.";
+      error = "(Simulated execution unavailable for Python — set PISTON_AUTH_TOKEN for real compilation)";
+    } else {
+      output = simulateAnsi(code, language);
+      error = "(Simulated execution — set PISTON_AUTH_TOKEN for real compilation)";
+    }
   }
 
   return NextResponse.json({ output, error, real });

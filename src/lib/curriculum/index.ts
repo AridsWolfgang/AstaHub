@@ -1,6 +1,7 @@
-import type { Lesson } from "../types";
+import type { Lesson, TrackKey } from "../types";
 
 export const TOTAL_DAYS = 100;
+export const TOTAL_TRACKS: Record<TrackKey, number> = { c: 100, python: 40, cpp: 40 };
 
 const loaders: Record<number, () => Promise<{ default: Partial<Lesson> }>> = {
   1: () => import("./days/day-1"),
@@ -137,4 +138,42 @@ export async function getLessonRange(from: number, to: number): Promise<Lesson[]
   const days = Array.from({ length: Math.max(0, hi - lo + 1) }, (_, i) => lo + i);
   const results = await Promise.all(days.map((d) => getLesson(d)));
   return results.filter((l): l is Lesson => l !== undefined);
+}
+
+/* ─── Track-aware lookups (C/ASM is the legacy "c" track) ─── */
+
+export async function getTrackLesson(track: TrackKey, day: number): Promise<Lesson | undefined> {
+  if (track === "python") {
+    const py = await import("./python");
+    return py.getPythonLesson(day);
+  }
+  if (track === "cpp") {
+    const cpp = await import("./cpp");
+    return cpp.getCppLesson(day);
+  }
+  return getLesson(day);
+}
+
+export async function getTrackLessons(track: TrackKey): Promise<Lesson[]> {
+  if (track === "python") {
+    const py = await import("./python");
+    return py.getPythonLessons();
+  }
+  if (track === "cpp") {
+    const cpp = await import("./cpp");
+    return cpp.getCppLessons();
+  }
+  return getLessons();
+}
+
+export async function getTrackTotalDays(track: TrackKey): Promise<number> {
+  if (track === "python") {
+    const py = await import("./python");
+    return py.PYTHON_TOTAL_DAYS;
+  }
+  if (track === "cpp") {
+    const cpp = await import("./cpp");
+    return cpp.CPP_TOTAL_DAYS;
+  }
+  return TOTAL_DAYS;
 }

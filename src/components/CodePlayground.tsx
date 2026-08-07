@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Play, RotateCcw, Copy, Check, Terminal, Cpu } from "lucide-react";
 import CyberPanel from "./CyberPanel";
 import { cn } from "@/lib/utils";
+import type { Language } from "@/lib/types";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
@@ -33,14 +34,14 @@ async function runWhenIdle(cb: () => void) {
 
 interface CodePlaygroundProps {
   defaultCode: string;
-  language: "c" | "asm";
+  language: Language;
   expectedOutput?: string;
   readOnly?: boolean;
   height?: string;
   onRun?: (code: string) => void;
 }
 
-async function executeCode(code: string, language: "c" | "asm") {
+async function executeCode(code: string, language: Language) {
   const res = await fetch("/api/execute", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -117,7 +118,8 @@ export default function CodePlayground({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const monacoLang = language === "c" ? "c" : "plaintext";
+  const monacoLang =
+    language === "c" ? "c" : language === "asm" ? "plaintext" : language === "python" ? "python" : "cpp";
 
   const modeColor = {
     idle: "text-gray-500",
@@ -144,7 +146,13 @@ export default function CodePlayground({
                 ? "bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/20"
                 : "bg-white/5 text-gray-300 border border-white/10"
             )}>
-              {language === "c" ? "C11" : "x86-64 NASM"}
+              {language === "c"
+                ? "C11"
+                : language === "asm"
+                ? "x86-64 NASM"
+                : language === "python"
+                ? "Python 3"
+                : "C++20"}
             </span>
             {executionMode !== "idle" && (
               <span className={cn("flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-mono border", modeColor)}>

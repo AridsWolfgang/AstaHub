@@ -9,10 +9,10 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://asta100.dev"),
   title: "AstaHub — Free Technical Education, Forever",
   description:
-    "World-class technical education for every person on Earth. Learn C and x86-64 Assembly hands-on — 100 days from your first printf to bare-metal syscall. Free, forever.",
+    "World-class technical education for every person on Earth. Hands-on tracks in C, x86-64 Assembly, Python, and C++ — from your first print to the bare metal. Free, forever.",
   applicationName: "AstaHub",
   manifest: "/manifest.json",
-  keywords: ["C", "Assembly", "x86-64", "systems programming", "learning", "free education", "AstaHub"],
+  keywords: ["C", "Assembly", "Python", "C++", "x86-64", "systems programming", "learning", "free education", "AstaHub"],
   icons: {
     icon: "/favicon.svg",
   },
@@ -22,13 +22,13 @@ export const metadata: Metadata = {
     siteName: "AstaHub",
     title: "AstaHub — Free Technical Education, Forever",
     description:
-      "World-class technical education for every person on Earth. Learn C and Assembly hands-on — free, forever.",
+      "World-class technical education for every person on Earth. Hands-on tracks in C, Assembly, Python, and C++ — free, forever.",
   },
   twitter: {
     card: "summary",
     title: "AstaHub — Free Technical Education, Forever",
     description:
-      "World-class technical education for every person on Earth. Learn C and Assembly hands-on — free, forever.",
+      "World-class technical education for every person on Earth. Hands-on tracks in C, Assembly, Python, and C++ — free, forever.",
   },
 };
 

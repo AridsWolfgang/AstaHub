@@ -88,8 +88,8 @@ export default async function TrackPage({
                 This track is live
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-gray-400">
-                You can start today. A hundred days of hands-on lessons, exercises, and a
-                working playground in your browser — free, forever.
+                You can start today. {track.days ?? "A hundred"} days of hands-on lessons,
+                exercises, and a working playground in your browser — free, forever.
               </p>
             </div>
             <Link href={track.href ?? "/curriculum"} className="btn-primary">
@@ -104,8 +104,9 @@ export default async function TrackPage({
                 On the roadmap
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-gray-400">
-                This track is being built on the same engine that powers C and Assembly
-                today. When it opens, it will be free — just like everything else here.
+                This track is being built on the same engine that powers C, Assembly,
+                Python, and C++ today. When it opens, it will be free — just like
+                everything else here.
               </p>
             </div>
             <Link href="/tracks" className="btn whitespace-nowrap">

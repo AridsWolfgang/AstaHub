@@ -4,6 +4,7 @@ import { useState } from "react";
 import CodePlayground from "@/components/CodePlayground";
 import CyberPanel from "@/components/CyberPanel";
 import { cn } from "@/lib/utils";
+import type { Language } from "@/lib/types";
 
 const TEMPLATES = {
   c: {
@@ -18,17 +19,38 @@ const TEMPLATES = {
     stack: `section .text\nglobal _start\n\n_start:\n    push 42\n    push 100\n    pop rax         ; rax = 100\n    pop rbx         ; rbx = 42\n    ; Stack grows downward\n    nop`,
     bitwise: `section .text\nglobal _start\n\n_start:\n    mov rax, 0b1100\n    mov rbx, 0b1010\n    and rax, rbx    ; 1000 = 8\n    mov rcx, rax\n    or  rcx, rbx    ; 1110 = 14\n    xor rcx, rbx    ; 0100 = 4\n    nop`,
   },
+  python: {
+    hello: `print("Hello, World!")`,
+    data: `name = "Ada"\nage = 36\nlanguages = ["Python", "C", "Assembly"]\n\nprint(f"{name} is {age} years old")\nprint("Loves:", ", ".join(languages))`,
+    loops: `for i in range(1, 6):\n    print("x" * i)\n\nnums = [n * n for n in range(1, 6)]\nprint(nums)`,
+    functions: `def greet(name, greeting="Hello"):\n    return f"{greeting}, {name}!"\n\ndef average(*nums):\n    return sum(nums) / len(nums)\n\nprint(greet("Ada"))\nprint(average(1, 2, 3, 4))`,
+    oop: `class BankAccount:\n    def __init__(self, owner, balance=0):\n        self.owner = owner\n        self.balance = balance\n\n    def deposit(self, amount):\n        self.balance += amount\n        return self.balance\n\n    def __str__(self):\n        return f"{self.owner}: \${self.balance}"\n\nacc = BankAccount("Ada")\nacc.deposit(100)\nprint(acc)`,
+  },
+  cpp: {
+    hello: `#include <iostream>\n\nint main() {\n    std::cout << "Hello, C++!" << std::endl;\n    return 0;\n}`,
+    vector: `#include <iostream>\n#include <vector>\n#include <algorithm>\n\nint main() {\n    std::vector<int> nums = {5, 2, 8, 1, 9};\n    std::sort(nums.begin(), nums.end());\n    for (int n : nums) std::cout << n << " ";\n    std::cout << std::endl;\n    return 0;\n}`,
+    class: `#include <iostream>\n#include <string>\n\nclass Student {\npublic:\n    Student(std::string name, int grade)\n        : name_(name), grade_(grade) {}\n\n    void describe() const {\n        std::cout << name_ << ": grade " << grade_ << std::endl;\n    }\n\nprivate:\n    std::string name_;\n    int grade_;\n};\n\nint main() {\n    Student s{"Ada", 10};\n    s.describe();\n    return 0;\n}`,
+    smart_ptr: `#include <iostream>\n#include <memory>\n\nint main() {\n    auto ptr = std::make_unique<int>(42);\n    std::cout << *ptr << std::endl;\n    return 0;\n}`,
+    lambda: `#include <iostream>\n#include <vector>\n#include <algorithm>\n\nint main() {\n    std::vector<int> nums = {1, 2, 3, 4, 5};\n    int even = std::count_if(nums.begin(), nums.end(),\n        [](int n) { return n % 2 == 0; });\n    std::cout << even << " even numbers" << std::endl;\n    return 0;\n}`,
+  },
+} as const;
+
+const LANG_META: Record<Language, { label: string }> = {
+  c: { label: "C Language" },
+  asm: { label: "x86-64 Assembly" },
+  python: { label: "Python" },
+  cpp: { label: "C++" },
 };
 
 export default function PlaygroundPage() {
-  const [lang, setLang] = useState<"c" | "asm">("c");
+  const [lang, setLang] = useState<Language>("c");
   const [template, setTemplate] = useState("hello");
-  const [code, setCode] = useState(TEMPLATES.c.hello);
+  const [code, setCode] = useState<string>(TEMPLATES.c.hello);
 
   const templates = TEMPLATES[lang];
   const templateKeys = Object.keys(templates) as (keyof typeof templates)[];
 
-  const handleLangChange = (newLang: "c" | "asm") => {
+  const handleLangChange = (newLang: Language) => {
     setLang(newLang);
     setTemplate("hello");
     setCode(TEMPLATES[newLang].hello);
@@ -46,12 +68,12 @@ export default function PlaygroundPage() {
           Playground
         </h1>
         <p className="text-sm text-gray-500 font-mono">
-          A free workbench for C and x86-64 Assembly — outside the curriculum
+          A free workbench for C, x86-64 Assembly, Python, and C++ — outside the curriculum
         </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
-        {(["c", "asm"] as const).map((l) => (
+        {(Object.keys(TEMPLATES) as Language[]).map((l) => (
           <button
             key={l}
             onClick={() => handleLangChange(l)}
@@ -62,7 +84,7 @@ export default function PlaygroundPage() {
                 : "text-gray-500 hover:text-white border border-transparent"
             )}
           >
-            {l === "c" ? "C Language" : "x86-64 Assembly"}
+            {LANG_META[l].label}
           </button>
         ))}
 
@@ -92,7 +114,25 @@ export default function PlaygroundPage() {
 
       <CyberPanel title="Quick Reference" className="mt-6">
         <div className="grid gap-4 md:grid-cols-2 text-xs font-mono">
-          {lang === "c" ? (
+          {lang === "python" ? (
+            <>
+              <div>
+                <p className="text-cyber-cyan mb-2">Core Syntax</p>
+                <pre className="text-gray-400">{`print("hello")     # output
+name = input()     # read input
+if / elif / else   # branching
+for x in range(n)  # loops
+def f(a, b=1):     # functions
+class Name:        # objects`}</pre>
+              </div>
+              <div>
+                <p className="text-cyber-cyan mb-2">Run</p>
+                <pre className="text-gray-400">{`python program.py
+# or run interactively:
+python`}</pre>
+              </div>
+            </>
+          ) : lang === "c" ? (
             <>
               <div>
                 <p className="text-cyber-cyan mb-2">Essential Headers</p>
@@ -104,6 +144,23 @@ export default function PlaygroundPage() {
               <div>
                 <p className="text-cyber-cyan mb-2">Compile & Run</p>
                 <pre className="text-gray-400">{`gcc -Wall -Wextra -std=c11 -o prog prog.c
+./prog
+echo $?    # exit code`}</pre>
+              </div>
+            </>
+          ) : lang === "cpp" ? (
+            <>
+              <div>
+                <p className="text-cyber-cyan mb-2">Core Headers</p>
+                <pre className="text-gray-400">{`<iostream> — cout / cin
+<string>   — std::string
+<vector>   — dynamic arrays
+<memory>   — smart pointers
+<algorithm> — sort, find, ...`}</pre>
+              </div>
+              <div>
+                <p className="text-cyber-cyan mb-2">Compile & Run</p>
+                <pre className="text-gray-400">{`g++ -std=c++20 -Wall -Wextra -o prog prog.cpp
 ./prog
 echo $?    # exit code`}</pre>
               </div>

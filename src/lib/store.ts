@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ProficiencyLevel, UserProgress } from "./types";
+import type { ProficiencyLevel, TrackKey, UserProgress } from "./types";
 import { levelFromXp, getLevelForDay } from "./types";
 
 interface ProgressState extends UserProgress {
@@ -46,105 +46,6 @@ function calcStreak(lastDate: string | null, currentStreak: number): number {
   return 1;
 }
 
-export const useProgressStore = create<ProgressState>()(
-  persist(
-    (set, get) => ({
-      ...initialState,
-
-      completeDay: (day, xp) =>
-        set((state) => {
-          const completedDays = state.completedDays.includes(day)
-            ? state.completedDays
-            : [...state.completedDays, day];
-          const totalXp = state.totalXp + xp;
-          const next = {
-            completedDays,
-            totalXp,
-            level: levelFromXp(totalXp),
-            currentDay: Math.max(state.currentDay, day + 1),
-            streak: calcStreak(state.lastActiveDate, state.streak),
-            lastActiveDate: todayString(),
-          };
-          queueSync(next);
-          return next;
-        }),
-
-      completeExercise: (day, exerciseId, xp) =>
-        set((state) => {
-          const dayExercises = state.completedExercises[day] ?? [];
-          if (dayExercises.includes(exerciseId)) return state;
-          const totalXp = state.totalXp + xp;
-          const next = {
-            completedExercises: {
-              ...state.completedExercises,
-              [day]: [...dayExercises, exerciseId],
-            },
-            totalXp,
-            level: levelFromXp(totalXp),
-            streak: calcStreak(state.lastActiveDate, state.streak),
-            lastActiveDate: todayString(),
-          };
-          queueSync(next);
-          return next;
-        }),
-
-      completeAssignment: (day, xp) =>
-        set((state) => {
-          if (state.completedAssignments.includes(day)) return state;
-          const totalXp = state.totalXp + xp;
-          const next = {
-            completedAssignments: [...state.completedAssignments, day],
-            totalXp,
-            level: levelFromXp(totalXp),
-            streak: calcStreak(state.lastActiveDate, state.streak),
-            lastActiveDate: todayString(),
-          };
-          queueSync(next);
-          return next;
-        }),
-
-      setCurrentDay: (day) => set({ currentDay: day }),
-
-      addNote: (day, note) =>
-        set((state) => {
-          const next = { notes: { ...state.notes, [day]: note } };
-          queueSync(next);
-          return next;
-        }),
-
-      updateStreak: () =>
-        set((state) => {
-          const next = {
-            streak: calcStreak(state.lastActiveDate, state.streak),
-            lastActiveDate: todayString(),
-          };
-          queueSync(next);
-          return next;
-        }),
-
-      resetProgress: () => set(initialState),
-
-      getDayProgress: (day) => {
-        const state = get();
-        const exercisesDone = (state.completedExercises[day] ?? []).length;
-        const theoryDone = state.completedDays.includes(day);
-        const assignmentDone = state.completedAssignments.includes(day);
-        const totalExercises = 3;
-        const parts = [
-          theoryDone ? 1 : 0,
-          exercisesDone / totalExercises,
-          assignmentDone ? 1 : 0,
-        ];
-        const percent = Math.round(
-          ((parts[0] + parts[1] + (assignmentDone ? 1 : 0)) / 3) * 100
-        );
-        return { theoryDone, exercisesDone, totalExercises, assignmentDone, percent };
-      },
-    }),
-    { name: "asta-100days-progress" }
-  )
-);
-
 let syncTimer: ReturnType<typeof setTimeout> | null = null;
 
 function queueSync(state: Partial<ProgressState>): void {
@@ -168,6 +69,118 @@ function queueSync(state: Partial<ProgressState>): void {
     });
   }, 800);
 }
+
+interface StoreFactoryOptions {
+  /** Persist key for zustand's localStorage. */
+  persistKey: string;
+  /** Sync to the server via /api/progress (only meaningful for the primary track). */
+  sync?: boolean;
+}
+
+function createProgressStore(track: TrackKey, { persistKey, sync = true }: StoreFactoryOptions) {
+  return create<ProgressState>()(
+    persist(
+      (set, get) => ({
+        ...initialState,
+
+        completeDay: (day, xp) =>
+          set((state) => {
+            const completedDays = state.completedDays.includes(day)
+              ? state.completedDays
+              : [...state.completedDays, day];
+            const totalXp = state.totalXp + xp;
+            const next = {
+              completedDays,
+              totalXp,
+              level: levelFromXp(totalXp),
+              currentDay: Math.max(state.currentDay, day + 1),
+              streak: calcStreak(state.lastActiveDate, state.streak),
+              lastActiveDate: todayString(),
+            };
+            if (sync) queueSync(next);
+            return next;
+          }),
+
+        completeExercise: (day, exerciseId, xp) =>
+          set((state) => {
+            const dayExercises = state.completedExercises[day] ?? [];
+            if (dayExercises.includes(exerciseId)) return state;
+            const totalXp = state.totalXp + xp;
+            const next = {
+              completedExercises: {
+                ...state.completedExercises,
+                [day]: [...dayExercises, exerciseId],
+              },
+              totalXp,
+              level: levelFromXp(totalXp),
+              streak: calcStreak(state.lastActiveDate, state.streak),
+              lastActiveDate: todayString(),
+            };
+            if (sync) queueSync(next);
+            return next;
+          }),
+
+        completeAssignment: (day, xp) =>
+          set((state) => {
+            if (state.completedAssignments.includes(day)) return state;
+            const totalXp = state.totalXp + xp;
+            const next = {
+              completedAssignments: [...state.completedAssignments, day],
+              totalXp,
+              level: levelFromXp(totalXp),
+              streak: calcStreak(state.lastActiveDate, state.streak),
+              lastActiveDate: todayString(),
+            };
+            if (sync) queueSync(next);
+            return next;
+          }),
+
+        setCurrentDay: (day) => set({ currentDay: day }),
+
+        addNote: (day, note) =>
+          set((state) => {
+            const next = { notes: { ...state.notes, [day]: note } };
+            if (sync) queueSync(next);
+            return next;
+          }),
+
+        updateStreak: () =>
+          set((state) => {
+            const next = {
+              streak: calcStreak(state.lastActiveDate, state.streak),
+              lastActiveDate: todayString(),
+            };
+            if (sync) queueSync(next);
+            return next;
+          }),
+
+        resetProgress: () => set(initialState),
+
+        getDayProgress: (day) => {
+          const state = get();
+          const exercisesDone = (state.completedExercises[day] ?? []).length;
+          const theoryDone = state.completedDays.includes(day);
+          const assignmentDone = state.completedAssignments.includes(day);
+          const totalExercises = 3;
+          const parts = [
+            theoryDone ? 1 : 0,
+            exercisesDone / totalExercises,
+            assignmentDone ? 1 : 0,
+          ];
+          const percent = Math.round(
+            ((parts[0] + parts[1] + (assignmentDone ? 1 : 0)) / 3) * 100
+          );
+          return { theoryDone, exercisesDone, totalExercises, assignmentDone, percent };
+        },
+      }),
+      { name: persistKey }
+    )
+  );
+}
+
+export const useProgressStore = createProgressStore("c", { persistKey: "asta-100days-progress" });
+export const usePythonStore = createProgressStore("python", { persistKey: "asta-python-progress", sync: false });
+export const useCppStore = createProgressStore("cpp", { persistKey: "asta-cpp-progress", sync: false });
 
 export function markSynced(): void {
   if (typeof window === "undefined") return;
