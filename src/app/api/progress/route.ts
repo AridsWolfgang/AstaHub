@@ -5,6 +5,36 @@ import { prisma } from "@/lib/prisma";
 
 const TRACKS = new Set(["c", "python", "cpp"]);
 
+const TRACK_TOTAL_DAYS: Record<string, number> = { c: 100, python: 40, cpp: 40 };
+const TRACK_CERT_TITLES: Record<string, string> = {
+  c: "C / x86-64 Assembly",
+  python: "Python",
+  cpp: "C++",
+};
+
+async function issueCertificateIfComplete(
+  userId: string,
+  track: string,
+  completedDays: unknown,
+  totalXp: unknown
+): Promise<void> {
+  const total = TRACK_TOTAL_DAYS[track];
+  if (!total || !Array.isArray(completedDays)) return;
+  const daySet = new Set(completedDays.filter((d) => typeof d === "number" && d >= 1 && d <= total));
+  if (daySet.size < total) return;
+  const existing = await prisma.certificate.findFirst({ where: { userId, track } });
+  if (existing) return;
+  await prisma.certificate.create({
+    data: {
+      userId,
+      track,
+      title: `Certificate of Completion — ${TRACK_CERT_TITLES[track]}`,
+      day: total,
+      xp: typeof totalXp === "number" ? totalXp : total,
+    },
+  });
+}
+
 function pickProgress(body: Record<string, unknown>): Record<string, unknown> {
   const data: Record<string, unknown> = {};
   const {
@@ -55,6 +85,14 @@ export async function PUT(req: Request) {
         select: { id: true, track: true, totalXp: true },
       });
     }
+
+    await issueCertificateIfComplete(
+      session.user.id,
+      track,
+      data.completedDays,
+      data.totalXp
+    );
+
     return NextResponse.json({ user });
   } catch (err) {
     console.error("progress sync error", err);

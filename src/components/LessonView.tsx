@@ -55,6 +55,7 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
   const [quizResults, setQuizResults] = useState<Record<string, boolean>>({});
   const [showHints, setShowHints] = useState<Record<string, boolean>>({});
+  const [runOutputs, setRunOutputs] = useState<Record<string, string>>({});
   const [noteInput, setNoteInput] = useState("");
   const [noteMinimized, setNoteMinimized] = useState(true);
   const [totalDays, setTotalDays] = useState(100);
@@ -159,6 +160,13 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
     if (!isAssignmentComplete && lesson.assignment) {
       completeAssignment(day, lesson.assignment.xpReward);
     }
+  };
+
+  const matchesExpected = (output: string, expected?: string) =>
+    !!expected && output.includes(expected);
+
+  const handleCodeRun = (exerciseId: string, output: string) => {
+    setRunOutputs((prev) => ({ ...prev, [exerciseId]: output }));
   };
 
   const handleSaveNote = () => {
@@ -371,6 +379,7 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
                           language={lesson.language}
                           expectedOutput={exercise.expectedOutput}
                           height="240px"
+                          onRunOutput={(o) => handleCodeRun(exercise.id, o)}
                         />
                         {exercise.hints && (
                           <div className="mt-3">
@@ -398,12 +407,37 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
                           </div>
                         )}
                         {!done && (
-                          <button
-                            onClick={() => completeExercise(day, exercise.id, exercise.xpReward)}
-                            className="btn-cyber text-xs mt-3"
-                          >
-                            Mark Complete (+{exercise.xpReward} XP)
-                          </button>
+                          <div className="mt-3">
+                            {exercise.expectedOutput &&
+                              runOutputs[exercise.id] !== undefined &&
+                              (matchesExpected(
+                                runOutputs[exercise.id],
+                                exercise.expectedOutput
+                              ) ? (
+                                <p className="text-xs font-mono text-cyber-cyan mb-2">
+                                  ✓ Output matches — ready to complete
+                                </p>
+                              ) : (
+                                <p className="text-xs font-mono text-cyber-red mb-2">
+                                  ✗ Output does not match expected yet
+                                </p>
+                              ))}
+                            <button
+                              onClick={() => completeExercise(day, exercise.id, exercise.xpReward)}
+                              disabled={
+                                !!exercise.expectedOutput &&
+                                !matchesExpected(
+                                  runOutputs[exercise.id] ?? "",
+                                  exercise.expectedOutput
+                                )
+                              }
+                              className="btn-cyber text-xs disabled:opacity-40"
+                            >
+                              {exercise.expectedOutput && !runOutputs[exercise.id]
+                                ? "Run your code to verify"
+                                : `Mark Complete (+${exercise.xpReward} XP)`}
+                            </button>
+                          </div>
                         )}
                         {done && (
                           <span className="text-xs font-mono text-cyber-cyan mt-3 block">

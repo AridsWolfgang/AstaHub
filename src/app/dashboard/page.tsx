@@ -14,13 +14,49 @@ import {
 } from "lucide-react";
 import ProgressRing from "@/components/ProgressRing";
 import CyberPanel from "@/components/CyberPanel";
-import { useProgressStore, getOverallProgress, isDayUnlocked } from "@/lib/store";
+import {
+  useProgressStore,
+  usePythonStore,
+  useCppStore,
+  getOverallProgress,
+  isDayUnlocked,
+} from "@/lib/store";
+import type { ProgressState } from "@/lib/store";
 import { getTierByLevel, PROFICIENCY_TIERS } from "@/lib/types";
-import { getLessonRange } from "@/lib/curriculum";
-import type { Lesson } from "@/lib/types";
+import { getTrackLesson, getTrackTotalDays, TOTAL_TRACKS } from "@/lib/curriculum";
+import type { Lesson, TrackKey } from "@/lib/types";
 import { formatDay, cn } from "@/lib/utils";
 
+const TRACK_NAMES: Record<TrackKey, string> = { c: "C / Assembly", python: "Python", cpp: "C++" };
+const STORES: Record<TrackKey, () => ProgressState> = {
+  c: useProgressStore,
+  python: usePythonStore,
+  cpp: useCppStore,
+};
+
+function lessonHref(track: TrackKey, day: number): string {
+  return track === "c" ? `/lesson/${day}` : `/lesson/${track}/${day}`;
+}
+
+function curriculumHref(track: TrackKey): string {
+  return track === "c" ? "/curriculum" : `/tracks/${track}`;
+}
+
+function dayRange(from: number, to: number): number[] {
+  const lo = Math.max(1, from);
+  const hi = Math.min(100, to);
+  return Array.from({ length: Math.max(0, hi - lo + 1) }, (_, i) => lo + i);
+}
+
 export default function DashboardPage() {
+  const [track, setTrack] = useState<TrackKey>("c");
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("track");
+    if (q === "python" || q === "cpp") setTrack(q);
+  }, []);
+
+  const store = STORES[track];
   const {
     currentDay,
     completedDays,
@@ -29,26 +65,31 @@ export default function DashboardPage() {
     level,
     completedExercises,
     completedAssignments,
-  } = useProgressStore();
+  } = store();
 
   const [recentLessons, setRecentLessons] = useState<Lesson[]>([]);
+  const [totalDays, setTotalDays] = useState(TOTAL_TRACKS.c);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    getLessonRange(currentDay - 2, currentDay + 4).then((list) => {
+    Promise.all([
+      getTrackTotalDays(track),
+      ...dayRange(currentDay - 2, currentDay + 4).map((d) => getTrackLesson(track, d)),
+    ]).then(([td, ...lessons]) => {
       if (cancelled) return;
-      setRecentLessons(list);
+      setTotalDays(td);
+      setRecentLessons(lessons.filter((l): l is Lesson => l !== undefined));
       setLoading(false);
     });
     return () => {
       cancelled = true;
     };
-  }, [currentDay]);
+  }, [track, currentDay]);
 
   const tier = getTierByLevel(level);
-  const overallPercent = getOverallProgress(completedDays, 100);
+  const overallPercent = getOverallProgress(completedDays, totalDays);
   const todayLesson = recentLessons.find((l) => l.day === currentDay);
   const nextTier = PROFICIENCY_TIERS.find((t) => t.dayRange[0] > currentDay);
 
@@ -63,12 +104,32 @@ export default function DashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="font-display text-3xl font-bold text-white mb-2">
-          Dashboard
-        </h1>
-        <p className="text-sm text-gray-500 font-mono">
-          Welcome back. Today is your next day.
-        </p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="font-display text-3xl font-bold text-white mb-2">
+              Dashboard — {TRACK_NAMES[track]}
+            </h1>
+            <p className="text-sm text-gray-500 font-mono">
+              Welcome back. Today is your next day.
+            </p>
+          </div>
+          <div className="flex items-center gap-1 rounded-lg border border-white/10 p-1">
+            {(["c", "python", "cpp"] as TrackKey[]).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTrack(t)}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-xs font-mono transition-colors",
+                  track === t
+                    ? "bg-white text-black"
+                    : "text-gray-400 hover:text-white"
+                )}
+              >
+                {t === "c" ? "C" : t === "python" ? "Python" : "C++"}
+              </button>
+            ))}
+          </div>
+        </div>
       </motion.div>
 
       {/* Stats Row */}
@@ -81,7 +142,7 @@ export default function DashboardPage() {
             label="Complete"
           />
           <p className="text-center text-xs text-gray-500 mt-3 font-mono">
-            {completedDays.length}/100 days
+            {completedDays.length}/{totalDays} days
           </p>
         </CyberPanel>
 
@@ -136,11 +197,11 @@ export default function DashboardPage() {
                   </span>
                   <span className={cn(
                     "rounded px-2 py-0.5 text-[10px] font-mono uppercase",
-                    todayLesson.language === "c"
+                    track === "c"
                       ? "bg-cyber-cyan/10 text-cyber-cyan"
                       : "bg-white/5 text-gray-300"
                   )}>
-                    {todayLesson.language}
+                    {TRACK_NAMES[track]}
                   </span>
                 </div>
                 <h2 className="font-display text-2xl font-bold text-white mb-1">
@@ -163,7 +224,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <Link
-                href={`/lesson/${currentDay}`}
+                href={lessonHref(track, currentDay)}
                 className="btn-cyber-solid whitespace-nowrap"
               >
                 Continue your journey
@@ -193,7 +254,7 @@ export default function DashboardPage() {
             return (
               <Link
                 key={lesson.day}
-                href={unlocked ? `/lesson/${lesson.day}` : "#"}
+                href={unlocked ? lessonHref(track, lesson.day) : "#"}
                 className={cn(
                   "group relative rounded-lg border p-4 transition-colors",
                   done
@@ -232,8 +293,8 @@ export default function DashboardPage() {
           })}
         </div>
         <div className="mt-4 text-center">
-          <Link href="/curriculum" className="text-xs font-mono text-cyber-cyan hover:underline">
-            View full 100-day curriculum →
+          <Link href={curriculumHref(track)} className="text-xs font-mono text-cyber-cyan hover:underline">
+            View full {TRACK_NAMES[track]} curriculum →
           </Link>
         </div>
       </CyberPanel>

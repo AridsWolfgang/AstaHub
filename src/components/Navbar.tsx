@@ -20,6 +20,8 @@ import {
   Atom,
   Sparkles,
   ArrowRight,
+  Settings,
+  Award,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProgressStore } from "@/lib/store";
@@ -34,8 +36,10 @@ const NAV_ITEMS = [
 
 const ACCOUNT_ITEMS = [
   { href: "/profile", icon: User, label: "Profile" },
+  { href: "/certificates", icon: Award, label: "Certificates" },
   { href: "/leaderboard", icon: Medal, label: "Leaderboard" },
   { href: "/achievements", icon: Trophy, label: "Achievements" },
+  { href: "/settings", icon: Settings, label: "Settings" },
 ];
 
 const LEARN_ICONS = { languages: Code2, sciences: Atom, dream: Sparkles } as const;

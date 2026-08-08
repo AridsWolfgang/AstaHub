@@ -11,8 +11,10 @@ const LEARN_LINKS = [
 const ACCOUNT_LINKS = [
   { href: "/signin", label: "Sign in" },
   { href: "/profile", label: "Profile" },
+  { href: "/certificates", label: "Certificates" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/achievements", label: "Achievements" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export default function Footer() {

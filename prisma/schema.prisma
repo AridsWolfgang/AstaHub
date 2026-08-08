@@ -56,6 +56,7 @@ model Certificate {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track     String   @default("c")
   title     String
   day       Int
   xp        Int

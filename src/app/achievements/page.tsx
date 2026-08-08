@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Trophy,
@@ -18,23 +19,29 @@ import {
   Gem,
   Crown,
   ClipboardList,
+  Braces,
+  FlaskConical,
 } from "lucide-react";
 import CyberPanel from "@/components/CyberPanel";
-import { useProgressStore } from "@/lib/store";
+import { useProgressStore, usePythonStore, useCppStore } from "@/lib/store";
+import type { ProgressState } from "@/lib/store";
 import { PROFICIENCY_TIERS } from "@/lib/types";
+import type { TrackKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+type Snapshot = ProgressState;
 
 interface Achievement {
   id: string;
   title: string;
   description: string;
   icon: React.ElementType;
-  condition: (state: ReturnType<typeof useProgressStore.getState>) => boolean;
+  condition: (state: Snapshot) => boolean;
   xp: number;
   rarity: "common" | "rare" | "epic" | "legendary";
 }
 
-const ACHIEVEMENTS: Achievement[] = [
+const C_ACHIEVEMENTS: Achievement[] = [
   {
     id: "first-boot",
     title: "First Boot",
@@ -163,6 +170,285 @@ const ACHIEVEMENTS: Achievement[] = [
   },
 ];
 
+const PY_ACHIEVEMENTS: Achievement[] = [
+  {
+    id: "hello-python",
+    title: "Hello, Python",
+    description: "Complete Day 1",
+    icon: Braces,
+    condition: (s) => s.completedDays.includes(1),
+    xp: 50,
+    rarity: "common",
+  },
+  {
+    id: "py-week-one",
+    title: "Script Apprentice",
+    description: "Complete 7 days",
+    icon: Flame,
+    condition: (s) => s.completedDays.length >= 7,
+    xp: 100,
+    rarity: "common",
+  },
+  {
+    id: "list-lord",
+    title: "List Lord",
+    description: "Complete Day 10 (Lists)",
+    icon: Layers,
+    condition: (s) => s.completedDays.includes(10),
+    xp: 150,
+    rarity: "rare",
+  },
+  {
+    id: "dict-whisperer",
+    title: "Dict Whisperer",
+    description: "Complete Day 12 (Dictionaries)",
+    icon: Pointer,
+    condition: (s) => s.completedDays.includes(12),
+    xp: 150,
+    rarity: "rare",
+  },
+  {
+    id: "comprehension",
+    title: "One-Liner",
+    description: "Complete Day 14 (Comprehensions)",
+    icon: Zap,
+    condition: (s) => s.completedDays.includes(14),
+    xp: 200,
+    rarity: "rare",
+  },
+  {
+    id: "function-master",
+    title: "Function Builder",
+    description: "Reach Day 15 (Functions)",
+    icon: Package,
+    condition: (s) => s.completedDays.some((d) => d >= 15),
+    xp: 150,
+    rarity: "rare",
+  },
+  {
+    id: "py-halfway",
+    title: "Halfway Through",
+    description: "Complete 20 days",
+    icon: Mountain,
+    condition: (s) => s.completedDays.length >= 20,
+    xp: 300,
+    rarity: "epic",
+  },
+  {
+    id: "exception-handler",
+    title: "Calm Under Errors",
+    description: "Complete Day 21 (Exceptions)",
+    icon: Cog,
+    condition: (s) => s.completedDays.includes(21),
+    xp: 200,
+    rarity: "rare",
+  },
+  {
+    id: "recursion-hero",
+    title: "Recursion Hero",
+    description: "Complete Day 30 (Recursion)",
+    icon: Cpu,
+    condition: (s) => s.completedDays.includes(30),
+    xp: 300,
+    rarity: "epic",
+  },
+  {
+    id: "oop-artisan",
+    title: "OOP Artisan",
+    description: "Reach Day 34 (Classes)",
+    icon: FlaskConical,
+    condition: (s) => s.completedDays.some((d) => d >= 34),
+    xp: 300,
+    rarity: "epic",
+  },
+  {
+    id: "py-streak-7",
+    title: "Consistent Coder",
+    description: "Maintain a 7-day streak",
+    icon: Signal,
+    condition: (s) => s.streak >= 7,
+    xp: 200,
+    rarity: "rare",
+  },
+  {
+    id: "py-streak-30",
+    title: "Daily Driver",
+    description: "Maintain a 30-day streak",
+    icon: Rocket,
+    condition: (s) => s.streak >= 30,
+    xp: 500,
+    rarity: "legendary",
+  },
+  {
+    id: "py-xp-1000",
+    title: "XP Collector",
+    description: "Earn 1,000 total XP",
+    icon: Gem,
+    condition: (s) => s.totalXp >= 1000,
+    xp: 100,
+    rarity: "common",
+  },
+  {
+    id: "py-xp-5000",
+    title: "XP Hoarder",
+    description: "Earn 5,000 total XP",
+    icon: Crown,
+    condition: (s) => s.totalXp >= 5000,
+    xp: 300,
+    rarity: "epic",
+  },
+  {
+    id: "py-capstone",
+    title: "Python Graduate",
+    description: "Complete all 40 days",
+    icon: Star,
+    condition: (s) => s.completedDays.length >= 40,
+    xp: 1000,
+    rarity: "legendary",
+  },
+  {
+    id: "py-assignment-10",
+    title: "Assignment Grinder",
+    description: "Complete 10 assignments",
+    icon: ClipboardList,
+    condition: (s) => s.completedAssignments.length >= 10,
+    xp: 200,
+    rarity: "rare",
+  },
+];
+
+const CPP_ACHIEVEMENTS: Achievement[] = [
+  {
+    id: "cpp-hello",
+    title: "Hello, C++",
+    description: "Complete Day 1",
+    icon: Braces,
+    condition: (s) => s.completedDays.includes(1),
+    xp: 50,
+    rarity: "common",
+  },
+  {
+    id: "cpp-week-one",
+    title: "Compiler Apprentice",
+    description: "Complete 7 days",
+    icon: Flame,
+    condition: (s) => s.completedDays.length >= 7,
+    xp: 100,
+    rarity: "common",
+  },
+  {
+    id: "cpp-types",
+    title: "Type Tamer",
+    description: "Reach Day 10",
+    icon: Layers,
+    condition: (s) => s.completedDays.some((d) => d >= 10),
+    xp: 150,
+    rarity: "rare",
+  },
+  {
+    id: "cpp-functions",
+    title: "Function Smith",
+    description: "Reach Day 15",
+    icon: Package,
+    condition: (s) => s.completedDays.some((d) => d >= 15),
+    xp: 200,
+    rarity: "rare",
+  },
+  {
+    id: "cpp-classes",
+    title: "Class Architect",
+    description: "Reach Day 21",
+    icon: Pointer,
+    condition: (s) => s.completedDays.some((d) => d >= 21),
+    xp: 250,
+    rarity: "rare",
+  },
+  {
+    id: "cpp-halfway",
+    title: "Halfway Through",
+    description: "Complete 20 days",
+    icon: Mountain,
+    condition: (s) => s.completedDays.length >= 20,
+    xp: 300,
+    rarity: "epic",
+  },
+  {
+    id: "cpp-stl",
+    title: "STL Explorer",
+    description: "Reach Day 30",
+    icon: Cog,
+    condition: (s) => s.completedDays.some((d) => d >= 30),
+    xp: 300,
+    rarity: "epic",
+  },
+  {
+    id: "cpp-streak-7",
+    title: "Consistent Coder",
+    description: "Maintain a 7-day streak",
+    icon: Signal,
+    condition: (s) => s.streak >= 7,
+    xp: 200,
+    rarity: "rare",
+  },
+  {
+    id: "cpp-streak-30",
+    title: "Daily Driver",
+    description: "Maintain a 30-day streak",
+    icon: Rocket,
+    condition: (s) => s.streak >= 30,
+    xp: 500,
+    rarity: "legendary",
+  },
+  {
+    id: "cpp-xp-1000",
+    title: "XP Collector",
+    description: "Earn 1,000 total XP",
+    icon: Gem,
+    condition: (s) => s.totalXp >= 1000,
+    xp: 100,
+    rarity: "common",
+  },
+  {
+    id: "cpp-xp-5000",
+    title: "XP Hoarder",
+    description: "Earn 5,000 total XP",
+    icon: Crown,
+    condition: (s) => s.totalXp >= 5000,
+    xp: 300,
+    rarity: "epic",
+  },
+  {
+    id: "cpp-graduate",
+    title: "C++ Graduate",
+    description: "Complete all 40 days",
+    icon: Star,
+    condition: (s) => s.completedDays.length >= 40,
+    xp: 1000,
+    rarity: "legendary",
+  },
+  {
+    id: "cpp-assignment-10",
+    title: "Assignment Grinder",
+    description: "Complete 10 assignments",
+    icon: ClipboardList,
+    condition: (s) => s.completedAssignments.length >= 10,
+    xp: 200,
+    rarity: "rare",
+  },
+];
+
+const ACHIEVEMENT_SETS: Record<TrackKey, Achievement[]> = {
+  c: C_ACHIEVEMENTS,
+  python: PY_ACHIEVEMENTS,
+  cpp: CPP_ACHIEVEMENTS,
+};
+
+const STORES: Record<TrackKey, () => Snapshot> = {
+  c: useProgressStore,
+  python: usePythonStore,
+  cpp: useCppStore,
+};
+
 const rarityColors = {
   common: "border-gray-500/20 text-gray-400",
   rare: "border-cyber-cyan/20 text-cyber-cyan",
@@ -178,19 +464,39 @@ const rarityBg = {
 };
 
 export default function AchievementsPage() {
-  const state = useProgressStore();
-  const unlocked = ACHIEVEMENTS.filter((a) => a.condition(state));
-  const locked = ACHIEVEMENTS.filter((a) => !a.condition(state));
+  const [track, setTrack] = useState<TrackKey>("c");
+  const state = STORES[track]();
+  const achievements = ACHIEVEMENT_SETS[track];
+  const unlocked = achievements.filter((a) => a.condition(state));
+  const locked = achievements.filter((a) => !a.condition(state));
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="font-display text-3xl font-bold text-white mb-2">
-          Achievements
-        </h1>
-        <p className="text-sm text-gray-500 font-mono">
-          {unlocked.length}/{ACHIEVEMENTS.length} unlocked
-        </p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="font-display text-3xl font-bold text-white mb-2">
+              Achievements
+            </h1>
+            <p className="text-sm text-gray-500 font-mono">
+              {unlocked.length}/{achievements.length} unlocked
+            </p>
+          </div>
+          <div className="flex items-center gap-1 rounded-lg border border-white/10 p-1">
+            {(["c", "python", "cpp"] as TrackKey[]).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTrack(t)}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-xs font-mono transition-colors",
+                  track === t ? "bg-white text-black" : "text-gray-400 hover:text-white"
+                )}
+              >
+                {t === "c" ? "C" : t === "python" ? "Python" : "C++"}
+              </button>
+            ))}
+          </div>
+        </div>
       </motion.div>
 
       {/* Tier Progress */}

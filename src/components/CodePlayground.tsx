@@ -39,6 +39,8 @@ interface CodePlaygroundProps {
   readOnly?: boolean;
   height?: string;
   onRun?: (code: string) => void;
+  /** Called after each run with the raw terminal output (for auto-verification). */
+  onRunOutput?: (output: string) => void;
 }
 
 async function executeCode(code: string, language: Language) {
@@ -63,6 +65,7 @@ export default function CodePlayground({
   readOnly = false,
   height = "320px",
   onRun,
+  onRunOutput,
 }: CodePlaygroundProps) {
   const [code, setCode] = useState(defaultCode);
   const [output, setOutput] = useState("");
@@ -97,14 +100,16 @@ export default function CodePlayground({
       if (result.error && !result.real) {
         console.warn(result.error);
       }
+      onRunOutput?.(result.output ?? "");
     } catch (err) {
       setOutput(`// Execution error:\n// ${err instanceof Error ? err.message : "Unknown error"}`);
       setExecutionMode("error");
+      onRunOutput?.("");
     }
 
     setRunning(false);
     onRun?.(code);
-  }, [code, language, onRun]);
+  }, [code, language, onRun, onRunOutput]);
 
   const handleReset = () => {
     setCode(defaultCode);

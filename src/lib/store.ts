@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import type { ProficiencyLevel, TrackKey, UserProgress } from "./types";
 import { levelFromXp, getLevelForDay } from "./types";
 
-interface ProgressState extends UserProgress {
+export interface ProgressState extends UserProgress {
   completeDay: (day: number, xp: number) => void;
   completeExercise: (day: number, exerciseId: string, xp: number) => void;
   completeAssignment: (day: number, xp: number) => void;
