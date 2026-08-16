@@ -2,21 +2,23 @@
   "name": "asta-100",
   "version": "1.0.0",
   "private": false,
-  "description": "Interactive 100-day bootcamp for C and x86-64 Assembly — theory, playgrounds, exercises, and assignments with XP progression.",
+  "description": "AstaHub — free, hands-on, mastery-oriented technical education. Live tracks in C, x86-64 Assembly, Python, and C++.",
   "keywords": [
     "c",
     "assembly",
     "x86-64",
+    "python",
+    "cpp",
     "systems-programming",
     "education",
     "interactive-learning",
-    "bootcamp"
+    "free-education"
   ],
   "author": "Asta Systems",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LoneDevWolf/asta-100"
+    "url": "https://github.com/AridsWolfgang/AstaHub"
   },
   "scripts": {
     "dev": "next dev",
