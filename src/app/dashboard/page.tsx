@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import {
   ArrowRight,
   Flame,
@@ -99,11 +98,7 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
+      <div className="mb-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="font-display text-3xl font-bold text-white mb-2">
@@ -130,7 +125,7 @@ export default function DashboardPage() {
             ))}
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Stats Row */}
       <div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-4 mb-8">
@@ -182,12 +177,7 @@ export default function DashboardPage() {
 
       {/* Current Day CTA */}
       {todayLesson && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-8"
-        >
+        <div className="mb-8">
           <CyberPanel glow="cyan">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div>
@@ -232,7 +222,7 @@ export default function DashboardPage() {
               </Link>
             </div>
           </CyberPanel>
-        </motion.div>
+        </div>
       )}
 
       {/* Day Grid */}

@@ -177,3 +177,31 @@ export async function getTrackTotalDays(track: TrackKey): Promise<number> {
   }
   return TOTAL_DAYS;
 }
+
+/** Lightweight catalog entry — enough to render lists without loading full lesson bodies. */
+export interface LessonMeta {
+  day: number;
+  title: string;
+  subtitle: string;
+  language: "c" | "asm";
+  level: Lesson["level"];
+  durationMinutes: number;
+  tags: string[];
+}
+
+export async function getLessonMetadata(): Promise<LessonMeta[]> {
+  const days = Array.from({ length: TOTAL_DAYS }, (_, i) => i + 1);
+  return Promise.all(days.map((d) => getLesson(d))).then((lessons) =>
+    lessons
+      .filter((l): l is Lesson => l !== undefined)
+      .map((l) => ({
+        day: l.day,
+        title: l.title,
+        subtitle: l.subtitle,
+        language: l.language as "c" | "asm",
+        level: l.level,
+        durationMinutes: l.durationMinutes,
+        tags: l.tags,
+      }))
+  );
+}

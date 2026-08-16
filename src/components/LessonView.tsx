@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
@@ -263,15 +262,8 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
       </div>
 
       {/* Tab Content */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-        >
-          {activeTab === "theory" && (
+      <div key={activeTab}>
+        {activeTab === "theory" && (
             <div className="space-y-6">
               <CyberPanel glow="cyan" title="Theory Module">
                 <div className="theory-content">
@@ -503,8 +495,7 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
               </CyberPanel>
             </div>
           )}
-        </motion.div>
-      </AnimatePresence>
+      </div>
 
       {/* Notes */}
       <div className="mt-8">

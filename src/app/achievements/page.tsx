@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import {
   Trophy,
   Lock,
@@ -472,7 +471,7 @@ export default function AchievementsPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+      <div className="mb-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="font-display text-3xl font-bold text-white mb-2">
@@ -497,7 +496,7 @@ export default function AchievementsPage() {
             ))}
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Tier Progress */}
       <CyberPanel glow="cyan" title="Tier Progress" className="mb-8">
@@ -538,12 +537,9 @@ export default function AchievementsPage() {
             Unlocked
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {unlocked.map((a, i) => (
-              <motion.div
+            {unlocked.map((a) => (
+              <div
                 key={a.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.05 }}
                 className={cn(
                   "rounded-xl border p-5",
                   rarityColors[a.rarity],
@@ -561,7 +557,7 @@ export default function AchievementsPage() {
                 <span className="text-[10px] font-mono uppercase tracking-wider opacity-60">
                   {a.rarity}
                 </span>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>

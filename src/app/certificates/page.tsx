@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Award, Loader2, Printer, ChevronRight } from "lucide-react";
 import CyberPanel from "@/components/CyberPanel";
 import { LogoMark } from "@/components/Logo";
@@ -36,12 +35,12 @@ export default function CertificatesPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+      <div className="mb-8">
         <h1 className="font-display text-3xl font-bold text-white mb-2">Certificates</h1>
         <p className="text-sm text-gray-500 font-mono">
           Earned automatically when you complete every day of a track.
         </p>
-      </motion.div>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-20 text-gray-500">
@@ -66,12 +65,9 @@ export default function CertificatesPage() {
         </CyberPanel>
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
-          {certificates.map((c, i) => (
-            <motion.div
+          {certificates.map((c) => (
+            <div
               key={c.id}
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.08 }}
               className="rounded-2xl border border-white/15 bg-gradient-to-b from-white/[0.04] to-transparent p-6"
             >
               <div className="flex items-start justify-between">
@@ -100,7 +96,7 @@ export default function CertificatesPage() {
                   Print
                 </button>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       )}

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle2, Flame, Lock, Trophy } from "lucide-react";
 import { getTrackLessons } from "@/lib/curriculum";
 import { usePythonStore, useCppStore, isDayUnlocked } from "@/lib/store";
@@ -119,20 +118,15 @@ export default function TrackJourney({ track }: { track: JourneyTrack }) {
           ? Array.from({ length: 12 }).map((_, i) => (
               <div key={i} className="h-12 animate-pulse rounded-lg border border-white/5 bg-white/[0.02]" />
             ))
-          : lessons.map((lesson, i) => {
+          : lessons.map((lesson) => {
               const unlocked = isDayUnlocked(lesson.day, completedDays);
               const done = completedDays.includes(lesson.day);
               const exDone = (completedExercises[lesson.day] ?? []).length;
               const assignmentDone = completedAssignments.includes(lesson.day);
 
               return (
-                <motion.div
-                  key={lesson.day}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.015 }}
-                >
                   <Link
+                    key={lesson.day}
                     href={unlocked ? `/lesson/${track}/${lesson.day}` : "#"}
                     className={cn(
                       "flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors",
@@ -167,7 +161,6 @@ export default function TrackJourney({ track }: { track: JourneyTrack }) {
                       </span>
                     )}
                   </Link>
-                </motion.div>
               );
             })}
       </div>

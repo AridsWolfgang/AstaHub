@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Compass,
   Code2,
@@ -115,54 +114,46 @@ export default function Navbar() {
               />
             </button>
 
-            <AnimatePresence>
-              {learnOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute left-0 top-full mt-2 w-72 overflow-hidden rounded-2xl border border-white/10 bg-black/95 p-2 shadow-2xl backdrop-blur-xl"
+            {learnOpen && (
+              <div className="absolute left-0 top-full mt-2 w-72 overflow-hidden rounded-2xl border border-white/10 bg-black/95 p-2 shadow-2xl backdrop-blur-xl">
+                <Link
+                  href="/tracks"
+                  onClick={() => setLearnOpen(false)}
+                  className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
                 >
-                  <Link
-                    href="/tracks"
-                    onClick={() => setLearnOpen(false)}
-                    className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Map className="h-4 w-4" />
-                      All tracks
-                    </span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                  <div className="my-1 h-px bg-white/5" />
-                  {TRACK_GROUPS.map((group) => {
-                    const Icon = LEARN_ICONS[group.id];
-                    return (
-                      <Link
-                        key={group.id}
-                        href={`/tracks#${group.id}`}
-                        onClick={() => setLearnOpen(false)}
-                        className="flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/5"
-                      >
-                        <Icon
-                          className="mt-0.5 h-4 w-4 shrink-0 text-gray-400"
-                          strokeWidth={1.5}
-                        />
-                        <span className="min-w-0">
-                          <span className="block text-sm text-white">
-                            {group.title}
-                          </span>
-                          <span className="block truncate text-xs text-gray-500">
-                            {group.tagline}
-                          </span>
+                  <span className="flex items-center gap-2">
+                    <Map className="h-4 w-4" />
+                    All tracks
+                  </span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+                <div className="my-1 h-px bg-white/5" />
+                {TRACK_GROUPS.map((group) => {
+                  const Icon = LEARN_ICONS[group.id];
+                  return (
+                    <Link
+                      key={group.id}
+                      href={`/tracks#${group.id}`}
+                      onClick={() => setLearnOpen(false)}
+                      className="flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/5"
+                    >
+                      <Icon
+                        className="mt-0.5 h-4 w-4 shrink-0 text-gray-400"
+                        strokeWidth={1.5}
+                      />
+                      <span className="min-w-0">
+                        <span className="block text-sm text-white">
+                          {group.title}
                         </span>
-                      </Link>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                        <span className="block truncate text-xs text-gray-500">
+                          {group.tagline}
+                        </span>
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
@@ -230,26 +221,21 @@ export default function Navbar() {
       </div>
 
       {/* Mobile drawer */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <>
-            <motion.button
-              type="button"
-              aria-label="Close menu"
-              onClick={close}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm md:hidden"
-            />
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
-              className="fixed top-0 right-0 bottom-0 z-50 flex w-[86%] max-w-sm flex-col overflow-hidden border-l border-white/10 bg-black md:hidden"
-            >
+      <button
+        type="button"
+        aria-label="Close menu"
+        onClick={close}
+        className={cn(
+          "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-200 md:hidden",
+          mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        )}
+      />
+      <div
+        className={cn(
+          "fixed top-0 right-0 bottom-0 z-50 flex w-[86%] max-w-sm flex-col overflow-hidden border-l border-white/10 bg-black transition-transform duration-300 ease-out md:hidden",
+          mobileOpen ? "translate-x-0" : "translate-x-full"
+        )}
+      >
               <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
                 <Logo onClick={close} />
                 <button
@@ -378,10 +364,7 @@ export default function Navbar() {
                   </span>
                 )}
               </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      </div>
     </nav>
   );
 }

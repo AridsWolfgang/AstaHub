@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { getTierByLevel, type ProficiencyLevel } from "@/lib/types";
 import type { TrackKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -31,9 +32,12 @@ function Avatar({ name, image, rank }: { name: string; image: string | null; ran
     .join("");
   if (image) {
     return (
-      <img
+      <Image
         src={image}
         alt={name}
+        unoptimized
+        width={40}
+        height={40}
         className="h-10 w-10 rounded-xl object-cover border border-white/10"
       />
     );

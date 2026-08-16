@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
@@ -47,10 +48,13 @@ function Avatar({ name, image, size = "md" }: { name: string; image: string | nu
       ? "h-24 w-24 text-2xl rounded-2xl"
       : "h-12 w-12 text-sm rounded-xl";
   if (image) {
+    const dims = size === "lg" ? { width: 96, height: 96 } : { width: 48, height: 48 };
     return (
-      <img
+      <Image
         src={image}
         alt={name}
+        unoptimized
+        {...dims}
         className={cn("object-cover border border-white/10", cls)}
       />
     );
