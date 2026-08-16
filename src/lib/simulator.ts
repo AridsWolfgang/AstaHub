@@ -635,6 +635,20 @@ function pyRepr(v: PyVal): string {
   return pyToStr(v);
 }
 
+/** Python-style JSON serialization: default separators are ", " and ": ". */
+function pyJsonDumps(v: PyVal): string {
+  if (v === null || v === undefined) return "null";
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "null";
+  if (typeof v === "boolean") return v ? "true" : "false";
+  if (typeof v === "string") return JSON.stringify(v);
+  if (Array.isArray(v)) return "[" + v.map(pyJsonDumps).join(", ") + "]";
+  if (typeof v === "object") {
+    const keys = Object.keys(v);
+    return "{" + keys.map((k) => `${JSON.stringify(k)}: ${pyJsonDumps((v as Record<string, PyVal>)[k])}`).join(", ") + "}";
+  }
+  return "null";
+}
+
 function pyEq(a: PyVal, b: PyVal): boolean {
   if (typeof a === "number" && typeof b === "number") return a === b;
   if (typeof a === "string" && typeof b === "string") return a === b;
@@ -1228,7 +1242,7 @@ function simulatePython(code: string): string[] {
             const b = typeof args[1] === "number" ? args[1] : 0;
             return Math.floor(Math.random() * (b - a + 1)) + a;
           }
-          if (fnName === "dumps") return JSON.stringify(args[0]);
+          if (fnName === "dumps") return pyJsonDumps(args[0]);
           if (fnName === "loads") {
             try { return JSON.parse(String(args[0] ?? "{}")); } catch { return {}; }
           }
@@ -1496,6 +1510,7 @@ function simulatePython(code: string): string[] {
         if (Array.isArray(args[0])) {
           const arr = [...args[0]];
           arr.sort((a, b) => (typeof a === "number" && typeof b === "number" ? a - b : pyToStr(a) < pyToStr(b) ? -1 : 1));
+          if (kwargs && kwargs["reverse"] === true) arr.reverse();
           return arr;
         }
         return args[0];
@@ -1886,16 +1901,27 @@ export function simulateAnsi(code: string, language: string): string {
       ? "Simulated C (C11)"
       : language === "python"
       ? "Simulated Python (subset)"
+      : language === "cpp"
+      ? "Simulated C++ (not available)"
       : "Simulated NASM x86-64";
   output.push(`// ASTA Runner v2.0 — ${label}`);
   output.push(`// ─────────────────────────────────────────────`);
   output.push("");
 
-  const body =
-    language === "c" ? simulateC(code)
-    : language === "python" ? simulatePython(code)
-    : simulateAsm(code);
-  output.push(...body);
+  if (language === "cpp") {
+    output.push(
+      "// There is no in-browser simulator for C++ yet.",
+      "// Connect the Piston backend (PISTON_AUTH_TOKEN) for real compilation,",
+      "// or use the C or Assembly playgrounds which run in the browser.",
+      "// Your code was not executed."
+    );
+  } else {
+    const body =
+      language === "c" ? simulateC(code)
+      : language === "python" ? simulatePython(code)
+      : simulateAsm(code);
+    output.push(...body);
+  }
 
   output.push("");
   output.push(`// Process finished — exit code 0`);

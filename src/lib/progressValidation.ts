@@ -37,6 +37,8 @@ export interface ProgressInput {
   completedExercises?: unknown;
   completedAssignments?: unknown;
   notes?: unknown;
+  /** Sent by the client but deliberately ignored — the level is derived from XP server-side. */
+  level?: unknown;
 }
 
 /**

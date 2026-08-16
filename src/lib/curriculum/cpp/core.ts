@@ -939,6 +939,53 @@ function generateCppTopicContent(topic: string, title: string, day: number): str
   );
 }
 
+/* ─── Code-challenge verification ───
+ * expectedOutput gates "Mark Complete" on the code exercise. It is set for
+ * every blueprint whose baseline produces deterministic output under the real
+ * compiler (Piston is the C++ execution path — there is no in-browser C++
+ * simulator yet). Day 6 needs stdin and day 34 is a multi-file stub that
+ * doesn't compile standalone, so both stay ungated. */
+const CPP_EXPECTED_OUTPUT: Record<number, string> = {
+  1: "Hello, C++!",
+  2: "30 3.14159 A 1",
+  3: "40 9.8 Ada 42",
+  4: "13 7 30",
+  5: "Hello, Ada!",
+  7: "B",
+  8: "0 1 2 3 4",
+  9: "16\nHello, Ada!",
+  10: "12 12.5664",
+  11: "120 55",
+  12: "2 1",
+  13: "42",
+  14: "1 50",
+  15: "0 1 2 3",
+  16: "10 20 30",
+  17: "Ada is in grade 10",
+  18: "100",
+  19: "Ada, age 36",
+  20: "opened",
+  21: "Woof!",
+  22: "12.5664",
+  23: "(4, 6)",
+  24: "42",
+  25: "7\n2.5",
+  26: "42 hello",
+  27: "36\n2",
+  28: "1 2 5 8 9",
+  29: "2\n50",
+  30: "first line",
+  31: "caught: division by zero",
+  32: "moved",
+  33: "1 2",
+  35: "1\n3.5",
+  36: "144 120",
+  37: "1000",
+  38: "1 1 3 4 5",
+  39: "modern C++ 10",
+  40: "[x] 0: learn C++",
+};
+
 function generateCppExercises(day: number, blueprint: CppBlueprint): Lesson["exercises"] {
   const prefix = `cpp${day}`;
   const topics = blueprint.theoryTopics;
@@ -986,6 +1033,7 @@ function generateCppExercises(day: number, blueprint: CppBlueprint): Lesson["exe
     title: "Code Challenge",
     description: `Practice ${blueprint.title} — implement the core concept`,
     starterCode: blueprint.codeTemplate,
+    expectedOutput: CPP_EXPECTED_OUTPUT[day],
     hints: [
       "Review the theory section for each topic",
       "Run the code in the playground to see the baseline",

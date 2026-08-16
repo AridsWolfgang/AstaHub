@@ -153,6 +153,16 @@ Key architectural decisions (documented intent):
 - **[ ] Redis (Upstash) rate limiting** — the in-process limiter is single-instance;
   move to Redis before multi-instance deploy (P1, see §16).
 
+### Execution backend note (2026-08-16)
+
+- **[!] Public Piston API (`emkc.org`) is now whitelist-only (as of 2026-02-15)** — the
+  configured `PISTON_AUTH_TOKEN` no longer authorizes the public endpoint; it returns 401.
+  The app degrades gracefully to the in-browser simulator (verified: `/api/execute` returns
+  `real: false` with simulated output). **Action (High):** run a self-hosted Piston instance
+  and point `PISTON_AUTH_TOKEN`/API URL at it for real compilation across all four languages.
+  Until then C++ cannot run for real (no in-browser C++ simulator; the fallback now says so
+  explicitly).
+
 ---
 
 ## 6. Performance
@@ -179,11 +189,17 @@ To watch:
 
 - **[x]** Lesson model: theory sections, playground, exercises, optional assignment
 - **[x]** XP rewards, day completion, streak calculation
-- **[x]** Exercise gating: code challenges verify `expectedOutput` before "Mark Complete"
-  (applies where `expectedOutput` exists — all hand-written C days)
-- **[~]** Python/C++ generated code challenges have **no `expectedOutput`** → ungated.
-  **Fix: add `expectedOutput` to generated challenges so verification applies to every
-  track (P1).**
+- **[x] Exercise gating: code challenges verify `expectedOutput` before "Mark Complete"**
+  (applies where `expectedOutput` exists — all hand-written C days that declare it)
+- **[x] `expectedOutput` added to generated Python/C++ code challenges** — new
+  `PY_EXPECTED_OUTPUT` / `CPP_EXPECTED_OUTPUT` maps in `src/lib/curriculum/{python,cpp}/core.ts`
+  wire real runtime output into every deterministic code challenge. Python: 24/40 days gated,
+  each verified reproducible by the in-browser simulator (works in both real and simulated
+  mode). C++: 38/40 days gated (real compiler only — there is no in-browser C++ simulator yet;
+  day 6 needs stdin, day 34 is a multi-file stub). **Simulator fixes landed in the same pass:**
+  `sorted(..., reverse=True)` honored, `json.dumps` now emits Python-style separators
+  (`", "`/`": "`), and the C++ fallback no longer fakes NASM output — it returns an honest
+  "no in-browser C++ simulator" message.
 - **[ ]** Concept/graph model, prerequisites, difficulty, skills, objectives (P2 — see §14)
 - **[ ]** Spaced repetition + rainchecks (P4 — vision §4.3)
 - **[ ]** AI hint-ladder coach (P7 — vision §16)
@@ -196,8 +212,8 @@ To watch:
 |---|---|---|---|
 | C | 100 (days 1–50 C, 51–100 ASM) | `[x]` live | All hand-written |
 | x86-64 Assembly | (within C track) | `[x]` live | Days 51–100 |
-| Python | 40 | `[x]` live | Generator-built; needs `expectedOutput` |
-| C++ | 40 | `[x]` live | Generator-built; needs `expectedOutput` |
+| Python | 40 | `[x]` live | Generator-built; code challenges gated (24/40 `expectedOutput`, sim-reproducible) |
+| C++ | 40 | `[x]` live | Generator-built; code challenges gated (38/40 `expectedOutput`, real-compiler path) |
 | JavaScript / TypeScript | — | `[ ]` planned | Next language per vision (tracks.ts `planned`) |
 | Rust | — | `[ ]` planned | |
 | SQL & Databases | — | `[ ]` planned | |
@@ -213,7 +229,7 @@ To watch:
 ## 9. Assessment
 
 - **[x]** Quiz recall checks (multiple choice, XP on correct)
-- **[x]** Code exercises with run-and-verify where `expectedOutput` exists
+- **[x]** Code exercises with run-and-verify where `expectedOutput` exists (all tracks now)
 - **[x]** Assignments with rubric + XP (self-submitted)
 - **[ ]** Server-side exercise/assignment verification (currently client-only)
 - **[ ]** Mastery evidence model (capstone results, review performance) (P4)
@@ -286,8 +302,9 @@ To watch:
 
 - **[x]** Vitest harness (`npm test` / `test:watch`)
 - **[x]** `tests/simulator.test.ts` — 20 pinned scenarios (C + Python + ASM)
-- **[x]** `tests/curriculum.test.ts` — integrity for all 180 lessons
-- **[ ]]** Store unit tests (XP math, streak, sync payload shape) (High)
+- **[x]** `tests/curriculum.test.ts` — integrity for all 180 lessons + generated code-challenge
+  verification (python `expectedOutput` must be simulator-reproducible; cpp must be non-empty)
+- **[x]** `tests/store.test.ts` — XP award/double-award guards, per-track isolation
 - **[ ]]** API route tests (register validation, progress hardening, leaderboard shape) (High)
 - **[ ]]** E2E learner journey (register → lesson → exercise → XP → certificate) (Medium)
 
@@ -312,7 +329,8 @@ Order of the next major phases (see also §3–§18):
    hardening, `/api/progress` server-side validation, rate limiting.
 2. **Documentation truth** (§3): rewrite README, refresh `.env.example` commentary.
 3. **Foundation hardening** (§1): runtime pin, prod deploy readiness.
-4. **Learning engine depth** (§7–§9): `expectedOutput` for python/cpp, store tests, API tests.
+4. **Learning engine depth** (§7–§9): ~~`expectedOutput` for python/cpp~~ (done 2026-08-16),
+   ~~store tests~~ (done), API tests.
 5. **Breadth** (§8): JavaScript/TypeScript track.
 6. Then the vision phases (community → AI → graph) in order.
 
@@ -328,12 +346,13 @@ Order of the next major phases (see also §3–§18):
 | 4 | High | PWA icons (192/512) | `[x]` done |
 | 5 | High | `/api/register` validation + throttle | `[x]` done |
 | 6 | High | README rewrite | `[x]` done |
-| 7 | High | `expectedOutput` for python/cpp code challenges | `[ ]` open |
-| 8 | High | Store unit tests + API route tests | `[~]` store XP test landed; expand |
+| 7 | High | `expectedOutput` for python/cpp code challenges | `[x]` done (2026-08-16) |
+| 8 | High | Store unit tests + API route tests | `[x]` store tests done; API tests open |
 | 9 | High | JS/TS track | `[ ]` open |
 | 10 | High | Runtime pin Node 20/22 + prod deploy | `[ ]` open |
-| 11 | Medium | Redis rate limiting / leaderboard caching | `[ ]` open |
-| 12 | Medium | Track-agnostic achievements (data-driven) | `[ ]` open |
-| 13 | Medium | PWA offline support (service worker) | `[ ]` open |
-| 14 | Low | `metadataBase` domain confirmation | `[ ]` open |
-| 15 | Low | Tier model reconciliation (day vs XP) | `[ ]` open |
+| 11 | High | Self-hosted Piston (public API is whitelist-only; C++ can't run for real until then) | `[ ]` open |
+| 12 | Medium | Redis rate limiting / leaderboard caching | `[ ]` open |
+| 13 | Medium | Track-agnostic achievements (data-driven) | `[ ]` open |
+| 14 | Medium | PWA offline support (service worker) | `[ ]` open |
+| 15 | Low | `metadataBase` domain confirmation | `[ ]` open |
+| 16 | Low | Tier model reconciliation (day vs XP) | `[ ]` open |

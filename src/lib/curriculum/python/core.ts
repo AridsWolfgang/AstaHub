@@ -10,6 +10,8 @@ interface PyBlueprint {
   tags: string[];
   theoryTopics: string[];
   codeTemplate: string;
+  /** Deterministic substring produced by a correct run of `codeTemplate` (for code-challenge gating). */
+  expectedOutput?: string;
 }
 
 const PY_CURRICULUM: PyBlueprint[] = [
@@ -485,6 +487,40 @@ function generatePyTopicContent(topic: string, title: string, day: number): stri
   );
 }
 
+/* ─── Code-challenge verification ───
+ * expectedOutput gates "Mark Complete" on the code exercise: the learner's run
+ * output must contain this substring. It is only set for blueprints whose
+ * baseline output is deterministic AND reproducible by the in-browser
+ * simulator, so gating works in both real (Piston) and simulated mode.
+ * Day 6/21 need stdin, 25/26 produce environment-dependent output, and the
+ * remaining days rely on features the subset simulator can't model yet. */
+const PY_EXPECTED_OUTPUT: Record<number, string> = {
+  1: "Hello, World!",
+  2: "hello 25 3.14159",
+  3: "13 7 30",
+  4: "Hello, Ada",
+  5: "True False",
+  7: "B",
+  8: "0\n1\n2\n3\n4",
+  9: "0 1 2 3 4",
+  10: "[0, 1, 2, 3, 4]",
+  11: "3 4",
+  12: "city = London",
+  14: "[0, 1, 4, 9, 16, 25]",
+  15: "Hello, Ada",
+  16: "15\n10",
+  19: "HELLO, WORLD",
+  20: "Ada is 36 years old",
+  22: "21",
+  24: '{"name": "Ada", "languages": ["Python", "C"]}',
+  27: "120",
+  28: "[1, 2, 5, 8, 9]",
+  30: "[1, 2, 3, 4]",
+  31: "[1]",
+  38: "10 15",
+  40: "1 notes saved",
+};
+
 function generatePyExercises(day: number, blueprint: PyBlueprint): Lesson["exercises"] {
   const prefix = `py${day}`;
   const topics = blueprint.theoryTopics;
@@ -532,6 +568,7 @@ function generatePyExercises(day: number, blueprint: PyBlueprint): Lesson["exerc
     title: "Code Challenge",
     description: `Practice ${blueprint.title} — implement the core concept`,
     starterCode: blueprint.codeTemplate,
+    expectedOutput: PY_EXPECTED_OUTPUT[day],
     hints: [
       "Review the theory section for each topic",
       "Run the code in the playground to see the baseline",

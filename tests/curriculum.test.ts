@@ -7,6 +7,7 @@ import {
   getTrackTotalDays,
   TOTAL_TRACKS,
 } from "../src/lib/curriculum";
+import { simulateAnsi } from "../src/lib/simulator";
 import type { Lesson, TrackKey } from "../src/lib/types";
 
 function assertWellFormedLesson(l: Lesson, expectedDay: number) {
@@ -110,5 +111,58 @@ describe("Track routing", () => {
   it("days out of range return undefined instead of throwing", async () => {
     const l = await getLesson(101);
     expect(l).toBeUndefined();
+  });
+});
+
+function simBody(code: string, language: string): string {
+  return simulateAnsi(code, language)
+    .replace(/\/\/ ASTA Runner.*?\n\/\/ ─[─\r\n]*\n\n/, "")
+    .replace(/\n?\/\/ Process finished.*$/, "")
+    .replace(/\r/g, "");
+}
+
+describe("Generated code-challenge verification", () => {
+  it("python code challenges that declare expectedOutput are reproducible by the simulator", async () => {
+    const total = await getTrackTotalDays("python");
+    let gated = 0;
+    for (let day = 1; day <= total; day++) {
+      const l = await getTrackLesson("python", day);
+      const code = l?.exercises.find((e) => e.type === "code");
+      if (!code || !code.expectedOutput) continue;
+      gated++;
+      expect(code.expectedOutput.length).toBeGreaterThan(0);
+      const sim = simBody(code.starterCode ?? "", "python");
+      expect(sim, `python day ${day} expectedOutput must be reproducible by the simulator`).toContain(code.expectedOutput);
+    }
+    expect(gated).toBeGreaterThan(20);
+  });
+
+  it("cpp code challenges that declare expectedOutput are non-empty", async () => {
+    const total = await getTrackTotalDays("cpp");
+    let gated = 0;
+    for (let day = 1; day <= total; day++) {
+      const l = await getTrackLesson("cpp", day);
+      const code = l?.exercises.find((e) => e.type === "code");
+      if (!code || !code.expectedOutput) continue;
+      gated++;
+      expect(code.expectedOutput.length).toBeGreaterThan(0);
+    }
+    expect(gated).toBeGreaterThan(30);
+  });
+
+  it("every code challenge across all tracks keeps a stable id and shape", async () => {
+    const lessons = [
+      ...(await getLessons()),
+      ...(await getTrackLessons("python")),
+      ...(await getTrackLessons("cpp")),
+    ];
+    const ids = new Set<string>();
+    for (const l of lessons) {
+      const code = l.exercises.find((e) => e.type === "code");
+      expect(code).toBeDefined();
+      expect(code!.id).toBeTruthy();
+      expect(ids.has(code!.id)).toBe(false);
+      ids.add(code!.id);
+    }
   });
 });
