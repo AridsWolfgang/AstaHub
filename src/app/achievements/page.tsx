@@ -22,7 +22,7 @@ import {
   FlaskConical,
 } from "lucide-react";
 import CyberPanel from "@/components/CyberPanel";
-import { useProgressStore, usePythonStore, useCppStore } from "@/lib/store";
+import { useProgressStore, usePythonStore, useCppStore, useJsStore } from "@/lib/store";
 import type { ProgressState } from "@/lib/store";
 import { PROFICIENCY_TIERS } from "@/lib/types";
 import type { TrackKey } from "@/lib/types";
@@ -436,16 +436,147 @@ const CPP_ACHIEVEMENTS: Achievement[] = [
   },
 ];
 
+const JS_ACHIEVEMENTS: Achievement[] = [
+  {
+    id: "js-hello",
+    title: "Hello, JavaScript",
+    description: "Complete Day 1",
+    icon: Zap,
+    condition: (s) => s.completedDays.includes(1),
+    xp: 50,
+    rarity: "common",
+  },
+  {
+    id: "js-week-one",
+    title: "Console Explorer",
+    description: "Complete 7 days",
+    icon: Flame,
+    condition: (s) => s.completedDays.length >= 7,
+    xp: 100,
+    rarity: "common",
+  },
+  {
+    id: "js-functions",
+    title: "Function Fan",
+    description: "Reach Day 12 (Functions)",
+    icon: Pointer,
+    condition: (s) => s.completedDays.some((d) => d >= 12),
+    xp: 150,
+    rarity: "rare",
+  },
+  {
+    id: "js-arrays",
+    title: "Array Artist",
+    description: "Complete Day 10 (Array Methods)",
+    icon: Layers,
+    condition: (s) => s.completedDays.includes(10),
+    xp: 150,
+    rarity: "rare",
+  },
+  {
+    id: "js-closures",
+    title: "Closure Crafter",
+    description: "Complete Day 15 (Scope & Closures)",
+    icon: Package,
+    condition: (s) => s.completedDays.includes(15),
+    xp: 200,
+    rarity: "rare",
+  },
+  {
+    id: "js-halfway",
+    title: "Halfway Through",
+    description: "Complete 20 days",
+    icon: Mountain,
+    condition: (s) => s.completedDays.length >= 20,
+    xp: 300,
+    rarity: "epic",
+  },
+  {
+    id: "js-promises",
+    title: "Promise Keeper",
+    description: "Reach Day 28 (Promises)",
+    icon: Cog,
+    condition: (s) => s.completedDays.some((d) => d >= 28),
+    xp: 250,
+    rarity: "rare",
+  },
+  {
+    id: "js-ts",
+    title: "Typed Up",
+    description: "Reach Day 34 (TypeScript)",
+    icon: Cpu,
+    condition: (s) => s.completedDays.some((d) => d >= 34),
+    xp: 300,
+    rarity: "epic",
+  },
+  {
+    id: "js-streak-7",
+    title: "Consistent Coder",
+    description: "Maintain a 7-day streak",
+    icon: Signal,
+    condition: (s) => s.streak >= 7,
+    xp: 200,
+    rarity: "rare",
+  },
+  {
+    id: "js-streak-30",
+    title: "Daily Driver",
+    description: "Maintain a 30-day streak",
+    icon: Rocket,
+    condition: (s) => s.streak >= 30,
+    xp: 500,
+    rarity: "legendary",
+  },
+  {
+    id: "js-xp-1000",
+    title: "XP Collector",
+    description: "Earn 1,000 total XP",
+    icon: Gem,
+    condition: (s) => s.totalXp >= 1000,
+    xp: 100,
+    rarity: "common",
+  },
+  {
+    id: "js-xp-5000",
+    title: "XP Hoarder",
+    description: "Earn 5,000 total XP",
+    icon: Crown,
+    condition: (s) => s.totalXp >= 5000,
+    xp: 300,
+    rarity: "epic",
+  },
+  {
+    id: "js-graduate",
+    title: "JavaScript Graduate",
+    description: "Complete all 40 days",
+    icon: Star,
+    condition: (s) => s.completedDays.length >= 40,
+    xp: 1000,
+    rarity: "legendary",
+  },
+  {
+    id: "js-assignment-10",
+    title: "Assignment Grinder",
+    description: "Complete 10 assignments",
+    icon: ClipboardList,
+    condition: (s) => s.completedAssignments.length >= 10,
+    xp: 200,
+    rarity: "rare",
+  },
+];
+
 const ACHIEVEMENT_SETS: Record<TrackKey, Achievement[]> = {
   c: C_ACHIEVEMENTS,
   python: PY_ACHIEVEMENTS,
   cpp: CPP_ACHIEVEMENTS,
+  js: JS_ACHIEVEMENTS,
 };
 
 const STORES: Record<TrackKey, () => Snapshot> = {
   c: useProgressStore,
   python: usePythonStore,
   cpp: useCppStore,
+  js: useJsStore,
 };
 
 const rarityColors = {
@@ -482,7 +613,7 @@ export default function AchievementsPage() {
             </p>
           </div>
           <div className="flex items-center gap-1 rounded-lg border border-white/10 p-1">
-            {(["c", "python", "cpp"] as TrackKey[]).map((t) => (
+            {(["c", "python", "cpp", "js"] as TrackKey[]).map((t) => (
               <button
                 key={t}
                 onClick={() => setTrack(t)}
@@ -491,7 +622,7 @@ export default function AchievementsPage() {
                   track === t ? "bg-white text-black" : "text-gray-400 hover:text-white"
                 )}
               >
-                {t === "c" ? "C" : t === "python" ? "Python" : "C++"}
+                {t === "c" ? "C" : t === "python" ? "Python" : t === "cpp" ? "C++" : "JS/TS"}
               </button>
             ))}
           </div>

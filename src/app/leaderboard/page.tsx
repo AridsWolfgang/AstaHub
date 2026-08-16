@@ -101,7 +101,7 @@ export default function LeaderboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-1 rounded-lg border border-white/10 p-1">
-            {(["c", "python", "cpp"] as TrackKey[]).map((t) => (
+            {(["c", "python", "cpp", "js"] as TrackKey[]).map((t) => (
               <button
                 key={t}
                 onClick={() => setTrack(t)}
@@ -110,7 +110,7 @@ export default function LeaderboardPage() {
                   track === t ? "bg-white text-black" : "text-gray-400 hover:text-white"
                 )}
               >
-                {t === "c" ? "C" : t === "python" ? "Python" : "C++"}
+                {t === "c" ? "C" : t === "python" ? "Python" : t === "cpp" ? "C++" : "JS/TS"}
               </button>
             ))}
           </div>

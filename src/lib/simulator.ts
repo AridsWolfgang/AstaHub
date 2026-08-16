@@ -1903,16 +1903,19 @@ export function simulateAnsi(code: string, language: string): string {
       ? "Simulated Python (subset)"
       : language === "cpp"
       ? "Simulated C++ (not available)"
+      : language === "js"
+      ? "Simulated JavaScript (not available)"
       : "Simulated NASM x86-64";
   output.push(`// ASTA Runner v2.0 — ${label}`);
   output.push(`// ─────────────────────────────────────────────`);
   output.push("");
 
-  if (language === "cpp") {
+  if (language === "cpp" || language === "js") {
+    const what = language === "cpp" ? "C++" : "JavaScript";
     output.push(
-      "// There is no in-browser simulator for C++ yet.",
-      "// Connect the Piston backend (PISTON_AUTH_TOKEN) for real compilation,",
-      "// or use the C or Assembly playgrounds which run in the browser.",
+      `// There is no in-browser simulator for ${what} yet.`,
+      "// Connect the Piston backend (PISTON_AUTH_TOKEN) for real execution,",
+      "// or use the C, Assembly, or Python playgrounds which run in the browser.",
       "// Your code was not executed."
     );
   } else {

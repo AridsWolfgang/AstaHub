@@ -17,6 +17,7 @@ import {
   useProgressStore,
   usePythonStore,
   useCppStore,
+  useJsStore,
   getOverallProgress,
   isDayUnlocked,
 } from "@/lib/store";
@@ -26,11 +27,12 @@ import { getTrackLesson, getTrackTotalDays, TOTAL_TRACKS } from "@/lib/curriculu
 import type { Lesson, TrackKey } from "@/lib/types";
 import { formatDay, cn } from "@/lib/utils";
 
-const TRACK_NAMES: Record<TrackKey, string> = { c: "C / Assembly", python: "Python", cpp: "C++" };
+const TRACK_NAMES: Record<TrackKey, string> = { c: "C / Assembly", python: "Python", cpp: "C++", js: "JavaScript / TypeScript" };
 const STORES: Record<TrackKey, () => ProgressState> = {
   c: useProgressStore,
   python: usePythonStore,
   cpp: useCppStore,
+  js: useJsStore,
 };
 
 function lessonHref(track: TrackKey, day: number): string {
@@ -52,7 +54,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search).get("track");
-    if (q === "python" || q === "cpp") setTrack(q);
+    if (q === "python" || q === "cpp" || q === "js") setTrack(q);
   }, []);
 
   const store = STORES[track];
@@ -109,7 +111,7 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-1 rounded-lg border border-white/10 p-1">
-            {(["c", "python", "cpp"] as TrackKey[]).map((t) => (
+            {(["c", "python", "cpp", "js"] as TrackKey[]).map((t) => (
               <button
                 key={t}
                 onClick={() => setTrack(t)}
@@ -120,7 +122,7 @@ export default function DashboardPage() {
                     : "text-gray-400 hover:text-white"
                 )}
               >
-                {t === "c" ? "C" : t === "python" ? "Python" : "C++"}
+                {t === "c" ? "C" : t === "python" ? "Python" : t === "cpp" ? "C++" : "JS/TS"}
               </button>
             ))}
           </div>

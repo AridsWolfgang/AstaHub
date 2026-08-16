@@ -4,20 +4,21 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Flame, Lock, Trophy } from "lucide-react";
 import { getTrackLessons } from "@/lib/curriculum";
-import { usePythonStore, useCppStore, isDayUnlocked } from "@/lib/store";
+import { usePythonStore, useCppStore, useJsStore, isDayUnlocked } from "@/lib/store";
 import { getTierByLevel } from "@/lib/types";
 import type { Lesson, TrackKey } from "@/lib/types";
 import { formatDay, cn } from "@/lib/utils";
 
-type JourneyTrack = "python" | "cpp";
+type JourneyTrack = "python" | "cpp" | "js";
 
 const TRACK_NAMES: Record<JourneyTrack, string> = {
   python: "Python",
   cpp: "C++",
+  js: "JavaScript / TypeScript",
 };
 
 export default function TrackJourney({ track }: { track: JourneyTrack }) {
-  const store = track === "python" ? usePythonStore : useCppStore;
+  const store = track === "python" ? usePythonStore : track === "cpp" ? useCppStore : useJsStore;
   const { completedDays, completedExercises, completedAssignments, totalXp, streak, currentDay, level } = store();
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);

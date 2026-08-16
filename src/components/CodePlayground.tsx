@@ -124,7 +124,7 @@ export default function CodePlayground({
   };
 
   const monacoLang =
-    language === "c" ? "c" : language === "asm" ? "plaintext" : language === "python" ? "python" : "cpp";
+    language === "c" ? "c" : language === "asm" ? "plaintext" : language === "python" ? "python" : language === "cpp" ? "cpp" : "javascript";
 
   const modeColor = {
     idle: "text-gray-500",
@@ -157,7 +157,9 @@ export default function CodePlayground({
                 ? "x86-64 NASM"
                 : language === "python"
                 ? "Python 3"
-                : "C++20"}
+                : language === "cpp"
+                ? "C++20"
+                : "JavaScript"}
             </span>
             {executionMode !== "idle" && (
               <span className={cn("flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-mono border", modeColor)}>

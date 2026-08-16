@@ -1,7 +1,7 @@
 import type { Lesson, TrackKey } from "../types";
 
 export const TOTAL_DAYS = 100;
-export const TOTAL_TRACKS: Record<TrackKey, number> = { c: 100, python: 40, cpp: 40 };
+export const TOTAL_TRACKS: Record<TrackKey, number> = { c: 100, python: 40, cpp: 40, js: 40 };
 
 const loaders: Record<number, () => Promise<{ default: Partial<Lesson> }>> = {
   1: () => import("./days/day-1"),
@@ -151,6 +151,10 @@ export async function getTrackLesson(track: TrackKey, day: number): Promise<Less
     const cpp = await import("./cpp");
     return cpp.getCppLesson(day);
   }
+  if (track === "js") {
+    const js = await import("./js");
+    return js.getJsLesson(day);
+  }
   return getLesson(day);
 }
 
@@ -163,6 +167,10 @@ export async function getTrackLessons(track: TrackKey): Promise<Lesson[]> {
     const cpp = await import("./cpp");
     return cpp.getCppLessons();
   }
+  if (track === "js") {
+    const js = await import("./js");
+    return js.getJsLessons();
+  }
   return getLessons();
 }
 
@@ -174,6 +182,10 @@ export async function getTrackTotalDays(track: TrackKey): Promise<number> {
   if (track === "cpp") {
     const cpp = await import("./cpp");
     return cpp.CPP_TOTAL_DAYS;
+  }
+  if (track === "js") {
+    const js = await import("./js");
+    return js.JS_TOTAL_DAYS;
   }
   return TOTAL_DAYS;
 }

@@ -53,6 +53,7 @@ function getPistonLanguage(lang: string): { language: string; version: string } 
   if (lang === "asm") return { language: "nasm", version: "2.15.05" };
   if (lang === "python") return { language: "python", version: "*" };
   if (lang === "cpp") return { language: "c++", version: "*" };
+  if (lang === "js") return { language: "javascript", version: "*" };
   return { language: lang, version: "*" };
 }
 
@@ -149,9 +150,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (language !== "c" && language !== "asm" && language !== "python" && language !== "cpp") {
+  if (language !== "c" && language !== "asm" && language !== "python" && language !== "cpp" && language !== "js") {
     return NextResponse.json(
-      { error: "Language must be 'c', 'asm', 'python', or 'cpp'" },
+      { error: "Language must be 'c', 'asm', 'python', 'cpp', or 'js'" },
       { status: 400 }
     );
   }

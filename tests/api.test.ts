@@ -80,6 +80,7 @@ describe("parseLeaderboardQuery", () => {
   it("maps valid track params and rejects unknown ones", () => {
     expect(parseLeaderboardQuery("http://x/api/leaderboard?track=python").track).toBe("python");
     expect(parseLeaderboardQuery("http://x/api/leaderboard?track=cpp").track).toBe("cpp");
+    expect(parseLeaderboardQuery("http://x/api/leaderboard?track=js").track).toBe("js");
     expect(parseLeaderboardQuery("http://x/api/leaderboard?track=rust").track).toBe("c");
   });
 });

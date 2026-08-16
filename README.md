@@ -6,8 +6,8 @@
 
 **Asta Knowledge Hub** is a free, hands-on, mastery-oriented technical learning platform.
 The core product today is the original C + x86-64 Assembly curriculum (100 days), expanded
-with Python and C++ tracks on the same engine — with accounts, progress sync, achievements,
-leaderboards, certificates, and a working code playground.
+with Python, C++, and JavaScript/TypeScript tracks on the same engine — with accounts,
+progress sync, achievements, leaderboards, certificates, and a working code playground.
 
 > Every person on Earth, regardless of wealth or geography, should be able to wake up,
 > learn a world-class technical skill, and turn it into a livelihood.
@@ -20,6 +20,7 @@ leaderboards, certificates, and a working code playground.
 | **x86-64 Assembly** | 50 | Read and write code that talks to the metal |
 | **Python** | 40 | Automation, data, and AI from first principles |
 | **C++** | 40 | Objects, templates, and the STL |
+| **JavaScript / TypeScript** | 40 | Web and full-stack development |
 
 Every track runs the same engine: day-by-day lessons, theory with live code examples, a
 Monaco playground, quizzes, code challenges, assignments with rubrics, and a capstone.
@@ -28,7 +29,7 @@ Monaco playground, quizzes, code challenges, assignments with rubrics, and a cap
 
 - **100-day C/Assembly curriculum** — every day is a hand-written lesson with theory,
   playground code, exercises, and an assignment
-- **Python & C++ tracks** — generated from the same modular engine
+- **Python, C++, and JavaScript/TypeScript tracks** — generated from the same modular engine
 - **Code execution** — real compilation via [Piston](https://github.com/engineer-man/piston)
   when a token is configured, with a built-in in-browser simulator as the free fallback.
   The UI always labels execution as *Live* or *Simulated* — never misrepresents one as the other
@@ -68,7 +69,7 @@ See `.env.example`:
 | `DATABASE_URL` | yes | PostgreSQL connection string (Prisma) |
 | `NEXTAUTH_SECRET` | yes | Auth.js signing secret (`openssl rand -base64 32`) |
 | `NEXTAUTH_URL` | no | Canonical URL (defaults to localhost) |
-| `PISTON_AUTH_TOKEN` | no | Enables real C/ASM/Python/C++ compilation via Piston. Without it, code runs in simulated mode |
+| `PISTON_AUTH_TOKEN` | no | Enables real C/ASM/Python/C++/JS compilation via Piston. Without it, code runs in simulated mode |
 
 > **Node runtime note:** the edge middleware (`withAuth`) can throw an `EvalError` on
 > Node 24. Pin to Node 20 or 22 in CI and production.
@@ -128,7 +129,7 @@ tests/                      # Vitest suites
 
 ## Adding a track
 
-A new language track is a content project, not a platform rewrite. Mirror the Python/C++
+A new language track is a content project, not a platform rewrite. Mirror the Python/C++/JS
 pattern:
 
 1. Add a `TrackKey` in `src/lib/types.ts` and entries in `src/lib/tracks.ts`

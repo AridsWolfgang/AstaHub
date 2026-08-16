@@ -20,7 +20,7 @@ import {
 import CyberPanel from "@/components/CyberPanel";
 import CodePlayground from "@/components/CodePlayground";
 import { getTrackLesson, getTrackTotalDays } from "@/lib/curriculum";
-import { useProgressStore, usePythonStore, useCppStore } from "@/lib/store";
+import { useProgressStore, usePythonStore, useCppStore, useJsStore } from "@/lib/store";
 import { getTierByLevel } from "@/lib/types";
 import { formatDay, cn } from "@/lib/utils";
 import type { Exercise, Lesson, TrackKey } from "@/lib/types";
@@ -31,12 +31,24 @@ const TRACK_META: Record<TrackKey, { home: string; next: string }> = {
   c: { home: "/dashboard", next: "Day" },
   python: { home: "/tracks/python", next: "Day" },
   cpp: { home: "/tracks/cpp", next: "Day" },
+  js: { home: "/tracks/javascript", next: "Day" },
+};
+
+function lessonHref(track: TrackKey, day: number): string {
+  return track === "c" ? `/lesson/${day}` : `/lesson/${track}/${day}`;
+}
+
+const TRACK_BACK: Record<TrackKey, string> = {
+  c: "Back to Dashboard",
+  python: "Back to Python track",
+  cpp: "Back to C++ track",
+  js: "Back to JavaScript track",
 };
 
 export default function LessonView({ track, day }: { track: TrackKey; day: number }) {
   const router = useRouter();
   const store =
-    track === "python" ? usePythonStore : track === "cpp" ? useCppStore : useProgressStore;
+    track === "python" ? usePythonStore : track === "cpp" ? useCppStore : track === "js" ? useJsStore : useProgressStore;
   const {
     completeDay,
     completeExercise,
@@ -84,8 +96,7 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      const hrefFor = (d: number) =>
-        track === "c" ? `/lesson/${d}` : track === "python" ? `/lesson/python/${d}` : `/lesson/cpp/${d}`;
+      const hrefFor = (d: number) => lessonHref(track, d);
       if (e.key === "ArrowLeft" && day > 1) router.push(hrefFor(day - 1));
       if (e.key === "ArrowRight" && day < totalDays) router.push(hrefFor(day + 1));
     };
@@ -179,6 +190,8 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
       ? "ASM"
       : lesson.language === "python"
       ? "Python"
+      : lesson.language === "js"
+      ? "JavaScript"
       : "C++";
   const langClass =
     lesson.language === "c"
@@ -186,6 +199,8 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
       : lesson.language === "asm"
       ? "bg-white/5 text-gray-300"
       : lesson.language === "python"
+      ? "bg-white/10 text-white"
+      : lesson.language === "js"
       ? "bg-white/10 text-white"
       : "bg-white/10 text-white";
 
@@ -198,11 +213,7 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
           className="inline-flex items-center gap-1 text-xs font-mono text-gray-500 hover:text-cyber-cyan mb-4 transition-colors"
         >
           <ArrowLeft className="h-3 w-3" />
-          {track === "c"
-            ? "Back to Dashboard"
-            : track === "python"
-            ? "Back to Python track"
-            : "Back to C++ track"}
+          {TRACK_BACK[track]}
         </Link>
 
         <div className="flex flex-wrap items-center gap-3 mb-3">
@@ -535,13 +546,7 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
       <div className="flex justify-between mt-10 pt-6 border-t border-white/5">
         {day > 1 ? (
           <Link
-            href={
-              track === "c"
-                ? `/lesson/${day - 1}`
-                : track === "python"
-                ? `/lesson/python/${day - 1}`
-                : `/lesson/cpp/${day - 1}`
-            }
+            href={lessonHref(track, day - 1)}
             className="btn-cyber text-xs group"
           >
             <ArrowLeft className="h-3 w-3" />
@@ -554,13 +559,7 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
         )}
         {day < totalDays && (
           <Link
-            href={
-              track === "c"
-                ? `/lesson/${day + 1}`
-                : track === "python"
-                ? `/lesson/python/${day + 1}`
-                : `/lesson/cpp/${day + 1}`
-            }
+            href={lessonHref(track, day + 1)}
             className="btn-cyber text-xs group"
           >
             <span className="hidden sm:inline">Day {day + 1}</span>

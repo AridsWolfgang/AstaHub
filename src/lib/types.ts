@@ -1,7 +1,7 @@
-export type Language = "c" | "asm" | "python" | "cpp";
+export type Language = "c" | "asm" | "python" | "cpp" | "js";
 
 /** Track keys used in lesson routing and progress namespacing. */
-export type TrackKey = "c" | "python" | "cpp";
+export type TrackKey = "c" | "python" | "cpp" | "js";
 
 export type ProficiencyLevel =
   | "initiate"

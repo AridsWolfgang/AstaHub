@@ -68,9 +68,12 @@ export const TRACK_GROUPS: TrackGroup[] = [
       {
         slug: "javascript",
         name: "JavaScript / TypeScript",
-        status: "planned",
+        status: "live",
         outcome: "Web and full-stack development",
-        description: "From first event listener to shipping a full-stack product.",
+        description:
+          "The language of the web, from a first console.log to async, the DOM, and TypeScript. Forty days from your first script to shipping full-stack.",
+        href: "/lesson/js/1",
+        days: 40,
       },
       {
         slug: "rust",

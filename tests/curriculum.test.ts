@@ -101,6 +101,25 @@ describe("C++ track integrity", () => {
   });
 });
 
+describe("JavaScript/TypeScript track integrity", () => {
+  it("resolves every day to a well-formed lesson", async () => {
+    const total = await getTrackTotalDays("js");
+    expect(total).toBe(TOTAL_TRACKS.js);
+    for (let day = 1; day <= total; day++) {
+      const l = await getTrackLesson("js", day);
+      expect(l).toBeDefined();
+      assertWellFormedLesson(l!, day);
+      expect(l!.language).toBe("js");
+      expect(l!.track).toBe("js");
+    }
+  });
+
+  it("getTrackLessons('js') returns the full track", async () => {
+    const lessons = await getTrackLessons("js");
+    expect(lessons).toHaveLength(TOTAL_TRACKS.js);
+  });
+});
+
 describe("Track routing", () => {
   it("unknown tracks fall back to the C engine", async () => {
     const l = await getTrackLesson("c" as TrackKey, 1);
@@ -150,11 +169,25 @@ describe("Generated code-challenge verification", () => {
     expect(gated).toBeGreaterThan(30);
   });
 
+  it("js code challenges that declare expectedOutput are non-empty", async () => {
+    const total = await getTrackTotalDays("js");
+    let gated = 0;
+    for (let day = 1; day <= total; day++) {
+      const l = await getTrackLesson("js", day);
+      const code = l?.exercises.find((e) => e.type === "code");
+      if (!code || !code.expectedOutput) continue;
+      gated++;
+      expect(code.expectedOutput.length).toBeGreaterThan(0);
+    }
+    expect(gated).toBeGreaterThan(25);
+  });
+
   it("every code challenge across all tracks keeps a stable id and shape", async () => {
     const lessons = [
       ...(await getLessons()),
       ...(await getTrackLessons("python")),
       ...(await getTrackLessons("cpp")),
+      ...(await getTrackLessons("js")),
     ];
     const ids = new Set<string>();
     for (const l of lessons) {

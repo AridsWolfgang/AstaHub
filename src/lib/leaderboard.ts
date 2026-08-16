@@ -21,6 +21,6 @@ export function parseLeaderboardQuery(url: string): LeaderboardQuery {
     ? Math.min(Math.max(parsed, 1), LEADERBOARD_MAX_LIMIT)
     : LEADERBOARD_DEFAULT_LIMIT;
   const trackParam = searchParams.get("track") ?? "c";
-  const track = (trackParam === "python" || trackParam === "cpp" ? trackParam : "c") as TrackKey;
+  const track = (trackParam === "python" || trackParam === "cpp" || trackParam === "js" ? trackParam : "c") as TrackKey;
   return { limit, track };
 }

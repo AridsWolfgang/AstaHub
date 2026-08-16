@@ -186,6 +186,7 @@ function createProgressStore(track: TrackKey, { persistKey, sync = true }: Store
 export const useProgressStore = createProgressStore("c", { persistKey: "asta-100days-progress" });
 export const usePythonStore = createProgressStore("python", { persistKey: "asta-python-progress", sync: true });
 export const useCppStore = createProgressStore("cpp", { persistKey: "asta-cpp-progress", sync: true });
+export const useJsStore = createProgressStore("js", { persistKey: "asta-js-progress", sync: true });
 
 export function markSynced(): void {
   if (typeof window === "undefined") return;
@@ -248,6 +249,7 @@ export async function hydrateFromServer(): Promise<boolean> {
     for (const row of tracks) {
       if (row.track === "python") usePythonStore.setState(mapTrackProgress(row));
       else if (row.track === "cpp") useCppStore.setState(mapTrackProgress(row));
+      else if (row.track === "js") useJsStore.setState(mapTrackProgress(row));
     }
     markSynced();
     return true;

@@ -97,7 +97,7 @@ export default function TracksPage() {
             Not sure where to start?
           </h3>
           <p className="mt-1 max-w-md text-sm leading-relaxed text-gray-400">
-            C, Assembly, Python, and C++ are live today. Start wherever you are — every
+            C, Assembly, Python, C++, and JavaScript are live today. Start wherever you are — every
             track is free, and every track builds on the same hands-on engine.
           </p>
         </div>

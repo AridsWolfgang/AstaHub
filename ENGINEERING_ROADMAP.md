@@ -11,11 +11,12 @@
 
 ## 1. Current State
 
-**What this is today:** a production-shaped Next.js 15 learning platform with four live
-tracks (C, x86-64 Assembly, Python, C++), a working account/progress/achievement/
-certificate system, a Monaco playground with real (Piston) and simulated execution, and a
-self-hosted black-and-white editorial UI. All 180 lessons (100 C/ASM + 40 Python + 40 C++)
-resolve cleanly; tests, lint, typecheck and build are green.
+**What this is today:** a production-shaped Next.js 15 learning platform with five live
+tracks (C, x86-64 Assembly, Python, C++, JavaScript/TypeScript), a working
+account/progress/achievement/certificate system, a Monaco playground with real (Piston) and
+simulated execution, and a self-hosted black-and-white editorial UI. All 220 lessons
+(100 C/ASM + 40 Python + 40 C++ + 40 JS/TS) resolve cleanly; tests, lint, typecheck and
+build are green.
 
 **Verified at audit time (2026-08-16):**
 
@@ -214,7 +215,7 @@ To watch:
 | x86-64 Assembly | (within C track) | `[x]` live | Days 51–100 |
 | Python | 40 | `[x]` live | Generator-built; code challenges gated (24/40 `expectedOutput`, sim-reproducible) |
 | C++ | 40 | `[x]` live | Generator-built; code challenges gated (38/40 `expectedOutput`, real-compiler path) |
-| JavaScript / TypeScript | — | `[ ]` planned | Next language per vision (tracks.ts `planned`) |
+| JavaScript / TypeScript | 40 | `[x]` live | Generator-built; code challenges gated (32/40 `expectedOutput`, real-runtime path) |
 | Rust | — | `[ ]` planned | |
 | SQL & Databases | — | `[ ]` planned | |
 | Bash / Linux / Git | — | `[ ]` planned | |
@@ -222,7 +223,7 @@ To watch:
 
 - **[x]** Curriculum page de-heavied (server component + `getLessonMetadata()`)
 - **[x]** `TOTAL_TRACKS` + track-aware lesson loading in `src/lib/curriculum/index.ts`
-- **[ ]** JS/TS track end-to-end (content + store + `/api/execute` mapping + templates) (High)
+- **[x]** JS/TS track end-to-end (content + store + `/api/execute` mapping + templates) (done 2026-08-16)
 
 ---
 
@@ -338,7 +339,8 @@ Order of the next major phases (see also §3–§18):
 3. **Foundation hardening** (§1): runtime pin, prod deploy readiness.
 4. **Learning engine depth** (§7–§9): ~~`expectedOutput` for python/cpp~~ (done 2026-08-16),
    ~~store tests~~ (done), ~~API route tests~~ (done 2026-08-16).
-5. **Breadth** (§8): JavaScript/TypeScript track.
+5. **Breadth** (§8): ~~JavaScript/TypeScript track~~ (done 2026-08-16). Next breadth:
+   Rust, SQL, Bash/Linux/Git.
 6. Then the vision phases (community → AI → graph) in order.
 
 ---
@@ -355,9 +357,9 @@ Order of the next major phases (see also §3–§18):
 | 6 | High | README rewrite | `[x]` done |
 | 7 | High | `expectedOutput` for python/cpp code challenges | `[x]` done (2026-08-16) |
 | 8 | High | Store unit tests + API route tests | `[x]` done (store + API, 2026-08-16) |
-| 9 | High | JS/TS track | `[ ]` open |
+| 9 | High | JS/TS track | `[x]` done (2026-08-16) |
 | 10 | High | Runtime pin Node 20/22 + prod deploy | `[ ]` open |
-| 11 | High | Self-hosted Piston (public API is whitelist-only; C++ can't run for real until then) | `[ ]` open |
+| 11 | High | Self-hosted Piston (public API is whitelist-only; C++/JS can't run for real until then) | `[ ]` open |
 | 12 | Medium | Redis rate limiting / leaderboard caching | `[ ]` open |
 | 13 | Medium | Track-agnostic achievements (data-driven) | `[ ]` open |
 | 14 | Medium | PWA offline support (service worker) | `[ ]` open |

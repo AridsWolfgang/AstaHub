@@ -33,6 +33,13 @@ const TEMPLATES = {
     smart_ptr: `#include <iostream>\n#include <memory>\n\nint main() {\n    auto ptr = std::make_unique<int>(42);\n    std::cout << *ptr << std::endl;\n    return 0;\n}`,
     lambda: `#include <iostream>\n#include <vector>\n#include <algorithm>\n\nint main() {\n    std::vector<int> nums = {1, 2, 3, 4, 5};\n    int even = std::count_if(nums.begin(), nums.end(),\n        [](int n) { return n % 2 == 0; });\n    std::cout << even << " even numbers" << std::endl;\n    return 0;\n}`,
   },
+  js: {
+    hello: `console.log("Hello, JavaScript!");`,
+    async: `const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));\n\nconst main = async () => {\n  console.log("start");\n  await delay(200);\n  console.log("after await");\n};\n\nmain();`,
+    arrays: `const nums = [5, 2, 8, 1, 9];\nconst sorted = [...nums].sort((a, b) => a - b);\nconst doubled = nums.map((n) => n * 2);\nconst total = nums.reduce((s, n) => s + n, 0);\nconsole.log(sorted);\nconsole.log(doubled);\nconsole.log(total);`,
+    classes: `class Student {\n  constructor(name, grade) {\n    this.name = name;\n    this.grade = grade;\n  }\n  describe() {\n    return \`\${this.name} is in grade \${this.grade}\`;\n  }\n}\n\nconst s = new Student("Ada", 10);\nconsole.log(s.describe());`,
+    fetch: `const getUsers = async () => {\n  try {\n    const res = await fetch("https://jsonplaceholder.typicode.com/users/1");\n    const user = await res.json();\n    console.log(user.name);\n  } catch (err) {\n    console.log("Error:", err.message);\n  }\n};\n\ngetUsers();`,
+  },
 } as const;
 
 const LANG_META: Record<Language, { label: string }> = {
@@ -40,6 +47,7 @@ const LANG_META: Record<Language, { label: string }> = {
   asm: { label: "x86-64 Assembly" },
   python: { label: "Python" },
   cpp: { label: "C++" },
+  js: { label: "JavaScript" },
 };
 
 export default function PlaygroundPage() {
@@ -68,7 +76,7 @@ export default function PlaygroundPage() {
           Playground
         </h1>
         <p className="text-sm text-gray-500 font-mono">
-          A free workbench for C, x86-64 Assembly, Python, and C++ — outside the curriculum
+          A free workbench for C, x86-64 Assembly, Python, C++, and JavaScript — outside the curriculum
         </p>
       </div>
 
@@ -130,6 +138,24 @@ class Name:        # objects`}</pre>
                 <pre className="text-gray-400">{`python program.py
 # or run interactively:
 python`}</pre>
+              </div>
+            </>
+          ) : lang === "js" ? (
+            <>
+              <div>
+                <p className="text-cyber-cyan mb-2">Core Syntax</p>
+                <pre className="text-gray-400">{`console.log(x)         // output
+let / const            // variables
+if / else / switch     // branching
+for...of / while       // loops
+const f = (a, b) => a  // arrow functions
+class Name { }         // objects`}</pre>
+              </div>
+              <div>
+                <p className="text-cyber-cyan mb-2">Run</p>
+                <pre className="text-gray-400">{`node program.js
+# or run interactively:
+node`}</pre>
               </div>
             </>
           ) : lang === "c" ? (

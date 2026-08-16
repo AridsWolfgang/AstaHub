@@ -118,7 +118,9 @@ export default async function TrackPage({
         )}
       </div>
 
-      {(slug === "python" || slug === "cpp") && <TrackJourney track={slug} />}
+      {(slug === "python" || slug === "cpp" || slug === "javascript") && (
+        <TrackJourney track={slug === "javascript" ? "js" : slug} />
+      )}
     </div>
   );
 }
