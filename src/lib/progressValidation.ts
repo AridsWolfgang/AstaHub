@@ -28,6 +28,13 @@ export function sanitizeCompletedDays(value: unknown, total: number): number[] {
   return out;
 }
 
+/** True when `completedDays` covers every day of a track (certificate condition). */
+export function isTrackComplete(completedDays: unknown, total: number): boolean {
+  if (!Array.isArray(completedDays) || total <= 0) return false;
+  const daySet = new Set(completedDays.filter((d) => typeof d === "number" && Number.isInteger(d) && d >= 1 && d <= total));
+  return daySet.size >= total;
+}
+
 export interface ProgressInput {
   currentDay?: unknown;
   totalXp?: unknown;

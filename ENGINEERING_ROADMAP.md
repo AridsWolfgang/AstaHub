@@ -305,7 +305,14 @@ To watch:
 - **[x]** `tests/curriculum.test.ts` — integrity for all 180 lessons + generated code-challenge
   verification (python `expectedOutput` must be simulator-reproducible; cpp must be non-empty)
 - **[x]** `tests/store.test.ts` — XP award/double-award guards, per-track isolation
-- **[ ]]** API route tests (register validation, progress hardening, leaderboard shape) (High)
+- **[x]** `tests/api.test.ts` — 16 tests on the extracted pure route logic: register
+  validation (missing/type/length/email/password rules + normalization), leaderboard query
+  parsing (defaults, clamps, track mapping — includes a negative-limit clamp fix), progress
+  certificate completion predicate, rate-limit `clientIp`. The route handlers themselves are
+  thin DB/session wrappers; their decision logic now lives in `src/lib/registerValidation.ts`,
+  `src/lib/leaderboard.ts`, and `src/lib/progressValidation.ts` (all imported by the routes).
+- **[ ]]** API route integration tests (register → persist, progress → certificate issuance,
+  leaderboard shape) (Medium) — need a test DB or Prisma mocks
 - **[ ]]** E2E learner journey (register → lesson → exercise → XP → certificate) (Medium)
 
 ---
@@ -330,7 +337,7 @@ Order of the next major phases (see also §3–§18):
 2. **Documentation truth** (§3): rewrite README, refresh `.env.example` commentary.
 3. **Foundation hardening** (§1): runtime pin, prod deploy readiness.
 4. **Learning engine depth** (§7–§9): ~~`expectedOutput` for python/cpp~~ (done 2026-08-16),
-   ~~store tests~~ (done), API tests.
+   ~~store tests~~ (done), ~~API route tests~~ (done 2026-08-16).
 5. **Breadth** (§8): JavaScript/TypeScript track.
 6. Then the vision phases (community → AI → graph) in order.
 
@@ -347,7 +354,7 @@ Order of the next major phases (see also §3–§18):
 | 5 | High | `/api/register` validation + throttle | `[x]` done |
 | 6 | High | README rewrite | `[x]` done |
 | 7 | High | `expectedOutput` for python/cpp code challenges | `[x]` done (2026-08-16) |
-| 8 | High | Store unit tests + API route tests | `[x]` store tests done; API tests open |
+| 8 | High | Store unit tests + API route tests | `[x]` done (store + API, 2026-08-16) |
 | 9 | High | JS/TS track | `[ ]` open |
 | 10 | High | Runtime pin Node 20/22 + prod deploy | `[ ]` open |
 | 11 | High | Self-hosted Piston (public API is whitelist-only; C++ can't run for real until then) | `[ ]` open |

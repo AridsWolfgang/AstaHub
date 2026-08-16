@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { TrackKey } from "@/lib/types";
+import { parseLeaderboardQuery } from "@/lib/leaderboard";
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const limit = Math.min(parseInt(searchParams.get("limit") ?? "50", 10) || 50, 100);
-  const trackParam = searchParams.get("track") ?? "c";
-  const track = (trackParam === "python" || trackParam === "cpp" ? trackParam : "c") as TrackKey;
+  const { limit, track } = parseLeaderboardQuery(req.url);
 
   if (track === "c") {
     const users = await prisma.user.findMany({

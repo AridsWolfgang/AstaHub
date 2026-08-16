@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { TRACKS, TRACK_TOTAL_DAYS, TRACK_CERT_TITLES, sanitizeProgress } from "@/lib/progressValidation";
+import {
+  TRACKS,
+  TRACK_TOTAL_DAYS,
+  TRACK_CERT_TITLES,
+  sanitizeProgress,
+  isTrackComplete,
+} from "@/lib/progressValidation";
 
 async function issueCertificateIfComplete(
   userId: string,
@@ -11,9 +17,7 @@ async function issueCertificateIfComplete(
   totalXp: unknown
 ): Promise<void> {
   const total = TRACK_TOTAL_DAYS[track];
-  if (!total || !Array.isArray(completedDays)) return;
-  const daySet = new Set(completedDays.filter((d) => typeof d === "number" && d >= 1 && d <= total));
-  if (daySet.size < total) return;
+  if (!total || !isTrackComplete(completedDays, total)) return;
   const existing = await prisma.certificate.findFirst({ where: { userId, track } });
   if (existing) return;
   await prisma.certificate.create({
