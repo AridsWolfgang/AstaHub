@@ -952,7 +952,7 @@ function generateCppExercises(day: number, blueprint: CppBlueprint): Lesson["exe
     if (entry && !usedTopics.has(topic)) {
       usedTopics.add(topic);
       quizzes.push({
-        id: `${prefix}-q${i + 1}`,
+        id: `${prefix}-q${quizzes.length + 1}`,
         type: "quiz",
         title: i === 0 ? "Concept Check" : "Deep Dive",
         description: `Day ${day}: ${topic}`,
