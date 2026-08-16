@@ -1,0 +1,114 @@
+import { describe, it, expect } from "vitest";
+import {
+  getLesson,
+  getLessons,
+  getTrackLesson,
+  getTrackLessons,
+  getTrackTotalDays,
+  TOTAL_TRACKS,
+} from "../src/lib/curriculum";
+import type { Lesson, TrackKey } from "../src/lib/types";
+
+function assertWellFormedLesson(l: Lesson, expectedDay: number) {
+  expect(l).toBeDefined();
+  expect(l.day).toBe(expectedDay);
+  expect(l.title).toBeTruthy();
+  expect(l.subtitle).toBeTruthy();
+  expect(l.tags.length).toBeGreaterThan(0);
+  expect(l.level).toBeTruthy();
+  expect(l.durationMinutes).toBeGreaterThan(0);
+  expect(l.xpTotal).toBeGreaterThan(0);
+
+  expect(l.theory.sections.length).toBeGreaterThan(0);
+  for (const s of l.theory.sections) {
+    expect(s.heading).toBeTruthy();
+    expect(s.content).toBeTruthy();
+  }
+
+  expect(l.playground).toBeTruthy();
+  expect(l.playground.defaultCode.length).toBeGreaterThan(0);
+  expect(l.playground.runnable).toBe(true);
+
+  expect(l.exercises.length).toBeGreaterThan(0);
+  const ids = new Set<string>();
+  for (const ex of l.exercises) {
+    expect(ex.id).toBeTruthy();
+    expect(ids.has(ex.id)).toBe(false); // no duplicate exercise ids
+    ids.add(ex.id);
+    expect(ex.xpReward).toBeGreaterThan(0);
+    expect(["quiz", "code"].includes(ex.type)).toBe(true);
+    if (ex.type === "quiz") {
+      expect(ex.question).toBeTruthy();
+      expect(ex.options && ex.options.length >= 2).toBe(true);
+    }
+    if (ex.type === "code") {
+      expect(ex.starterCode).toBeTruthy();
+    }
+  }
+}
+
+describe("C/Assembly curriculum integrity", () => {
+  it("resolves every day 1-100 to a well-formed lesson", async () => {
+    for (let day = 1; day <= 100; day++) {
+      const l = await getLesson(day);
+      assertWellFormedLesson(l!, day);
+    }
+  });
+
+  it("getLessons() returns exactly 100 lessons", async () => {
+    const lessons = await getLessons();
+    expect(lessons).toHaveLength(100);
+    expect(new Set(lessons.map((l) => l.day)).size).toBe(100);
+  });
+});
+
+describe("Python track integrity", () => {
+  it("resolves every day to a well-formed lesson", async () => {
+    const total = await getTrackTotalDays("python");
+    expect(total).toBe(TOTAL_TRACKS.python);
+    for (let day = 1; day <= total; day++) {
+      const l = await getTrackLesson("python", day);
+      expect(l).toBeDefined();
+      assertWellFormedLesson(l!, day);
+      expect(l!.language).toBe("python");
+      expect(l!.track).toBe("python");
+    }
+  });
+
+  it("getTrackLessons('python') returns the full track", async () => {
+    const lessons = await getTrackLessons("python");
+    expect(lessons).toHaveLength(TOTAL_TRACKS.python);
+  });
+});
+
+describe("C++ track integrity", () => {
+  it("resolves every day to a well-formed lesson", async () => {
+    const total = await getTrackTotalDays("cpp");
+    expect(total).toBe(TOTAL_TRACKS.cpp);
+    for (let day = 1; day <= total; day++) {
+      const l = await getTrackLesson("cpp", day);
+      expect(l).toBeDefined();
+      assertWellFormedLesson(l!, day);
+      expect(l!.language).toBe("cpp");
+      expect(l!.track).toBe("cpp");
+    }
+  });
+
+  it("getTrackLessons('cpp') returns the full track", async () => {
+    const lessons = await getTrackLessons("cpp");
+    expect(lessons).toHaveLength(TOTAL_TRACKS.cpp);
+  });
+});
+
+describe("Track routing", () => {
+  it("unknown tracks fall back to the C engine", async () => {
+    const l = await getTrackLesson("c" as TrackKey, 1);
+    expect(l).toBeDefined();
+    expect(l!.day).toBe(1);
+  });
+
+  it("days out of range return undefined instead of throwing", async () => {
+    const l = await getLesson(101);
+    expect(l).toBeUndefined();
+  });
+});
