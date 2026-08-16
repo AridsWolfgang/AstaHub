@@ -2,15 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
-const TRACKS = new Set(["c", "python", "cpp"]);
-
-const TRACK_TOTAL_DAYS: Record<string, number> = { c: 100, python: 40, cpp: 40 };
-const TRACK_CERT_TITLES: Record<string, string> = {
-  c: "C / x86-64 Assembly",
-  python: "Python",
-  cpp: "C++",
-};
+import { TRACKS, TRACK_TOTAL_DAYS, TRACK_CERT_TITLES, sanitizeProgress } from "@/lib/progressValidation";
 
 async function issueCertificateIfComplete(
   userId: string,
@@ -35,31 +27,6 @@ async function issueCertificateIfComplete(
   });
 }
 
-function pickProgress(body: Record<string, unknown>): Record<string, unknown> {
-  const data: Record<string, unknown> = {};
-  const {
-    currentDay,
-    totalXp,
-    level,
-    streak,
-    lastActiveDate,
-    completedDays,
-    completedExercises,
-    completedAssignments,
-    notes,
-  } = body;
-  if (typeof currentDay === "number") data.currentDay = currentDay;
-  if (typeof totalXp === "number") data.totalXp = totalXp;
-  if (typeof level === "string") data.level = level;
-  if (typeof streak === "number") data.streak = streak;
-  if (typeof lastActiveDate === "string" || lastActiveDate === null) data.lastActiveDate = lastActiveDate;
-  if (Array.isArray(completedDays)) data.completedDays = completedDays;
-  if (completedExercises && typeof completedExercises === "object") data.completedExercises = completedExercises;
-  if (Array.isArray(completedAssignments)) data.completedAssignments = completedAssignments;
-  if (notes && typeof notes === "object") data.notes = notes;
-  return data;
-}
-
 export async function PUT(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -68,7 +35,7 @@ export async function PUT(req: Request) {
   try {
     const body = await req.json();
     const track = typeof body.track === "string" && TRACKS.has(body.track) ? body.track : "c";
-    const data = pickProgress(body);
+    const data = sanitizeProgress(body, track);
 
     let user;
     if (track === "c") {

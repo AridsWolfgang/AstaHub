@@ -92,10 +92,11 @@ function createProgressStore(track: TrackKey, { persistKey, sync = true }: Store
 
         completeDay: (day, xp) =>
           set((state) => {
-            const completedDays = state.completedDays.includes(day)
+            const alreadyDone = state.completedDays.includes(day);
+            const completedDays = alreadyDone
               ? state.completedDays
               : [...state.completedDays, day];
-            const totalXp = state.totalXp + xp;
+            const totalXp = state.totalXp + (alreadyDone ? 0 : xp);
             const next = {
               completedDays,
               totalXp,

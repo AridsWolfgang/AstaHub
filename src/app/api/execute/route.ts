@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { simulateAnsi } from "@/lib/simulator";
+import { rateLimit, clientIp } from "@/lib/rateLimit";
 
 interface FileEntry {
   name?: string;
@@ -40,6 +41,12 @@ interface PistonResponse {
 
 const PISTON_API = "https://emkc.org/api/v2/piston";
 const AUTH_TOKEN = process.env.PISTON_AUTH_TOKEN || "";
+
+// Abuse protection — public route, no auth.
+const MAX_CODE_LENGTH = 50_000;
+const MAX_BODY_BYTES = 128 * 1024;
+const RATE_LIMIT = 30;
+const RATE_WINDOW_MS = 60 * 1000;
 
 function getPistonLanguage(lang: string): { language: string; version: string } {
   if (lang === "c") return { language: "c", version: "10.2.0" };
@@ -106,11 +113,38 @@ async function executeViaPiston(code: string, language: string): Promise<{
 }
 
 export async function POST(request: NextRequest) {
-  const { code, language } = await request.json();
+  const ip = clientIp(request);
+  if (!rateLimit(`execute:${ip}`, RATE_LIMIT, RATE_WINDOW_MS)) {
+    return NextResponse.json(
+      { error: "Too many requests. Try again in a minute." },
+      { status: 429 }
+    );
+  }
+
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (contentLength > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "Payload too large." }, { status: 413 });
+  }
+
+  let body: { code?: unknown; language?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+  }
+
+  const { code, language } = body as { code: string; language: string };
 
   if (!code || !language) {
     return NextResponse.json(
       { error: "Missing 'code' or 'language' field" },
+      { status: 400 }
+    );
+  }
+
+  if (typeof code !== "string" || code.length === 0 || code.length > MAX_CODE_LENGTH) {
+    return NextResponse.json(
+      { error: `'code' must be a string up to ${MAX_CODE_LENGTH} characters.` },
       { status: 400 }
     );
   }
