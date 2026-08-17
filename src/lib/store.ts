@@ -187,6 +187,9 @@ export const useProgressStore = createProgressStore("c", { persistKey: "asta-100
 export const usePythonStore = createProgressStore("python", { persistKey: "asta-python-progress", sync: true });
 export const useCppStore = createProgressStore("cpp", { persistKey: "asta-cpp-progress", sync: true });
 export const useJsStore = createProgressStore("js", { persistKey: "asta-js-progress", sync: true });
+export const useRustStore = createProgressStore("rust", { persistKey: "asta-rust-progress", sync: true });
+export const useSqlStore = createProgressStore("sql", { persistKey: "asta-sql-progress", sync: true });
+export const useBashStore = createProgressStore("bash", { persistKey: "asta-bash-progress", sync: true });
 
 export function markSynced(): void {
   if (typeof window === "undefined") return;
@@ -250,6 +253,9 @@ export async function hydrateFromServer(): Promise<boolean> {
       if (row.track === "python") usePythonStore.setState(mapTrackProgress(row));
       else if (row.track === "cpp") useCppStore.setState(mapTrackProgress(row));
       else if (row.track === "js") useJsStore.setState(mapTrackProgress(row));
+      else if (row.track === "rust") useRustStore.setState(mapTrackProgress(row));
+      else if (row.track === "sql") useSqlStore.setState(mapTrackProgress(row));
+      else if (row.track === "bash") useBashStore.setState(mapTrackProgress(row));
     }
     markSynced();
     return true;

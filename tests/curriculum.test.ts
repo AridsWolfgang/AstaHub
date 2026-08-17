@@ -120,6 +120,63 @@ describe("JavaScript/TypeScript track integrity", () => {
   });
 });
 
+describe("Rust track integrity", () => {
+  it("resolves every day to a well-formed lesson", async () => {
+    const total = await getTrackTotalDays("rust");
+    expect(total).toBe(TOTAL_TRACKS.rust);
+    for (let day = 1; day <= total; day++) {
+      const l = await getTrackLesson("rust", day);
+      expect(l).toBeDefined();
+      assertWellFormedLesson(l!, day);
+      expect(l!.language).toBe("rust");
+      expect(l!.track).toBe("rust");
+    }
+  });
+
+  it("getTrackLessons('rust') returns the full track", async () => {
+    const lessons = await getTrackLessons("rust");
+    expect(lessons).toHaveLength(TOTAL_TRACKS.rust);
+  });
+});
+
+describe("SQL track integrity", () => {
+  it("resolves every day to a well-formed lesson", async () => {
+    const total = await getTrackTotalDays("sql");
+    expect(total).toBe(TOTAL_TRACKS.sql);
+    for (let day = 1; day <= total; day++) {
+      const l = await getTrackLesson("sql", day);
+      expect(l).toBeDefined();
+      assertWellFormedLesson(l!, day);
+      expect(l!.language).toBe("sql");
+      expect(l!.track).toBe("sql");
+    }
+  });
+
+  it("getTrackLessons('sql') returns the full track", async () => {
+    const lessons = await getTrackLessons("sql");
+    expect(lessons).toHaveLength(TOTAL_TRACKS.sql);
+  });
+});
+
+describe("Bash track integrity", () => {
+  it("resolves every day to a well-formed lesson", async () => {
+    const total = await getTrackTotalDays("bash");
+    expect(total).toBe(TOTAL_TRACKS.bash);
+    for (let day = 1; day <= total; day++) {
+      const l = await getTrackLesson("bash", day);
+      expect(l).toBeDefined();
+      assertWellFormedLesson(l!, day);
+      expect(l!.language).toBe("bash");
+      expect(l!.track).toBe("bash");
+    }
+  });
+
+  it("getTrackLessons('bash') returns the full track", async () => {
+    const lessons = await getTrackLessons("bash");
+    expect(lessons).toHaveLength(TOTAL_TRACKS.bash);
+  });
+});
+
 describe("Track routing", () => {
   it("unknown tracks fall back to the C engine", async () => {
     const l = await getTrackLesson("c" as TrackKey, 1);
@@ -182,12 +239,54 @@ describe("Generated code-challenge verification", () => {
     expect(gated).toBeGreaterThan(25);
   });
 
+  it("rust code challenges that declare expectedOutput are non-empty", async () => {
+    const total = await getTrackTotalDays("rust");
+    let gated = 0;
+    for (let day = 1; day <= total; day++) {
+      const l = await getTrackLesson("rust", day);
+      const code = l?.exercises.find((e) => e.type === "code");
+      if (!code || !code.expectedOutput) continue;
+      gated++;
+      expect(code.expectedOutput.length).toBeGreaterThan(0);
+    }
+    expect(gated).toBeGreaterThan(25);
+  });
+
+  it("sql code challenges that declare expectedOutput are non-empty", async () => {
+    const total = await getTrackTotalDays("sql");
+    let gated = 0;
+    for (let day = 1; day <= total; day++) {
+      const l = await getTrackLesson("sql", day);
+      const code = l?.exercises.find((e) => e.type === "code");
+      if (!code || !code.expectedOutput) continue;
+      gated++;
+      expect(code.expectedOutput.length).toBeGreaterThan(0);
+    }
+    expect(gated).toBeGreaterThan(30);
+  });
+
+  it("bash code challenges that declare expectedOutput are non-empty", async () => {
+    const total = await getTrackTotalDays("bash");
+    let gated = 0;
+    for (let day = 1; day <= total; day++) {
+      const l = await getTrackLesson("bash", day);
+      const code = l?.exercises.find((e) => e.type === "code");
+      if (!code || !code.expectedOutput) continue;
+      gated++;
+      expect(code.expectedOutput.length).toBeGreaterThan(0);
+    }
+    expect(gated).toBeGreaterThan(15);
+  });
+
   it("every code challenge across all tracks keeps a stable id and shape", async () => {
     const lessons = [
       ...(await getLessons()),
       ...(await getTrackLessons("python")),
       ...(await getTrackLessons("cpp")),
       ...(await getTrackLessons("js")),
+      ...(await getTrackLessons("rust")),
+      ...(await getTrackLessons("sql")),
+      ...(await getTrackLessons("bash")),
     ];
     const ids = new Set<string>();
     for (const l of lessons) {

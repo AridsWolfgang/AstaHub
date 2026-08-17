@@ -1,12 +1,15 @@
 import { levelFromXp } from "./types";
 
-export const TRACKS = new Set(["c", "python", "cpp", "js"]);
-export const TRACK_TOTAL_DAYS: Record<string, number> = { c: 100, python: 40, cpp: 40, js: 40 };
+export const TRACKS = new Set(["c", "python", "cpp", "js", "rust", "sql", "bash"]);
+export const TRACK_TOTAL_DAYS: Record<string, number> = { c: 100, python: 40, cpp: 40, js: 40, rust: 40, sql: 40, bash: 40 };
 export const TRACK_CERT_TITLES: Record<string, string> = {
   c: "C / x86-64 Assembly",
   python: "Python",
   cpp: "C++",
   js: "JavaScript / TypeScript",
+  rust: "Rust",
+  sql: "SQL & Databases",
+  bash: "Bash / Linux / Git",
 };
 
 // Server-side integrity bounds — the client must never be trusted for XP/level.

@@ -6,8 +6,9 @@
 
 **Asta Knowledge Hub** is a free, hands-on, mastery-oriented technical learning platform.
 The core product today is the original C + x86-64 Assembly curriculum (100 days), expanded
-with Python, C++, and JavaScript/TypeScript tracks on the same engine — with accounts,
-progress sync, achievements, leaderboards, certificates, and a working code playground.
+with Python, C++, JavaScript/TypeScript, Rust, SQL, and Bash tracks on the same engine —
+with accounts, progress sync, achievements, leaderboards, certificates, and a working
+code playground.
 
 > Every person on Earth, regardless of wealth or geography, should be able to wake up,
 > learn a world-class technical skill, and turn it into a livelihood.
@@ -21,6 +22,9 @@ progress sync, achievements, leaderboards, certificates, and a working code play
 | **Python** | 40 | Automation, data, and AI from first principles |
 | **C++** | 40 | Objects, templates, and the STL |
 | **JavaScript / TypeScript** | 40 | Web and full-stack development |
+| **Rust** | 40 | Memory safety without garbage collection |
+| **SQL & Databases** | 40 | Design, query, and optimize real data systems |
+| **Bash / Linux / Git** | 40 | The working toolkit every engineer needs |
 
 Every track runs the same engine: day-by-day lessons, theory with live code examples, a
 Monaco playground, quizzes, code challenges, assignments with rubrics, and a capstone.
@@ -29,7 +33,7 @@ Monaco playground, quizzes, code challenges, assignments with rubrics, and a cap
 
 - **100-day C/Assembly curriculum** — every day is a hand-written lesson with theory,
   playground code, exercises, and an assignment
-- **Python, C++, and JavaScript/TypeScript tracks** — generated from the same modular engine
+- **Python, C++, JavaScript/TypeScript, Rust, SQL, and Bash tracks** — generated from the same modular engine
 - **Code execution** — real compilation via [Piston](https://github.com/engineer-man/piston)
   when a token is configured, with a built-in in-browser simulator as the free fallback.
   The UI always labels execution as *Live* or *Simulated* — never misrepresents one as the other
@@ -37,6 +41,8 @@ Monaco playground, quizzes, code challenges, assignments with rubrics, and a cap
 - **Progress sync** — per-track XP, streaks, levels, completed days, notes; server-backed
 - **Gamification** — XP and levels (Initiate → Master), achievements, leaderboard
 - **Certificates** — auto-issued on full-track completion
+- **Community** — learnings feed, Q&A with evidence-of-effort, study groups with real-time chat,
+  and a moderation queue. The human layer: learning stays social and sticky
 - **Editorial black & white UI** — calm, minimal, content-first; dark default with a light
   theme; self-hosted fonts; mobile-first
 
@@ -69,7 +75,9 @@ See `.env.example`:
 | `DATABASE_URL` | yes | PostgreSQL connection string (Prisma) |
 | `NEXTAUTH_SECRET` | yes | Auth.js signing secret (`openssl rand -base64 32`) |
 | `NEXTAUTH_URL` | no | Canonical URL (defaults to localhost) |
-| `PISTON_AUTH_TOKEN` | no | Enables real C/ASM/Python/C++/JS compilation via Piston. Without it, code runs in simulated mode |
+| `PISTON_AUTH_TOKEN` | no | Enables real C/ASM/Python/C++/JS/Rust/SQL/Bash compilation via Piston. Without it, code runs in simulated mode |
+| `MODERATOR_EMAILS` | no | Comma-separated emails that can view/action the moderation queue |
+| `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` | no | Supabase Realtime for live chat/presence. Without them, community features poll (see `.env.example`) |
 
 > **Node runtime note:** the edge middleware (`withAuth`) can throw an `EvalError` on
 > Node 24. Pin to Node 20 or 22 in CI and production.
@@ -96,6 +104,7 @@ npm run test:watch # Vitest watch mode
 | State | Zustand (per-track, localStorage persisted, server-synced) |
 | Editor | Monaco (CDN) |
 | Execution | Piston API + in-browser simulator fallback |
+| Realtime | Supabase Realtime (optional; group chat/presence degrade to polling without it) |
 | Tests | Vitest |
 | CI | GitHub Actions (lint → typecheck → test → build) |
 
@@ -107,16 +116,20 @@ src/
 │   ├── api/                # register, auth, me, progress, leaderboard,
 │   │                       # password, export, execute
 │   ├── lesson/[day]        # C/Assembly lessons
-│   ├── lesson/{python,cpp}/[day]
+│   ├── lesson/{python,cpp,js,rust,sql,bash}/[day]
 │   ├── tracks/             # Knowledge-bank hub (all tracks, live + planned)
 │   ├── curriculum/         # C/ASM 100-day map (server-rendered metadata)
+│   ├── community/          # Phase 2: feed, Q&A, groups+chat, moderation
 │   ├── dashboard/ profile/ achievements/ leaderboard/
 │   ├── settings/ certificates/ playground/ signin/
 │   └── layout.tsx globals.css ...
 ├── components/             # Shared UI (CodePlayground, LessonView, Navbar, …)
+│   └── community/          # Avatar, VoteButtons, ReportButton
 ├── lib/
-│   ├── curriculum/         # Content engine (core + lazy day modules + python/cpp)
-│   ├── simulator.ts        # In-browser interpreter (C/Python/C++/ASM)
+│   ├── curriculum/         # Content engine (core + lazy day modules + python/cpp/js/rust/sql/bash)
+│   ├── community.ts        # Pure community logic (voting, moderation, pagination)
+│   ├── realtime.ts         # Supabase Realtime client (graceful polling fallback)
+│   ├── simulator.ts        # In-browser interpreter (C/Python/ASM; honest fallback for the rest)
 │   ├── store.ts            # Per-track Zustand progress stores + sync
 │   ├── progressValidation.ts # Server-side progress sanitization
 │   ├── rateLimit.ts        # In-process rate limiter for public APIs
@@ -129,7 +142,7 @@ tests/                      # Vitest suites
 
 ## Adding a track
 
-A new language track is a content project, not a platform rewrite. Mirror the Python/C++/JS
+A new language track is a content project, not a platform rewrite. Mirror the Python/C++/JS/Rust/SQL/Bash
 pattern:
 
 1. Add a `TrackKey` in `src/lib/types.ts` and entries in `src/lib/tracks.ts`
@@ -161,14 +174,14 @@ npm run build       # production build succeeds
 ## Roadmap (short)
 
 - [x] 100-day C/Assembly curriculum (hand-written)
-- [x] Python + C++ tracks
+- [x] Python, C++, JavaScript/TypeScript, Rust, SQL, and Bash tracks
 - [x] Accounts, progress sync, achievements, leaderboard, certificates
 - [x] Real (Piston) + simulated execution with honest labeling
 - [x] Tests, CI, black & white redesign
-- [ ] JavaScript/TypeScript track, then Rust
-- [ ] `expectedOutput` for all generated code challenges
+- [x] `expectedOutput` for all generated code challenges
+- [x] Community: learnings feed, Q&A, study groups + realtime chat, moderation
 - [ ] PWA offline support (service worker)
-- [ ] Community (Q&A, posts, groups)
+- [ ] Live coding + YouTube export
 - [ ] AI learning companion (hint ladders)
 
 See `ENGINEERING_ROADMAP.md` for the full prioritized backlog.

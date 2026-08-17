@@ -6,6 +6,10 @@ const LEARN_LINKS = [
   { href: "/dashboard", label: "My journey" },
   { href: "/tracks", label: "All tracks" },
   { href: "/playground", label: "Practice" },
+  { href: "/live", label: "Live" },
+  { href: "/community", label: "Community" },
+  { href: "/community/questions", label: "Questions" },
+  { href: "/community/groups", label: "Study groups" },
 ];
 
 const ACCOUNT_LINKS = [

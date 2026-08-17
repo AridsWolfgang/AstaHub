@@ -17,6 +17,10 @@ model User {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
+  // Community
+  role               String   @default("user") // "user" | "mod"
+  reputation         Int      @default(0)
+
   // Progress + gamification
   currentDay         Int      @default(1)
   totalXp            Int      @default(0)
@@ -30,6 +34,148 @@ model User {
 
   certificates       Certificate[]
   trackProgress      UserTrackProgress[]
+  posts              Post[]
+  comments           Comment[]
+  votes              Vote[]
+  questions          Question[]
+  answers            Answer[]
+  groupMemberships   GroupMember[]
+  messages           Message[]
+  ownedGroups        Group[]
+  reports            Report[]
+  liveEventsCreated  LiveEvent[]       @relation("LiveEventCreator")
+  liveEventMessages  LiveEventMessage[]
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  comments  Comment[]
+  votes     Vote[]
+
+  @@index([createdAt])
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body       String
+  createdAt  DateTime @default(now())
+  postId     String?
+  post       Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  questionId String?
+  question   Question? @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerId   String?
+  answer     Answer?  @relation(fields: [answerId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([questionId])
+  @@index([answerId])
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  value     Int      @default(1) // +1 or -1
+  postId    String?
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  answerId  String?
+  answer    Answer?  @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@unique([userId, answerId])
+}
+
+model Question {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  evidence  String? // what they tried — evidence of effort
+  status    String    @default("open") // open | answered | closed
+  tags      String[]  @default([])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  answers   Answer[]
+  comments  Comment[]
+
+  @@index([status, createdAt])
+}
+
+model Answer {
+  id         String    @id @default(cuid())
+  questionId String
+  question   Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body       String
+  accepted   Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  comments   Comment[]
+  votes      Vote[]
+
+  @@index([questionId])
+}
+
+model Group {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  description String
+  ownerId     String
+  owner       User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  members     GroupMember[]
+  messages    Message[]
+}
+
+model GroupMember {
+  id       String   @id @default(cuid())
+  groupId  String
+  group    Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     String   @default("member") // member | owner
+  joinedAt DateTime @default(now())
+
+  @@unique([groupId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([groupId, createdAt])
+}
+
+model Report {
+  id         String    @id @default(cuid())
+  reporterId String
+  reporter   User      @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  targetType String // post | comment | question | answer | message
+  targetId   String
+  reason     String
+  status     String    @default("open") // open | actioned | dismissed
+  createdAt  DateTime  @default(now())
+  actionedAt DateTime?
+
+  @@index([status])
 }
 
 model UserTrackProgress {
@@ -63,4 +209,39 @@ model Certificate {
   issuedAt  DateTime @default(now())
 
   @@index([userId])
+}
+
+model LiveEvent {
+  id              String       @id @default(cuid())
+  slug            String       @unique
+  title           String
+  description     String
+  type            String       @default("live_class") // live_coding | live_class | office_hours | qa
+  track           String? // curriculum track slug, when linked to a lesson
+  lessonDay       Int? // optional link to a specific day of a track
+  startAt         DateTime
+  durationMinutes Int          @default(60)
+  hostName        String
+  youtubeUrl      String? // live stream / premiere link
+  recordingUrl    String? // YouTube recording after the event
+  status          String       @default("scheduled") // scheduled | live | finished | cancelled
+  createdById     String
+  createdBy       User         @relation("LiveEventCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  messages        LiveEventMessage[]
+
+  @@index([status, startAt])
+}
+
+model LiveEventMessage {
+  id        String    @id @default(cuid())
+  eventId   String
+  event     LiveEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime  @default(now())
+
+  @@index([eventId, createdAt])
 }

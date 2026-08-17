@@ -81,7 +81,10 @@ describe("parseLeaderboardQuery", () => {
     expect(parseLeaderboardQuery("http://x/api/leaderboard?track=python").track).toBe("python");
     expect(parseLeaderboardQuery("http://x/api/leaderboard?track=cpp").track).toBe("cpp");
     expect(parseLeaderboardQuery("http://x/api/leaderboard?track=js").track).toBe("js");
-    expect(parseLeaderboardQuery("http://x/api/leaderboard?track=rust").track).toBe("c");
+    expect(parseLeaderboardQuery("http://x/api/leaderboard?track=rust").track).toBe("rust");
+    expect(parseLeaderboardQuery("http://x/api/leaderboard?track=sql").track).toBe("sql");
+    expect(parseLeaderboardQuery("http://x/api/leaderboard?track=bash").track).toBe("bash");
+    expect(parseLeaderboardQuery("http://x/api/leaderboard?track=go").track).toBe("c");
   });
 });
 

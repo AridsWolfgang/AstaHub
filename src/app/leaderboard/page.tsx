@@ -100,17 +100,17 @@ export default function LeaderboardPage() {
               Ranked by track XP. Earn XP by completing theory, exercises, and assignments.
             </p>
           </div>
-          <div className="flex items-center gap-1 rounded-lg border border-white/10 p-1">
-            {(["c", "python", "cpp", "js"] as TrackKey[]).map((t) => (
+          <div className="flex flex-wrap items-center gap-1 rounded-lg border border-white/10 p-1">
+            {(["c", "python", "cpp", "js", "rust", "sql", "bash"] as TrackKey[]).map((t) => (
               <button
                 key={t}
                 onClick={() => setTrack(t)}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-xs font-mono transition-colors",
+                  "rounded-md px-2.5 py-1.5 text-xs font-mono transition-colors",
                   track === t ? "bg-white text-black" : "text-gray-400 hover:text-white"
                 )}
               >
-                {t === "c" ? "C" : t === "python" ? "Python" : t === "cpp" ? "C++" : "JS/TS"}
+                {t === "c" ? "C" : t === "python" ? "Python" : t === "cpp" ? "C++" : t === "js" ? "JS/TS" : t === "rust" ? "Rust" : t === "sql" ? "SQL" : "Bash"}
               </button>
             ))}
           </div>

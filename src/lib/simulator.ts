@@ -1905,13 +1905,24 @@ export function simulateAnsi(code: string, language: string): string {
       ? "Simulated C++ (not available)"
       : language === "js"
       ? "Simulated JavaScript (not available)"
+      : language === "rust"
+      ? "Simulated Rust (not available)"
+      : language === "sql"
+      ? "Simulated SQL (not available)"
+      : language === "bash"
+      ? "Simulated Bash (not available)"
       : "Simulated NASM x86-64";
   output.push(`// ASTA Runner v2.0 — ${label}`);
   output.push(`// ─────────────────────────────────────────────`);
   output.push("");
 
-  if (language === "cpp" || language === "js") {
-    const what = language === "cpp" ? "C++" : "JavaScript";
+  if (language === "cpp" || language === "js" || language === "rust" || language === "sql" || language === "bash") {
+    const what =
+      language === "cpp" ? "C++"
+      : language === "js" ? "JavaScript"
+      : language === "rust" ? "Rust"
+      : language === "sql" ? "SQL"
+      : "Bash";
     output.push(
       `// There is no in-browser simulator for ${what} yet.`,
       "// Connect the Piston backend (PISTON_AUTH_TOKEN) for real execution,",

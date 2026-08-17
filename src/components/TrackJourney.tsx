@@ -4,21 +4,35 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Flame, Lock, Trophy } from "lucide-react";
 import { getTrackLessons } from "@/lib/curriculum";
-import { usePythonStore, useCppStore, useJsStore, isDayUnlocked } from "@/lib/store";
+import { usePythonStore, useCppStore, useJsStore, useRustStore, useSqlStore, useBashStore, isDayUnlocked } from "@/lib/store";
 import { getTierByLevel } from "@/lib/types";
 import type { Lesson, TrackKey } from "@/lib/types";
 import { formatDay, cn } from "@/lib/utils";
 
-type JourneyTrack = "python" | "cpp" | "js";
+type JourneyTrack = "python" | "cpp" | "js" | "rust" | "sql" | "bash";
 
 const TRACK_NAMES: Record<JourneyTrack, string> = {
   python: "Python",
   cpp: "C++",
   js: "JavaScript / TypeScript",
+  rust: "Rust",
+  sql: "SQL & Databases",
+  bash: "Bash / Linux / Git",
 };
 
 export default function TrackJourney({ track }: { track: JourneyTrack }) {
-  const store = track === "python" ? usePythonStore : track === "cpp" ? useCppStore : useJsStore;
+  const store =
+    track === "python"
+      ? usePythonStore
+      : track === "cpp"
+      ? useCppStore
+      : track === "js"
+      ? useJsStore
+      : track === "rust"
+      ? useRustStore
+      : track === "sql"
+      ? useSqlStore
+      : useBashStore;
   const { completedDays, completedExercises, completedAssignments, totalXp, streak, currentDay, level } = store();
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);

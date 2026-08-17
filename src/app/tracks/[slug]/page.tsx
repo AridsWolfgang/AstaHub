@@ -118,8 +118,8 @@ export default async function TrackPage({
         )}
       </div>
 
-      {(slug === "python" || slug === "cpp" || slug === "javascript") && (
-        <TrackJourney track={slug === "javascript" ? "js" : slug} />
+      {(slug === "python" || slug === "cpp" || slug === "javascript" || slug === "rust" || slug === "sql" || slug === "toolkit") && (
+        <TrackJourney track={slug === "javascript" ? "js" : slug === "toolkit" ? "bash" : slug} />
       )}
     </div>
   );

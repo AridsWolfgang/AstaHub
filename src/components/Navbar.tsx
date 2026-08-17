@@ -21,6 +21,8 @@ import {
   ArrowRight,
   Settings,
   Award,
+  Users,
+  Radio,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProgressStore } from "@/lib/store";
@@ -31,6 +33,8 @@ import Logo from "@/components/Logo";
 const NAV_ITEMS = [
   { href: "/dashboard", icon: Compass, label: "My journey" },
   { href: "/playground", icon: Code2, label: "Practice" },
+  { href: "/live", icon: Radio, label: "Live" },
+  { href: "/community", icon: Users, label: "Community" },
 ];
 
 const ACCOUNT_ITEMS = [

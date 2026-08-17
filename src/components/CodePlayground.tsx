@@ -41,6 +41,8 @@ interface CodePlaygroundProps {
   onRun?: (code: string) => void;
   /** Called after each run with the raw terminal output (for auto-verification). */
   onRunOutput?: (output: string) => void;
+  /** Called whenever the editor contents change (for the AI coach context). */
+  onCodeChange?: (code: string) => void;
 }
 
 async function executeCode(code: string, language: Language) {
@@ -66,6 +68,7 @@ export default function CodePlayground({
   height = "320px",
   onRun,
   onRunOutput,
+  onCodeChange,
 }: CodePlaygroundProps) {
   const [code, setCode] = useState(defaultCode);
   const [output, setOutput] = useState("");
@@ -124,7 +127,21 @@ export default function CodePlayground({
   };
 
   const monacoLang =
-    language === "c" ? "c" : language === "asm" ? "plaintext" : language === "python" ? "python" : language === "cpp" ? "cpp" : "javascript";
+    language === "c"
+      ? "c"
+      : language === "asm"
+      ? "plaintext"
+      : language === "python"
+      ? "python"
+      : language === "cpp"
+      ? "cpp"
+      : language === "js"
+      ? "javascript"
+      : language === "rust"
+      ? "rust"
+      : language === "sql"
+      ? "sql"
+      : "shell";
 
   const modeColor = {
     idle: "text-gray-500",
@@ -159,7 +176,13 @@ export default function CodePlayground({
                 ? "Python 3"
                 : language === "cpp"
                 ? "C++20"
-                : "JavaScript"}
+                : language === "js"
+                ? "JavaScript"
+                : language === "rust"
+                ? "Rust 2021"
+                : language === "sql"
+                ? "SQLite"
+                : "Bash"}
             </span>
             {executionMode !== "idle" && (
               <span className={cn("flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-mono border", modeColor)}>
@@ -199,7 +222,12 @@ export default function CodePlayground({
             <MonacoEditor
               language={monacoLang}
               value={code}
-              onChange={(v) => !readOnly && setCode(v ?? "")}
+              onChange={(v) => {
+                if (readOnly) return;
+                const next = v ?? "";
+                setCode(next);
+                onCodeChange?.(next);
+              }}
               theme="vs-dark"
               options={{
                 readOnly,

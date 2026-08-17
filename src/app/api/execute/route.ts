@@ -54,6 +54,9 @@ function getPistonLanguage(lang: string): { language: string; version: string } 
   if (lang === "python") return { language: "python", version: "*" };
   if (lang === "cpp") return { language: "c++", version: "*" };
   if (lang === "js") return { language: "javascript", version: "*" };
+  if (lang === "rust") return { language: "rust", version: "*" };
+  if (lang === "sql") return { language: "sqlite3", version: "*" };
+  if (lang === "bash") return { language: "bash", version: "*" };
   return { language: lang, version: "*" };
 }
 
@@ -150,9 +153,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (language !== "c" && language !== "asm" && language !== "python" && language !== "cpp" && language !== "js") {
+  if (language !== "c" && language !== "asm" && language !== "python" && language !== "cpp" && language !== "js" && language !== "rust" && language !== "sql" && language !== "bash") {
     return NextResponse.json(
-      { error: "Language must be 'c', 'asm', 'python', 'cpp', or 'js'" },
+      { error: "Language must be 'c', 'asm', 'python', 'cpp', 'js', 'rust', 'sql', or 'bash'" },
       { status: 400 }
     );
   }

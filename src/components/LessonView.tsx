@@ -19,8 +19,9 @@ import {
 } from "lucide-react";
 import CyberPanel from "@/components/CyberPanel";
 import CodePlayground from "@/components/CodePlayground";
+import CoachPanel from "@/components/coach/CoachPanel";
 import { getTrackLesson, getTrackTotalDays } from "@/lib/curriculum";
-import { useProgressStore, usePythonStore, useCppStore, useJsStore } from "@/lib/store";
+import { useProgressStore, usePythonStore, useCppStore, useJsStore, useRustStore, useSqlStore, useBashStore } from "@/lib/store";
 import { getTierByLevel } from "@/lib/types";
 import { formatDay, cn } from "@/lib/utils";
 import type { Exercise, Lesson, TrackKey } from "@/lib/types";
@@ -32,6 +33,9 @@ const TRACK_META: Record<TrackKey, { home: string; next: string }> = {
   python: { home: "/tracks/python", next: "Day" },
   cpp: { home: "/tracks/cpp", next: "Day" },
   js: { home: "/tracks/javascript", next: "Day" },
+  rust: { home: "/tracks/rust", next: "Day" },
+  sql: { home: "/tracks/sql", next: "Day" },
+  bash: { home: "/tracks/toolkit", next: "Day" },
 };
 
 function lessonHref(track: TrackKey, day: number): string {
@@ -43,12 +47,15 @@ const TRACK_BACK: Record<TrackKey, string> = {
   python: "Back to Python track",
   cpp: "Back to C++ track",
   js: "Back to JavaScript track",
+  rust: "Back to Rust track",
+  sql: "Back to SQL track",
+  bash: "Back to Bash track",
 };
 
 export default function LessonView({ track, day }: { track: TrackKey; day: number }) {
   const router = useRouter();
   const store =
-    track === "python" ? usePythonStore : track === "cpp" ? useCppStore : track === "js" ? useJsStore : useProgressStore;
+    track === "python" ? usePythonStore : track === "cpp" ? useCppStore : track === "js" ? useJsStore : track === "rust" ? useRustStore : track === "sql" ? useSqlStore : track === "bash" ? useBashStore : useProgressStore;
   const {
     completeDay,
     completeExercise,
@@ -67,6 +74,7 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
   const [quizResults, setQuizResults] = useState<Record<string, boolean>>({});
   const [showHints, setShowHints] = useState<Record<string, boolean>>({});
   const [runOutputs, setRunOutputs] = useState<Record<string, string>>({});
+  const [codeAttempts, setCodeAttempts] = useState<Record<string, string>>({});
   const [noteInput, setNoteInput] = useState("");
   const [noteMinimized, setNoteMinimized] = useState(true);
   const [totalDays, setTotalDays] = useState(100);
@@ -192,16 +200,18 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
       ? "Python"
       : lesson.language === "js"
       ? "JavaScript"
+      : lesson.language === "rust"
+      ? "Rust"
+      : lesson.language === "sql"
+      ? "SQL"
+      : lesson.language === "bash"
+      ? "Bash"
       : "C++";
   const langClass =
     lesson.language === "c"
       ? "bg-cyber-cyan/10 text-cyber-cyan"
       : lesson.language === "asm"
       ? "bg-white/5 text-gray-300"
-      : lesson.language === "python"
-      ? "bg-white/10 text-white"
-      : lesson.language === "js"
-      ? "bg-white/10 text-white"
       : "bg-white/10 text-white";
 
   return (
@@ -383,6 +393,16 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
                           expectedOutput={exercise.expectedOutput}
                           height="240px"
                           onRunOutput={(o) => handleCodeRun(exercise.id, o)}
+                          onCodeChange={(c) =>
+                            setCodeAttempts((prev) => ({ ...prev, [exercise.id]: c }))
+                          }
+                        />
+                        <CoachPanel
+                          track={track}
+                          day={day}
+                          topic={lesson.title}
+                          prompt={exercise.description}
+                          code={codeAttempts[exercise.id] ?? ""}
                         />
                         {exercise.hints && (
                           <div className="mt-3">

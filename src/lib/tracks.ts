@@ -78,25 +78,32 @@ export const TRACK_GROUPS: TrackGroup[] = [
       {
         slug: "rust",
         name: "Rust",
-        status: "planned",
+        status: "live",
         outcome: "Memory safety without garbage collection",
         description:
-          "Ownership, borrowing, and fearless concurrency — systems programming done right.",
+          "Ownership, borrowing, and fearless concurrency — systems programming done right. Forty days from your first println! to traits, lifetimes, and threads.",
+        href: "/lesson/rust/1",
+        days: 40,
       },
       {
         slug: "sql",
         name: "SQL & Databases",
-        status: "planned",
+        status: "live",
         outcome: "Design, query, and optimize real data systems",
-        description: "From your first SELECT to schema design and query tuning.",
+        description:
+          "From your first SELECT to schema design, joins, and query tuning. Forty days from a single table to a well-normalized database you actually built.",
+        href: "/lesson/sql/1",
+        days: 40,
       },
       {
         slug: "toolkit",
         name: "Bash / Linux / Git",
-        status: "planned",
+        status: "live",
         outcome: "The working toolkit every engineer needs",
         description:
-          "The shell, the OS, and version control — cross-cutting skills woven through every track.",
+          "The shell, the OS, and version control — the cross-cutting toolkit woven through every track. Forty days from your first echo to a deploy script and a real git workflow.",
+        href: "/lesson/bash/1",
+        days: 40,
       },
     ],
   },

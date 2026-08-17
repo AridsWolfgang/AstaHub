@@ -15,7 +15,25 @@ interface Certificate {
   issuedAt: string;
 }
 
-const TRACK_HOME: Record<string, string> = { c: "/dashboard", python: "/tracks/python", cpp: "/tracks/cpp" };
+const TRACK_HOME: Record<string, string> = {
+  c: "/dashboard",
+  python: "/tracks/python",
+  cpp: "/tracks/cpp",
+  js: "/tracks/javascript",
+  rust: "/tracks/rust",
+  sql: "/tracks/sql",
+  bash: "/tracks/toolkit",
+};
+
+const TRACK_LABEL: Record<string, string> = {
+  c: "C / Assembly",
+  python: "Python",
+  cpp: "C++",
+  js: "JavaScript / TypeScript",
+  rust: "Rust",
+  sql: "SQL & Databases",
+  bash: "Bash / Linux / Git",
+};
 
 export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -56,7 +74,7 @@ export default function CertificatesPage() {
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               {Object.entries(TRACK_HOME).map(([track, href]) => (
                 <Link key={track} href={href} className="btn-cyber text-xs">
-                  {track === "c" ? "C / Assembly" : track === "python" ? "Python" : "C++"}
+                  {TRACK_LABEL[track] ?? track}
                   <ChevronRight className="h-3 w-3" />
                 </Link>
               ))}

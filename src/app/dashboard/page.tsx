@@ -18,6 +18,9 @@ import {
   usePythonStore,
   useCppStore,
   useJsStore,
+  useRustStore,
+  useSqlStore,
+  useBashStore,
   getOverallProgress,
   isDayUnlocked,
 } from "@/lib/store";
@@ -27,12 +30,23 @@ import { getTrackLesson, getTrackTotalDays, TOTAL_TRACKS } from "@/lib/curriculu
 import type { Lesson, TrackKey } from "@/lib/types";
 import { formatDay, cn } from "@/lib/utils";
 
-const TRACK_NAMES: Record<TrackKey, string> = { c: "C / Assembly", python: "Python", cpp: "C++", js: "JavaScript / TypeScript" };
+const TRACK_NAMES: Record<TrackKey, string> = {
+  c: "C / Assembly",
+  python: "Python",
+  cpp: "C++",
+  js: "JavaScript / TypeScript",
+  rust: "Rust",
+  sql: "SQL & Databases",
+  bash: "Bash / Linux / Git",
+};
 const STORES: Record<TrackKey, () => ProgressState> = {
   c: useProgressStore,
   python: usePythonStore,
   cpp: useCppStore,
   js: useJsStore,
+  rust: useRustStore,
+  sql: useSqlStore,
+  bash: useBashStore,
 };
 
 function lessonHref(track: TrackKey, day: number): string {
@@ -40,7 +54,9 @@ function lessonHref(track: TrackKey, day: number): string {
 }
 
 function curriculumHref(track: TrackKey): string {
-  return track === "c" ? "/curriculum" : `/tracks/${track}`;
+  if (track === "c") return "/curriculum";
+  if (track === "bash") return "/tracks/toolkit";
+  return `/tracks/${track}`;
 }
 
 function dayRange(from: number, to: number): number[] {
@@ -54,7 +70,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search).get("track");
-    if (q === "python" || q === "cpp" || q === "js") setTrack(q);
+    if (q === "python" || q === "cpp" || q === "js" || q === "rust" || q === "sql" || q === "bash") setTrack(q);
   }, []);
 
   const store = STORES[track];
@@ -110,19 +126,19 @@ export default function DashboardPage() {
               Welcome back. Today is your next day.
             </p>
           </div>
-          <div className="flex items-center gap-1 rounded-lg border border-white/10 p-1">
-            {(["c", "python", "cpp", "js"] as TrackKey[]).map((t) => (
+          <div className="flex flex-wrap items-center gap-1 rounded-lg border border-white/10 p-1">
+            {(["c", "python", "cpp", "js", "rust", "sql", "bash"] as TrackKey[]).map((t) => (
               <button
                 key={t}
                 onClick={() => setTrack(t)}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-xs font-mono transition-colors",
+                  "rounded-md px-2.5 py-1.5 text-xs font-mono transition-colors",
                   track === t
                     ? "bg-white text-black"
                     : "text-gray-400 hover:text-white"
                 )}
               >
-                {t === "c" ? "C" : t === "python" ? "Python" : t === "cpp" ? "C++" : "JS/TS"}
+                {t === "c" ? "C" : t === "python" ? "Python" : t === "cpp" ? "C++" : t === "js" ? "JS/TS" : t === "rust" ? "Rust" : t === "sql" ? "SQL" : "Bash"}
               </button>
             ))}
           </div>
