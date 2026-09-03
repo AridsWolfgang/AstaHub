@@ -1,3 +1,5 @@
 {
-  "extends": "next/core-web-vitals"
+  "root": true,
+  "env": { "browser": true, "es2020": true, "node": true },
+  "ignorePatterns": ["dist", "node_modules", ".next"]
 }

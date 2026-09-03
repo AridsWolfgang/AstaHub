@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useParams } from "react-router-dom";
+import { useSession } from "@/lib/auth-client";
 import { Trash2, Loader2 } from "lucide-react";
 import { Avatar } from "@/components/community/Avatar";
 import { VoteButtons } from "@/components/community/VoteButtons";

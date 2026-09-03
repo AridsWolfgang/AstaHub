@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 export default function NotFound() {
   return (
@@ -14,7 +14,7 @@ export default function NotFound() {
       <p className="text-gray-400 font-mono text-sm mb-8 max-w-md">
         The page you&apos;re looking for doesn&apos;t exist or has moved.
       </p>
-      <Link href="/dashboard" className="btn-cyber-solid">
+      <Link to="/dashboard" className="btn-cyber-solid">
         Go to Dashboard
       </Link>
     </div>

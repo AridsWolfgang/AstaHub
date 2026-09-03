@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { Link, useLocation } from "react-router-dom";
+import { useSession, signOut } from "@/lib/auth-client";
 import {
   Compass,
   Code2,
@@ -48,7 +47,7 @@ const ACCOUNT_ITEMS = [
 const LEARN_ICONS = { languages: Code2, sciences: Atom, dream: Sparkles } as const;
 
 export default function Navbar() {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   const { totalXp, streak } = useProgressStore();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [learnOpen, setLearnOpen] = useState(false);
@@ -121,7 +120,7 @@ export default function Navbar() {
             {learnOpen && (
               <div className="absolute left-0 top-full mt-2 w-72 overflow-hidden rounded-2xl border border-white/10 bg-black/95 p-2 shadow-2xl backdrop-blur-xl">
                 <Link
-                  href="/tracks"
+                  to="/tracks"
                   onClick={() => setLearnOpen(false)}
                   className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
                 >
@@ -137,7 +136,7 @@ export default function Navbar() {
                   return (
                     <Link
                       key={group.id}
-                      href={`/tracks#${group.id}`}
+                      to={`/tracks#${group.id}`}
                       onClick={() => setLearnOpen(false)}
                       className="flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/5"
                     >
@@ -163,7 +162,7 @@ export default function Navbar() {
           {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
             <Link
               key={href}
-              href={href}
+              to={href}
               className={cn(
                 "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
                 pathname === href
@@ -192,14 +191,14 @@ export default function Navbar() {
                 )}
               </div>
               <Link
-                href="/profile"
+                to="/profile"
                 className="hidden h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-gray-400 transition-colors hover:border-white/25 hover:text-white md:flex"
                 aria-label="Profile"
               >
                 <User className="h-4 w-4" />
               </Link>
               <button
-                onClick={() => signOut({ callbackUrl: "/" })}
+                onClick={() => signOut()}
                 className="hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-gray-400 transition-colors hover:bg-white/5 hover:text-white lg:flex"
               >
                 <LogOut className="h-4 w-4" />
@@ -207,7 +206,7 @@ export default function Navbar() {
               </button>
             </>
           ) : (
-            <Link href="/signin" className="btn-primary !px-4 !py-2 text-sm">
+            <Link to="/signin" className="btn-primary !px-4 !py-2 text-sm">
               Sign in
             </Link>
           )}
@@ -256,7 +255,7 @@ export default function Navbar() {
                   Learn
                 </p>
                 <Link
-                  href="/tracks"
+                  to="/tracks"
                   onClick={close}
                   className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-400 hover:bg-white/5 hover:text-white"
                 >
@@ -268,7 +267,7 @@ export default function Navbar() {
                   return (
                     <Link
                       key={group.id}
-                      href={`/tracks#${group.id}`}
+                      to={`/tracks#${group.id}`}
                       onClick={close}
                       className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-400 hover:bg-white/5 hover:text-white"
                     >
@@ -284,7 +283,7 @@ export default function Navbar() {
                 {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
                   <Link
                     key={href}
-                    href={href}
+                    to={href}
                     onClick={close}
                     className={cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
@@ -323,7 +322,7 @@ export default function Navbar() {
                     {ACCOUNT_ITEMS.map(({ href, icon: Icon, label }) => (
                       <Link
                         key={href}
-                        href={href}
+                        to={href}
                         onClick={close}
                         className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-400 hover:bg-white/5 hover:text-white"
                       >
@@ -332,7 +331,7 @@ export default function Navbar() {
                       </Link>
                     ))}
                     <button
-                      onClick={() => signOut({ callbackUrl: "/" })}
+                      onClick={() => signOut()}
                       className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-400 hover:bg-white/5 hover:text-white"
                     >
                       <LogOut className="h-4 w-4" /> Sign out
@@ -349,7 +348,7 @@ export default function Navbar() {
                         the leaderboard.
                       </p>
                       <Link
-                        href="/signin"
+                        to="/signin"
                         onClick={close}
                         className="btn-primary mt-3 flex w-full items-center justify-center !px-4 !py-2 text-sm"
                       >

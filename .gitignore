@@ -7,10 +7,12 @@
 # testing
 /coverage
 
-# next.js
+# build
 /.next/
 /out/
-
+# Vite
+/dist/
+/dist-server/
 # production
 /build
 
@@ -18,10 +20,6 @@
 .DS_Store
 *.pem
 *.log
-
-# next-sitemap
-/public/sitemap*
-/public/robots.txt
 
 # environment
 .env

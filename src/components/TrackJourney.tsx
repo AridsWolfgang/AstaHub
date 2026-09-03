@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, Flame, Lock, Trophy } from "lucide-react";
 import { getTrackLessons } from "@/lib/curriculum";
 import { usePythonStore, useCppStore, useJsStore, useRustStore, useSqlStore, useBashStore, isDayUnlocked } from "@/lib/store";
@@ -120,7 +120,7 @@ export default function TrackJourney({ track }: { track: JourneyTrack }) {
 
       {nextLesson && (
         <Link
-          href={`/lesson/${track}/${nextLesson.day}`}
+          to={`/lesson/${track}/${nextLesson.day}`}
           className="btn-primary mt-6 inline-flex"
         >
           {completedDays.length === 0 ? "Start the track" : "Continue learning"}
@@ -142,7 +142,7 @@ export default function TrackJourney({ track }: { track: JourneyTrack }) {
               return (
                   <Link
                     key={lesson.day}
-                    href={unlocked ? `/lesson/${track}/${lesson.day}` : "#"}
+                    to={unlocked ? `/lesson/${track}/${lesson.day}` : "#"}
                     className={cn(
                       "flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors",
                       done

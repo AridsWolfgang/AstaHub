@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, Clock3, Compass } from "lucide-react";
 import { TRACK_GROUPS, TRACKS } from "@/lib/tracks";
 import type { Track, TrackStatus } from "@/lib/tracks";
@@ -33,8 +33,7 @@ function TrackRow({ track }: { track: Track }) {
 
   return (
     <li className="border-t border-white/5 first:border-t-0">
-      <Link
-        href={`/tracks/${track.slug}`}
+      <Link to={`/tracks/${track.slug}`}
         className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
       >
         {inner}
@@ -102,7 +101,7 @@ export default function TracksPage() {
             hands-on engine.
           </p>
         </div>
-        <Link href="/curriculum" className="btn-primary whitespace-nowrap">
+        <Link to="/curriculum" className="btn-primary whitespace-nowrap">
           Start a live track
           <ArrowRight className="h-4 w-4" />
         </Link>

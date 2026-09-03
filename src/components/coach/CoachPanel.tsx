@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Sparkles, Loader2, Lightbulb, Send } from "lucide-react";
 import { HINT_LADDER } from "@/lib/coach";
 
@@ -102,7 +102,7 @@ export default function CoachPanel({ track, day, topic, prompt, code }: CoachPan
             <p className="rounded-lg border border-white/10 bg-white/[0.02] p-3 text-xs leading-relaxed text-gray-400">
               The AI coach is not connected on this server yet — it answers honestly rather
               than pretending. Try the built-in hints in this lesson, or ask in the{" "}
-              <Link href="/community/questions" className="text-white underline underline-offset-2">
+              <Link to="/community/questions" className="text-white underline underline-offset-2">
                 community
               </Link>{" "}
               where real humans help.

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Award, Loader2, Printer, ChevronRight } from "lucide-react";
 import CyberPanel from "@/components/CyberPanel";
 import { LogoMark } from "@/components/Logo";
@@ -73,7 +73,7 @@ export default function CertificatesPage() {
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               {Object.entries(TRACK_HOME).map(([track, href]) => (
-                <Link key={track} href={href} className="btn-cyber text-xs">
+                <Link key={track} to={href} className="btn-cyber text-xs">
                   {TRACK_LABEL[track] ?? track}
                   <ChevronRight className="h-3 w-3" />
                 </Link>

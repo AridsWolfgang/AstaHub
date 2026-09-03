@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { Link } from "react-router-dom";
+import { useSession } from "@/lib/auth-client";
 import { ArrowLeft, Loader2, Send, Radio } from "lucide-react";
 import { Avatar } from "@/components/community/Avatar";
 import { relativeTime } from "@/lib/time";
@@ -134,8 +134,7 @@ export default function LiveRoomClient({ event }: { event: RoomEvent }) {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-      <Link
-        href={`/live/${event.slug}`}
+      <Link to={`/live/${event.slug}`}
         className="inline-flex items-center gap-1.5 font-mono text-xs text-gray-500 transition-colors hover:text-white"
       >
         <ArrowLeft className="h-3.5 w-3.5" /> {event.title}
@@ -232,7 +231,7 @@ export default function LiveRoomClient({ event }: { event: RoomEvent }) {
                 </button>
               </>
             ) : (
-              <Link href="/signin" className="btn-primary w-full !px-4 !py-2 text-center text-xs">
+              <Link to="/signin" className="btn-primary w-full !px-4 !py-2 text-center text-xs">
                 Sign in to join the conversation
               </Link>
             )}

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Newspaper, HelpCircle, Users, ShieldCheck, ArrowRight } from "lucide-react";
 
 const SECTIONS = [
@@ -37,7 +37,7 @@ export default function CommunityPage() {
         {SECTIONS.map(({ href, icon: Icon, title, tagline }) => (
           <Link
             key={href}
-            href={href}
+            to={href}
             className="group flex flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition-colors hover:border-white/25 hover:bg-white/[0.04]"
           >
             <div>

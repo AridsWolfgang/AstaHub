@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { CalendarPlus, Loader2 } from "lucide-react";
 import { LIVE_TYPE_LABELS } from "@/lib/live";
 import { TRACKS } from "@/lib/tracks";
@@ -9,7 +9,7 @@ import { TRACKS } from "@/lib/tracks";
 const TYPES = Object.entries(LIVE_TYPE_LABELS) as [string, string][];
 
 export default function CreateEventForm() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,8 +60,8 @@ export default function CreateEventForm() {
         return;
       }
       setOpen(false);
-      router.push(`/live/${data.event.slug}`);
-      router.refresh();
+      navigate(`/live/${data.event.slug}`);
+      window.location.reload();
     } finally {
       setSaving(false);
     }

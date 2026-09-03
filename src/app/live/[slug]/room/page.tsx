@@ -1,27 +1,17 @@
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { deriveLiveStatus } from "@/lib/live";
+"use client";
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
 import LiveRoomClient from "@/components/live/LiveRoomClient";
 
-export default async function LiveRoomPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const event = await prisma.liveEvent.findUnique({ where: { slug } });
-  if (!event) notFound();
-
-  const status = deriveLiveStatus(event.status, event.startAt, event.durationMinutes, new Date());
-
-  return (
-    <LiveRoomClient
-      event={{
-        id: event.id,
-        slug: event.slug,
-        title: event.title,
-        status,
-        startAt: event.startAt.toISOString(),
-        durationMinutes: event.durationMinutes,
-        youtubeUrl: event.youtubeUrl,
-        recordingUrl: event.recordingUrl,
-      }}
-    />
-  );
+export default function LiveRoomPage(){
+  const { slug } = useParams<{ slug: string }>();
+  const [event, setEvent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(()=>{
+    if(!slug) return;
+    fetch(`/api/live/${slug}`).then(r=>r.json()).then(j=> setEvent(j.event ?? j)).finally(()=> setLoading(false));
+  },[slug]);
+  if(loading) return <div className="p-10 text-center font-mono text-sm text-gray-500">Loading…</div>;
+  if(!event) return <div className="p-10 text-center text-gray-500">Room not found. <Link to="/live" className="text-white underline">Back</Link></div>;
+  return <LiveRoomClient event={event} />;
 }

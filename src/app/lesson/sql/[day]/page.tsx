@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams } from "react-router-dom";
 import LessonView from "@/components/LessonView";
 
 export default function SqlLessonPage() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { motion, useInView, useMotionValue, animate } from "framer-motion";
 import {
   ArrowRight,
@@ -98,11 +98,11 @@ export default function HomePage() {
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Link href="/dashboard" className="btn-primary text-base">
+              <Link to="/dashboard" className="btn-primary text-base">
                 Start learning
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/tracks" className="btn text-base">
+              <Link to="/tracks" className="btn text-base">
                 Explore the tracks
               </Link>
             </div>
@@ -180,7 +180,7 @@ export default function HomePage() {
                 capstone.
               </p>
             </div>
-            <Link href="/tracks" className="btn text-sm">
+            <Link to="/tracks" className="btn text-sm">
               Explore all tracks
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -228,8 +228,7 @@ export default function HomePage() {
                         key={track.slug}
                         className="border-t border-white/5 first:border-t-0"
                       >
-                        <Link
-                          href={`/tracks/${track.slug}`}
+                        <Link to={`/tracks/${track.slug}`}
                           className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
                         >
                           {inner}
@@ -257,7 +256,7 @@ export default function HomePage() {
             And it should be for everyone.
           </p>
           <div className="mt-10 flex justify-center">
-            <Link href="/dashboard" className="btn-primary text-base">
+            <Link to="/dashboard" className="btn-primary text-base">
               Begin your journey
               <ArrowRight className="h-4 w-4" />
             </Link>

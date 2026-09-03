@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { Link } from "react-router-dom";
+import { useSession } from "@/lib/auth-client";
 import { Users, Loader2, ArrowRight } from "lucide-react";
 import { Avatar } from "@/components/community/Avatar";
 import { relativeTime } from "@/lib/time";
@@ -122,7 +122,7 @@ export default function GroupsPage() {
           {groups.map((g) => (
             <Link
               key={g.id}
-              href={`/community/groups/${g.slug}`}
+              to={`/community/groups/${g.slug}`}
               className="group block rounded-2xl border border-white/5 bg-white/[0.02] p-5 transition-colors hover:border-white/15 hover:bg-white/[0.03]"
             >
               <div className="flex items-center justify-between gap-4">

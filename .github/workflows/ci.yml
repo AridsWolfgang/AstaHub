@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/asta
+      JWT_SECRET: ci-placeholder-secret
       NEXTAUTH_SECRET: ci-placeholder-secret
     steps:
       - uses: actions/checkout@v4
@@ -31,5 +32,5 @@ jobs:
       - name: Tests
         run: npm test
 
-      - name: Build
+      - name: Build (Vite)
         run: npm run build

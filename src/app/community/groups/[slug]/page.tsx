@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useParams } from "react-router-dom";
+import { useSession } from "@/lib/auth-client";
 import { Loader2, Send, Users } from "lucide-react";
 import { Avatar } from "@/components/community/Avatar";
 import { relativeTime } from "@/lib/time";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const FONT_STACK =
@@ -45,8 +45,7 @@ export default function Logo({
   onClick,
 }: LogoProps) {
   return (
-    <Link
-      href="/"
+    <Link to="/"
       onClick={onClick}
       className={cn("group flex shrink-0 items-center gap-3", className)}
     >

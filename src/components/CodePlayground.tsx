@@ -1,6 +1,7 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import * as React from "react";
+const dynamic = (loader: () => Promise<{ default: React.ComponentType<any> }>, _opts?: unknown) => React.lazy(loader); // shimmed for Vite
 import { useState, useEffect, useCallback } from "react";
 import { Play, RotateCcw, Copy, Check, Terminal, Cpu } from "lucide-react";
 import CyberPanel from "./CyberPanel";
@@ -222,7 +223,7 @@ export default function CodePlayground({
             <MonacoEditor
               language={monacoLang}
               value={code}
-              onChange={(v) => {
+              onChange={(v: string | undefined) => {
                 if (readOnly) return;
                 const next = v ?? "";
                 setCode(next);

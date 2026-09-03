@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { CheckCircle2, Lock, Filter, Search, BookOpen, Cpu } from "lucide-react";
 import CyberPanel from "@/components/CyberPanel";
 import type { LessonMeta } from "@/lib/curriculum";
@@ -167,7 +167,7 @@ export default function CurriculumBrowser({ lessons }: { lessons: LessonMeta[] }
                 return (
                     <Link
                       key={lesson.day}
-                      href={unlocked ? `/lesson/${lesson.day}` : "#"}
+                      to={unlocked ? `/lesson/${lesson.day}` : "#"}
                       className={cn(
                         "flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors",
                         done

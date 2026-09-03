@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { LogoMark } from "@/components/Logo";
 import { TRACK_GROUPS } from "@/lib/tracks";
 
@@ -48,8 +48,7 @@ export default function Footer() {
             <ul className="mt-4 space-y-2.5">
               {LEARN_LINKS.map((l) => (
                 <li key={l.href}>
-                  <Link
-                    href={l.href}
+                  <Link to={l.href}
                     className="text-sm text-gray-400 transition-colors hover:text-white"
                   >
                     {l.label}
@@ -66,8 +65,7 @@ export default function Footer() {
             <ul className="mt-4 space-y-2.5">
               {TRACK_GROUPS.map((g) => (
                 <li key={g.id}>
-                  <Link
-                    href={`/tracks#${g.id}`}
+                  <Link to={`/tracks#${g.id}`}
                     className="text-sm text-gray-400 transition-colors hover:text-white"
                   >
                     {g.title}
@@ -84,8 +82,7 @@ export default function Footer() {
             <ul className="mt-4 space-y-2.5">
               {ACCOUNT_LINKS.map((l) => (
                 <li key={l.href}>
-                  <Link
-                    href={l.href}
+                  <Link to={l.href}
                     className="text-sm text-gray-400 transition-colors hover:text-white"
                   >
                     {l.label}
@@ -98,7 +95,15 @@ export default function Footer() {
 
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/5 pt-6 sm:flex-row sm:items-center">
           <p className="font-mono text-[11px] text-gray-500">
-            © {year} AstaHub · Free technical education, forever
+            © {year} AstaHub · Free technical education, forever · Powered by{" "}
+            <a
+              href="https://ps-hub.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 underline decoration-white/20 underline-offset-4 transition-colors hover:text-white hover:decoration-white/40"
+            >
+              Prosperity Systems Hub
+            </a>
           </p>
           <p className="font-mono text-[11px] text-gray-500">
             Learning should be fun. And it should be for everyone.

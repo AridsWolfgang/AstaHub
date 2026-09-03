@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Flame,
@@ -232,7 +232,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <Link
-                href={lessonHref(track, currentDay)}
+                to={lessonHref(track, currentDay)}
                 className="btn-cyber-solid whitespace-nowrap"
               >
                 Continue your journey
@@ -262,7 +262,7 @@ export default function DashboardPage() {
             return (
               <Link
                 key={lesson.day}
-                href={unlocked ? lessonHref(track, lesson.day) : "#"}
+                to={unlocked ? lessonHref(track, lesson.day) : "#"}
                 className={cn(
                   "group relative rounded-lg border p-4 transition-colors",
                   done
@@ -301,7 +301,7 @@ export default function DashboardPage() {
           })}
         </div>
         <div className="mt-4 text-center">
-          <Link href={curriculumHref(track)} className="text-xs font-mono text-cyber-cyan hover:underline">
+          <Link to={curriculumHref(track)} className="text-xs font-mono text-cyber-cyan hover:underline">
             View full {TRACK_NAMES[track]} curriculum →
           </Link>
         </div>

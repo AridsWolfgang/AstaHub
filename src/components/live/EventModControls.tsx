@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { CheckCircle2, XCircle, Trash2, Loader2 } from "lucide-react";
 
 export default function EventModControls({ eventId }: { eventId: string }) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
 
   const setStatus = async (status: string) => {
@@ -16,7 +16,7 @@ export default function EventModControls({ eventId }: { eventId: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
-      router.refresh();
+      window.location.reload();
     } finally {
       setBusy(false);
     }
@@ -27,8 +27,8 @@ export default function EventModControls({ eventId }: { eventId: string }) {
     setBusy(true);
     try {
       await fetch(`/api/live/${eventId}`, { method: "DELETE" });
-      router.push("/live");
-      router.refresh();
+      navigate("/live");
+      window.location.reload();
     } finally {
       setBusy(false);
     }

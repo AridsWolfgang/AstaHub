@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { useNavigate } from "react-router-dom";
+import { signOut  } from "@/lib/auth-client";
 import { Download, KeyRound, Trash2, Mail, Loader2, Check } from "lucide-react";
 import CyberPanel from "@/components/CyberPanel";
 
 export default function SettingsPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -77,8 +77,8 @@ export default function SettingsPage() {
     try {
       const res = await fetch("/api/me", { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete account.");
-      await signOut({ redirect: false });
-      router.push("/signin");
+      await signOut();
+      navigate("/signin");
     } catch (err) {
       setMsg({ ok: false, text: err instanceof Error ? err.message : "Failed to delete account." });
       setBusy(null);

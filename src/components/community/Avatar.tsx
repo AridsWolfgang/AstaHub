@@ -1,4 +1,4 @@
-import Image from "next/image";
+// Image -> img (migrated from next/image)
 import { cn } from "@/lib/utils";
 
 export function Avatar({
@@ -19,10 +19,10 @@ export function Avatar({
     .join("");
   if (image) {
     return (
-      <Image
+      <img
         src={image}
         alt={name}
-        unoptimized
+        
         width={size}
         height={size}
         className={cn("shrink-0 rounded-full border border-white/10 object-cover", className)}

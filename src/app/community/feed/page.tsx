@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { Link } from "react-router-dom";
+import { useSession } from "@/lib/auth-client";
 import { Newspaper, Loader2, ArrowRight } from "lucide-react";
 import { Avatar } from "@/components/community/Avatar";
 import { relativeTime } from "@/lib/time";
@@ -145,7 +145,7 @@ export default function CommunityFeedPage() {
         </div>
       ) : (
         <div className="mb-10 rounded-2xl border border-white/10 bg-white/[0.02] p-5 text-sm text-gray-400">
-          <Link href="/signin" className="text-white underline underline-offset-4">
+          <Link to="/signin" className="text-white underline underline-offset-4">
             Sign in
           </Link>{" "}
           to publish your own learnings. The feed is open to everyone.
@@ -168,7 +168,7 @@ export default function CommunityFeedPage() {
             {posts.map((post) => (
               <Link
                 key={post.id}
-                href={`/community/feed/${post.id}`}
+                to={`/community/feed/${post.id}`}
                 className="block rounded-2xl border border-white/5 bg-white/[0.02] p-5 transition-colors hover:border-white/15 hover:bg-white/[0.03]"
               >
                 <div className="flex items-center gap-3">

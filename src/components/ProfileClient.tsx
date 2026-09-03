@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
-import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+// Image -> img (migrated from next/image)
+import { signOut  } from "@/lib/auth-client";
+import { useNavigate } from "react-router-dom";
 import {
   Award,
   Flame,
@@ -50,10 +50,10 @@ function Avatar({ name, image, size = "md" }: { name: string; image: string | nu
   if (image) {
     const dims = size === "lg" ? { width: 96, height: 96 } : { width: 48, height: 48 };
     return (
-      <Image
+      <img
         src={image}
         alt={name}
-        unoptimized
+        
         {...dims}
         className={cn("object-cover border border-white/10", cls)}
       />
@@ -72,7 +72,7 @@ function Avatar({ name, image, size = "md" }: { name: string; image: string | nu
 }
 
 export default function ProfileClient({ user, tier }: { user: ProfileUser; tier: TierInfo }) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user.name);
   const [bio, setBio] = useState(user.bio ?? "");
@@ -99,7 +99,7 @@ export default function ProfileClient({ user, tier }: { user: ProfileUser; tier:
         return;
       }
       setEditing(false);
-      router.refresh();
+      window.location.reload();
     } catch {
       setError("Something went wrong.");
       setSaving(false);
@@ -107,7 +107,7 @@ export default function ProfileClient({ user, tier }: { user: ProfileUser; tier:
   }
 
   async function handleSignOut() {
-    await signOut({ callbackUrl: "/" });
+    await signOut();
   }
 
   return (

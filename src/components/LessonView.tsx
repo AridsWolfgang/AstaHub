@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
@@ -53,7 +53,7 @@ const TRACK_BACK: Record<TrackKey, string> = {
 };
 
 export default function LessonView({ track, day }: { track: TrackKey; day: number }) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const store =
     track === "python" ? usePythonStore : track === "cpp" ? useCppStore : track === "js" ? useJsStore : track === "rust" ? useRustStore : track === "sql" ? useSqlStore : track === "bash" ? useBashStore : useProgressStore;
   const {
@@ -105,12 +105,12 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       const hrefFor = (d: number) => lessonHref(track, d);
-      if (e.key === "ArrowLeft" && day > 1) router.push(hrefFor(day - 1));
-      if (e.key === "ArrowRight" && day < totalDays) router.push(hrefFor(day + 1));
+      if (e.key === "ArrowLeft" && day > 1) navigate(hrefFor(day - 1));
+      if (e.key === "ArrowRight" && day < totalDays) navigate(hrefFor(day + 1));
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [day, totalDays, track, router]);
+  }, [day, totalDays, track, navigate]);
 
   useEffect(() => {
     setNoteInput(notes[day] || "");
@@ -137,7 +137,7 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
         <p className="text-gray-400 font-mono text-sm">
           Lesson not found.
         </p>
-        <Link href={TRACK_META[track].home} className="btn-cyber text-xs mt-4 inline-block">
+        <Link to={TRACK_META[track].home} className="btn-cyber text-xs mt-4 inline-block">
           Back to track
         </Link>
       </div>
@@ -218,8 +218,7 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
     <div className="mx-auto max-w-5xl px-4 py-8">
       {/* Header */}
       <div className="mb-6">
-        <Link
-          href={TRACK_META[track].home}
+        <Link to={TRACK_META[track].home}
           className="inline-flex items-center gap-1 text-xs font-mono text-gray-500 hover:text-cyber-cyan mb-4 transition-colors"
         >
           <ArrowLeft className="h-3 w-3" />
@@ -565,8 +564,7 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
       {/* Navigation */}
       <div className="flex justify-between mt-10 pt-6 border-t border-white/5">
         {day > 1 ? (
-          <Link
-            href={lessonHref(track, day - 1)}
+          <Link to={lessonHref(track, day - 1)}
             className="btn-cyber text-xs group"
           >
             <ArrowLeft className="h-3 w-3" />
@@ -578,8 +576,7 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
           <div />
         )}
         {day < totalDays && (
-          <Link
-            href={lessonHref(track, day + 1)}
+          <Link to={lessonHref(track, day + 1)}
             className="btn-cyber text-xs group"
           >
             <span className="hidden sm:inline">Day {day + 1}</span>
