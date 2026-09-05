@@ -44,9 +44,20 @@ export function rateLimitSync(key: string, limit: number, windowMs: number): boo
   return memoryRateLimit(key, limit, windowMs);
 }
 
-/** Best-effort client IP from proxy headers, falling back to the direct peer. */
-export function clientIp(req: Request): string {
-  const forwarded = req.headers.get("x-forwarded-for");
+/** Best-effort client IP from proxy headers, falling back to the direct peer. Works with both Fetch Request and Express req. */
+export function clientIp(req: { headers: unknown; ip?: string; socket?: { remoteAddress?: string } }): string {
+  const h = req.headers as Record<string, unknown> | Headers;
+  // Fetch Headers
+  if (h && typeof (h as Headers).get === "function") {
+    const forwarded = (h as Headers).get("x-forwarded-for");
+    if (forwarded) return forwarded.split(",")[0]?.trim() || "unknown";
+    return (h as Headers).get("x-real-ip") || "unknown";
+  }
+  // Express plain object
+  const hdr = (h as Record<string, string>) || {};
+  const forwarded = (hdr["x-forwarded-for"] as string) || (hdr["X-Forwarded-For"] as string);
   if (forwarded) return forwarded.split(",")[0]?.trim() || "unknown";
-  return req.headers.get("x-real-ip") || "unknown";
+  const realIp = (hdr["x-real-ip"] as string) || (hdr["X-Real-Ip"] as string);
+  if (realIp) return realIp;
+  return (req as { ip?: string }).ip || (req as { socket?: { remoteAddress?: string } }).socket?.remoteAddress || "unknown";
 }

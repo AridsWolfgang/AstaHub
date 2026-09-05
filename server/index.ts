@@ -94,7 +94,7 @@ function getPistonLanguage(lang: string) {
 }
 
 app.post("/api/execute", async (req, res) => {
-  const ip = clientIp(req as unknown as Request);
+  const ip = clientIp(req);
   if (!(await rateLimit(`execute:${ip}`, 30, 60_000))) {
     return res.status(429).json({ error: "Too many requests. Try again in a minute." });
   }
@@ -136,7 +136,7 @@ app.post("/api/execute", async (req, res) => {
 
 // ---------- Auth ----------
 app.post("/api/register", async (req, res) => {
-  const ip = clientIp(req as unknown as Request);
+  const ip = clientIp(req);
   if (!(await rateLimit(`register:${ip}`, 5, 10 * 60_000))) return res.status(429).json({ error: "Too many attempts" });
   const validated = validateRegistration(req.body);
   if (!validated.ok) return res.status(validated.status).json({ error: validated.error });
@@ -149,7 +149,7 @@ app.post("/api/register", async (req, res) => {
 });
 
 app.post("/api/auth/signin", async (req, res) => {
-  const ip = clientIp(req as unknown as Request);
+  const ip = clientIp(req);
   if (!(await rateLimit(`signin:${ip}`, 10, 60_000))) return res.status(429).json({ error: "Too many sign-in attempts. Try again in a minute." });
   const { email, password } = req.body ?? {};
   if (!email || !password) return res.status(400).json({ error: "Missing email/password" });
@@ -428,7 +428,7 @@ app.get("/api/export", async (req, res) => {
 
 // ---------- Coach ----------
 app.post("/api/coach", async (req, res) => {
-  const ip = clientIp(req as unknown as Request);
+  const ip = clientIp(req);
   if (!(await rateLimit(`coach:${ip}`, 10, 60_000))) {
     return res.status(429).json({ error: "Too many requests. Try again in a minute." });
   }
