@@ -55,7 +55,7 @@ export function signJwt(payload: Record<string, unknown>, expiresInSec = 60 * 60
   const exp = Math.floor(Date.now() / 1000) + expiresInSec;
   const body = b64urlEncode(JSON.stringify({ ...payload, exp }));
   // Node: use crypto
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  // eslint-disable-next-line
   const crypto = require("crypto") as typeof import("crypto");
   const sig = crypto.createHmac("sha256", JWT_SECRET).update(`${header}.${body}`).digest("base64url");
   return `${header}.${body}.${sig}`;
@@ -65,7 +65,7 @@ export function verifyJwt(token: string): Record<string, unknown> | null {
   try {
     const [header, body, sig] = token.split(".");
     if (!header || !body || !sig) return null;
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    // eslint-disable-next-line
     const crypto = require("crypto") as typeof import("crypto");
     const expected = crypto.createHmac("sha256", JWT_SECRET).update(`${header}.${body}`).digest("base64url");
     if (expected !== sig) return null;

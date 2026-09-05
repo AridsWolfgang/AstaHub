@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { simulateAnsi } from "../src/lib/simulator";
 import { prisma } from "../src/lib/prisma";
@@ -55,10 +56,17 @@ import bcrypt from "bcryptjs";
 
 const app = express();
 const PORT = Number(process.env.PORT || process.env.SERVER_PORT || 4000);
+const isProd = process.env.NODE_ENV === "production";
 
+app.set("trust proxy", 1);
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
 app.use(express.json({ limit: "128kb" }));
+
+function cookieOpts(maxAge = 30 * 24 * 3600 * 1000): express.CookieOptions {
+  return { httpOnly: true, sameSite: "lax", secure: isProd, maxAge, path: "/" };
+}
 
 function getUserFromReq(req: express.Request) {
   const token = req.cookies?.token || (req.headers.authorization?.replace("Bearer ", "") ?? "");
@@ -141,6 +149,8 @@ app.post("/api/register", async (req, res) => {
 });
 
 app.post("/api/auth/signin", async (req, res) => {
+  const ip = clientIp(req as unknown as Request);
+  if (!rateLimit(`signin:${ip}`, 10, 60_000)) return res.status(429).json({ error: "Too many sign-in attempts. Try again in a minute." });
   const { email, password } = req.body ?? {};
   if (!email || !password) return res.status(400).json({ error: "Missing email/password" });
   const normalized = String(email).toLowerCase().trim();
@@ -150,7 +160,7 @@ app.post("/api/auth/signin", async (req, res) => {
   const ok = await bcrypt.compare(String(password), user.passwordHash);
   if (!ok) return res.status(401).json({ error: "Invalid credentials" });
   const token = signJwt({ uid: user.id, email: user.email });
-  res.cookie("token", token, { httpOnly: true, sameSite: "lax", maxAge: 30 * 24 * 3600 * 1000, path: "/" });
+  res.cookie("token", token, cookieOpts());
   res.json({ user: { id: user.id, name: user.name, email: user.email, image: user.image } });
 });
 
@@ -209,7 +219,7 @@ app.get("/api/auth/google/callback", async (req, res) => {
     if (!profile.email) return res.status(400).send("Google account has no email");
     const user = await findOrCreateGoogleUser({ id: profile.id, email: profile.email, name: profile.name, picture: profile.picture });
     const token = signJwt({ uid: user.id, email: user.email });
-    res.cookie("token", token, { httpOnly: true, sameSite: "lax", maxAge: 30 * 24 * 3600 * 1000, path: "/" });
+    res.cookie("token", token, cookieOpts());
     res.redirect(`${FRONTEND_URL}/dashboard`);
   } catch (e) {
     console.error("Google callback error", e);
@@ -228,7 +238,7 @@ app.post("/api/auth/google", async (req, res) => {
     if (payload.aud !== GOOGLE_CLIENT_ID) return res.status(401).json({ error: "Token audience mismatch" });
     const user = await findOrCreateGoogleUser({ id: payload.sub, email: payload.email, name: payload.name, picture: payload.picture });
     const token = signJwt({ uid: user.id, email: user.email });
-    res.cookie("token", token, { httpOnly: true, sameSite: "lax", maxAge: 30 * 24 * 3600 * 1000, path: "/" });
+    res.cookie("token", token, cookieOpts());
     res.json({ user: { id: user.id, name: user.name, email: user.email, image: user.image } });
   } catch (e) {
     console.error("Google One-Tap error", e);
@@ -237,7 +247,7 @@ app.post("/api/auth/google", async (req, res) => {
 });
 
 app.post("/api/auth/signout", (_req, res) => {
-  res.clearCookie("token", { path: "/" });
+  res.clearCookie("token", { path: "/", secure: isProd, sameSite: "lax" });
   res.json({ ok: true });
 });
 
@@ -278,7 +288,7 @@ app.delete("/api/me", async (req, res) => {
   if (!payload) return res.status(401).json({ error: "Not authenticated" });
   try {
     await prisma.user.delete({ where: { id: payload.uid } });
-    res.clearCookie("token", { path: "/" });
+    res.clearCookie("token", { path: "/", secure: isProd, sameSite: "lax" });
     return res.json({ ok: true });
   } catch (err) {
     console.error("account delete error", err);
@@ -1029,5 +1039,14 @@ app.post("/api/live/:id/export", async (req, res) => {
 
 // ---------- Health ----------
 app.get("/api/health", (_req, res) => res.json({ ok: true, poweredBy: "https://ps-hub.org" }));
+
+// Global error handler (must be after all routes)
+app.use(((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error("Unhandled error", err);
+  res.status(500).json({ error: "Internal server error" });
+}) as express.ErrorRequestHandler);
+
+// 404 for unknown API routes (kept honest, never fake success)
+app.use("/api", (_req, res) => res.status(404).json({ error: "Not found" }));
 
 app.listen(PORT, () => console.log(`AstaHub API (Vite) listening on http://localhost:${PORT} — powered by https://ps-hub.org`));

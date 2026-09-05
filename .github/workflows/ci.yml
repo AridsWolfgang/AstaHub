@@ -26,11 +26,17 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Typecheck
+      - name: Typecheck (client)
         run: npx tsc --noEmit
+
+      - name: Typecheck (server)
+        run: npx tsc -p tsconfig.server.json --noEmit
 
       - name: Tests
         run: npm test
 
       - name: Build (Vite)
         run: npm run build
+
+      - name: Build (server)
+        run: npm run server:build

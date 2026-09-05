@@ -1,5 +1,3 @@
-"use client";
-
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 
 type SessionUser = { id: string; name: string | null; email: string; image: string | null };

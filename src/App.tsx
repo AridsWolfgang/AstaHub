@@ -36,6 +36,7 @@ import LessonRustPage from "@/app/lesson/rust/[day]/page";
 import LessonSqlPage from "@/app/lesson/sql/[day]/page";
 import LessonBashPage from "@/app/lesson/bash/[day]/page";
 import NotFound from "@/app/not-found";
+import Protected from "@/components/Protected";
 
 export default function App() {
   return (
@@ -50,31 +51,31 @@ export default function App() {
               <Route path="/tracks/:slug" element={<TrackSlugPage />} />
               <Route path="/curriculum" element={<CurriculumPage />} />
               <Route path="/playground" element={<PlaygroundPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/dashboard" element={<Protected><DashboardPage /></Protected>} />
+              <Route path="/profile" element={<Protected><ProfilePage /></Protected>} />
+              <Route path="/settings" element={<Protected><SettingsPage /></Protected>} />
               <Route path="/signin" element={<SigninPage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
-              <Route path="/achievements" element={<AchievementsPage />} />
-              <Route path="/certificates" element={<CertificatesPage />} />
+              <Route path="/achievements" element={<Protected><AchievementsPage /></Protected>} />
+              <Route path="/certificates" element={<Protected><CertificatesPage /></Protected>} />
               <Route path="/community" element={<CommunityPage />} />
               <Route path="/community/feed" element={<FeedPage />} />
               <Route path="/community/feed/:id" element={<FeedDetailPage />} />
               <Route path="/community/questions" element={<QuestionsPage />} />
               <Route path="/community/questions/:id" element={<QuestionDetailPage />} />
               <Route path="/community/groups" element={<GroupsPage />} />
-              <Route path="/community/groups/:slug" element={<GroupDetailPage />} />
-              <Route path="/community/moderation" element={<ModerationPage />} />
+              <Route path="/community/groups/:slug" element={<Protected><GroupDetailPage /></Protected>} />
+              <Route path="/community/moderation" element={<Protected><ModerationPage /></Protected>} />
               <Route path="/live" element={<LivePage />} />
               <Route path="/live/:slug" element={<LiveDetailPage />} />
               <Route path="/live/:slug/room" element={<LiveRoomPage />} />
-              <Route path="/lesson/:day" element={<LessonCPage />} />
-              <Route path="/lesson/python/:day" element={<LessonPythonPage />} />
-              <Route path="/lesson/cpp/:day" element={<LessonCppPage />} />
-              <Route path="/lesson/js/:day" element={<LessonJsPage />} />
-              <Route path="/lesson/rust/:day" element={<LessonRustPage />} />
-              <Route path="/lesson/sql/:day" element={<LessonSqlPage />} />
-              <Route path="/lesson/bash/:day" element={<LessonBashPage />} />
+              <Route path="/lesson/:day" element={<Protected><LessonCPage /></Protected>} />
+              <Route path="/lesson/python/:day" element={<Protected><LessonPythonPage /></Protected>} />
+              <Route path="/lesson/cpp/:day" element={<Protected><LessonCppPage /></Protected>} />
+              <Route path="/lesson/js/:day" element={<Protected><LessonJsPage /></Protected>} />
+              <Route path="/lesson/rust/:day" element={<Protected><LessonRustPage /></Protected>} />
+              <Route path="/lesson/sql/:day" element={<Protected><LessonSqlPage /></Protected>} />
+              <Route path="/lesson/bash/:day" element={<Protected><LessonBashPage /></Protected>} />
               {/* legacy redirects */}
               <Route path="/lesson/:track/:day" element={<Navigate to="/" replace />} />
               <Route path="*" element={<NotFound />} />
