@@ -32,7 +32,7 @@
     "start": "vite preview --port 3000",
     "server": "tsx server/index.ts",
     "server:build": "tsc -p tsconfig.server.json",
-    "lint": "eslint .",
+    "lint": "eslint src --ext .ts,.tsx",
     "test": "vitest run",
     "test:watch": "vitest"
   },
