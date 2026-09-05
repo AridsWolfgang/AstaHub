@@ -37,15 +37,17 @@ import LessonSqlPage from "@/app/lesson/sql/[day]/page";
 import LessonBashPage from "@/app/lesson/bash/[day]/page";
 import NotFound from "@/app/not-found";
 import Protected from "@/components/Protected";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 export default function App() {
   return (
     <AuthProvider>
       <StoreHydrator>
-        <div className="min-h-screen bg-black">
-          <Navbar />
-          <main className="pt-16">
-            <Routes>
+        <ErrorBoundary>
+          <div className="min-h-screen bg-black">
+            <Navbar />
+            <main className="pt-16">
+              <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/tracks" element={<TracksPage />} />
               <Route path="/tracks/:slug" element={<TrackSlugPage />} />
@@ -81,8 +83,9 @@ export default function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
-          <Footer />
-        </div>
+            <Footer />
+          </div>
+        </ErrorBoundary>
       </StoreHydrator>
     </AuthProvider>
   );
