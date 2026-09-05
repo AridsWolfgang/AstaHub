@@ -1,26 +1,22 @@
 /**
- * Lightweight in-process rate limiter for public API routes.
- *
- * NOTE: This is a single-instance, in-memory limiter — sufficient for a single
- * Node/Vercel function deployment and to stop casual abuse. Distributed deployments
- * should move this to Redis (Upstash) — see ENGINEERING_ROADMAP.md §16.
+ * Lightweight rate limiter — in-memory by default, Redis (Upstash) when configured.
+ * Use `rateLimit()` (async) for distributed deployments; it falls back to memory
+ * when Redis is not configured or unavailable.
  */
+import { isRedisConfigured, redisRateLimit } from "./redis";
 
 interface Bucket {
   hits: number[];
 }
 
 const buckets = new Map<string, Bucket>();
-
 const MAX_ENTRIES = 10_000;
 
-/** Sliding-window rate limit. Returns `true` when the request is allowed. */
-export function rateLimit(key: string, limit: number, windowMs: number): boolean {
+function memoryRateLimit(key: string, limit: number, windowMs: number): boolean {
   const now = Date.now();
   let bucket = buckets.get(key);
   if (!bucket) {
     if (buckets.size >= MAX_ENTRIES) {
-      // Evict stale keys to bound memory.
       for (const [k, b] of buckets) {
         if (b.hits.every((t) => now - t > windowMs)) buckets.delete(k);
       }
@@ -28,11 +24,24 @@ export function rateLimit(key: string, limit: number, windowMs: number): boolean
     bucket = { hits: [] };
     buckets.set(key, bucket);
   }
-
   bucket.hits = bucket.hits.filter((t) => now - t <= windowMs);
   if (bucket.hits.length >= limit) return false;
   bucket.hits.push(now);
   return true;
+}
+
+/** Sliding-window rate limit (async, Redis → memory fallback). Returns `true` when allowed. */
+export async function rateLimit(key: string, limit: number, windowMs: number): Promise<boolean> {
+  if (isRedisConfigured()) {
+    const redisResult = await redisRateLimit(key, limit, windowMs);
+    if (redisResult !== null) return redisResult;
+  }
+  return memoryRateLimit(key, limit, windowMs);
+}
+
+/** Sync memory-only check (for non-critical paths or tests). */
+export function rateLimitSync(key: string, limit: number, windowMs: number): boolean {
+  return memoryRateLimit(key, limit, windowMs);
 }
 
 /** Best-effort client IP from proxy headers, falling back to the direct peer. */

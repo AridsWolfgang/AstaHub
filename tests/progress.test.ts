@@ -4,7 +4,7 @@ import {
   sanitizeCompletedDays,
   TRACK_TOTAL_DAYS,
 } from "../src/lib/progressValidation";
-import { rateLimit } from "../src/lib/rateLimit";
+import { rateLimitSync } from "../src/lib/rateLimit";
 
 describe("sanitizeProgress", () => {
   it("clamps totalXp and derives level from XP, ignoring client level", () => {
@@ -65,25 +65,25 @@ describe("rateLimit", () => {
 
   it("allows up to the limit within the window", () => {
     const key = `test:${Date.now()}`;
-    expect(rateLimit(key, 3, 60_000)).toBe(true);
-    expect(rateLimit(key, 3, 60_000)).toBe(true);
-    expect(rateLimit(key, 3, 60_000)).toBe(true);
-    expect(rateLimit(key, 3, 60_000)).toBe(false);
+    expect(rateLimitSync(key, 3, 60_000)).toBe(true);
+    expect(rateLimitSync(key, 3, 60_000)).toBe(true);
+    expect(rateLimitSync(key, 3, 60_000)).toBe(true);
+    expect(rateLimitSync(key, 3, 60_000)).toBe(false);
   });
 
   it("treats distinct keys independently", () => {
     const a = `testa:${Date.now()}`;
     const b = `testb:${Date.now()}`;
-    expect(rateLimit(a, 1, 60_000)).toBe(true);
-    expect(rateLimit(a, 1, 60_000)).toBe(false);
-    expect(rateLimit(b, 1, 60_000)).toBe(true);
+    expect(rateLimitSync(a, 1, 60_000)).toBe(true);
+    expect(rateLimitSync(a, 1, 60_000)).toBe(false);
+    expect(rateLimitSync(b, 1, 60_000)).toBe(true);
   });
 
   it("refills after the window elapses", async () => {
     const key = `test:${Date.now()}`;
-    expect(rateLimit(key, 1, 5)).toBe(true);
-    expect(rateLimit(key, 1, 5)).toBe(false);
+    expect(rateLimitSync(key, 1, 5)).toBe(true);
+    expect(rateLimitSync(key, 1, 5)).toBe(false);
     await new Promise((r) => setTimeout(r, 10));
-    expect(rateLimit(key, 1, 5)).toBe(true);
+    expect(rateLimitSync(key, 1, 5)).toBe(true);
   });
 });

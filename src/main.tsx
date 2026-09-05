@@ -10,6 +10,13 @@ try {
   if (t === "light") document.documentElement.setAttribute("data-theme", "light");
 } catch {}
 
+// Register PWA service worker (offline cache, network-first navigation)
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>

@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Award, Loader2, Printer, ChevronRight } from "lucide-react";
+import { Award, Loader2, Printer, ChevronRight, ShieldCheck } from "lucide-react";
 import CyberPanel from "@/components/CyberPanel";
 import { LogoMark } from "@/components/Logo";
+import { certificateUrl, isCertificateVerifiable } from "@/lib/certificate";
 
 interface Certificate {
   id: string;
@@ -39,6 +40,7 @@ export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
+  const verifiable = isCertificateVerifiable();
 
   useEffect(() => {
     fetch("/api/me", { cache: "no-store" })
@@ -102,18 +104,32 @@ export default function CertificatesPage() {
               <p className="mt-1 text-xs text-gray-500">
                 Completed all {c.day} days · {c.xp} XP earned
               </p>
-              <div className="mt-6 flex items-center justify-between">
+              <div className="mt-6 flex items-center justify-between gap-3">
                 <p className="text-[10px] font-mono text-gray-500">
                   Issued {new Date(c.issuedAt).toLocaleDateString()}
                 </p>
-                <button
-                  onClick={() => window.print()}
-                  className="inline-flex items-center gap-1 text-xs font-mono text-cyber-cyan hover:underline"
-                >
-                  <Printer className="h-3 w-3" />
-                  Print
-                </button>
+                <div className="flex items-center gap-3">
+                  <Link
+                    to={certificateUrl(c.id)}
+                    className="inline-flex items-center gap-1 text-xs font-mono text-gray-300 hover:text-white hover:underline"
+                  >
+                    <ShieldCheck className="h-3 w-3" />
+                    Verify
+                  </Link>
+                  <button
+                    onClick={() => window.print()}
+                    className="inline-flex items-center gap-1 text-xs font-mono text-cyber-cyan hover:underline"
+                  >
+                    <Printer className="h-3 w-3" />
+                    Print
+                  </button>
+                </div>
               </div>
+              {!verifiable && (
+                <p className="mt-3 text-[10px] font-mono leading-relaxed text-gray-500">
+                  Verification requires public link — coming with portal
+                </p>
+              )}
             </div>
           ))}
         </div>

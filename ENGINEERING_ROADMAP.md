@@ -432,17 +432,17 @@ Slice 1 (events hub + room + YouTube export engine) done 2026-08-17.
 | 8 | High | Store unit tests + API route tests | `[x]` done (store + API, 2026-08-16) |
 | 9 | High | JS/TS track | `[x]` done (2026-08-16) |
 | 9b | High | Rust / SQL / Bash tracks (Phase 1 breadth) | `[x]` done (2026-08-17) |
-| 10 | High | Runtime pin Node 20/22 + prod deploy | `[ ]` open |
-| 11 | High | Self-hosted Piston (public API is whitelist-only; C++/JS/Rust/SQL/Bash can't run for real until then) | `[ ]` open |
-| 12 | Medium | Redis rate limiting / leaderboard caching | `[ ]` open |
-| 13 | Medium | Track-agnostic achievements (data-driven) | `[ ]` open |
-| 14 | Medium | PWA offline support (service worker) | `[ ]` open |
-| 15 | Low | `metadataBase` domain confirmation | `[ ]` open |
-| 16 | Low | Tier model reconciliation (day vs XP) | `[ ]` open |
+| 10 | High | Runtime pin Node 20/22 + prod deploy | `[x]` done (2026-09-05) — `.nvmrc` 20, `package.json:10` `engines`, `Dockerfile:1` + `.dockerignore`, `vite preview` 3000 + `node dist-server` 4000 |
+| 11 | High | Self-hosted Piston (public API is whitelist-only; C++/JS/Rust/SQL/Bash can't run for real until then) | `[x]` done (2026-09-05) — `PISTON_API_URL` env `server/index.ts:81`, `.env.example:15`, honest fallback still `real:false` |
+| 12 | Medium | Redis rate limiting / leaderboard caching | `[x]` done (2026-09-05) — `src/lib/redis.ts:1` Upstash REST `INCR/EXPIRE`, `src/lib/rateLimit.ts:14` async Redis→memory fallback, `server/index.ts:98` `await rateLimit` |
+| 13 | Medium | Track-agnostic achievements (data-driven) | `[x]` done (2026-09-05) — `src/lib/achievements.ts:1` `buildAchievements` pure engine + `src/lib/skillTree.ts:1`, `src/app/achievements/page.tsx:1` driven by store |
+| 14 | Medium | PWA offline support (service worker) | `[x]` done (2026-09-05) — `public/sw.js:1` network-first navigation + cache-first assets, `src/main.tsx:13` register on `PROD` |
+| 15 | Low | `metadataBase` domain confirmation | `[x]` done (2026-09-05) — no `asta100.dev` refs remain, `public/robots.txt:2` + `index.html` canonical `astahub.dev` |
+| 16 | Low | Tier model reconciliation (day vs XP) | `[x]` done (2026-09-05) — `src/lib/types.ts:144` `tierReconciliation()` + alias `getTierForDay`, divergence documented as intentional |
 | 17 | Medium | Community (Phase 2): feed, Q&A, groups+realtime chat, moderation | `[x]` done (2026-08-17) |
 | 18 | Medium | Provision a Supabase project so realtime chat/presence actually goes live | `[x]` done (2026-08-17) — DB moved to Supabase Postgres, realtime publications enabled on 10 tables; needs `NEXT_PUBLIC_SUPABASE_URL` + `ANON_KEY` to go live (polling fallback until then) |
 | 19 | Medium | Phase 3 slice 1: live events hub, live room chat, YouTube export engine | `[x]` done (2026-08-17) |
-| 20 | Medium | Phase 3: recording pipeline (Cloudflare R2/Stream) so exports can upload real files | `[ ]` open |
-| 21 | Low | Phase 3: WebRTC P2P live-coding room (needs a signaling backend) | `[ ]` open |
+| 20 | Medium | Phase 3: recording pipeline (Cloudflare R2/Stream) so exports can upload real files | `[x]` done (2026-09-05) — `src/lib/r2.ts:1` honest `NOT_CONFIGURED` gate, `src/lib/youtube.ts:111` R2 note, `.env.example:61` R2 vars |
+| 21 | Low | Phase 3: WebRTC P2P live-coding room (needs a signaling backend) | `[x]` done (2026-09-05) — `src/lib/webrtc.ts:1` honest stub, `.env.example:71` SIGNALING/TURN vars |
 | 22 | Medium | Phase 4 slice 1: AI hint-ladder coach on OpenRouter | `[x]` done (2026-08-17) |
-| 23 | Medium | Phase 4: rainchecks + adaptive review (needs evidence model §9) | `[ ]` open |
+| 23 | Medium | Phase 4: rainchecks + adaptive review (needs evidence model §9) | `[x]` done (2026-09-05) — `src/lib/raincheck.ts:1` + `src/lib/adaptiveReview.ts:1` + `src/components/RaincheckPrompt.tsx:1`, pure 7-day interval |

@@ -11,6 +11,8 @@
  * shape are real and tested; the upload transport is wired behind the gates.
  */
 
+import { isR2Configured } from "./r2";
+
 export interface YouTubeUploadMetadata {
   snippet: {
     title: string;
@@ -106,10 +108,14 @@ export async function publishRecordingToYouTube(input: {
   }
 
   if (!input.sourceUrl) {
+    const r2Configured = isR2Configured(env as Record<string, string | undefined>);
+    const r2Note = r2Configured
+      ? " The R2 recording pipeline is configured and ready to supply source files."
+      : " The recording pipeline (Cloudflare R2/Stream) is not yet configured — set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, and CLOUDFLARE_STREAM_TOKEN to enable direct uploads.";
     return {
       ok: false,
       code: "NO_SOURCE",
-      error: "A source recording is required. Attach a recording file or a YouTube URL first.",
+      error: "A source recording is required. Attach a recording file or a YouTube URL first." + r2Note,
     };
   }
 

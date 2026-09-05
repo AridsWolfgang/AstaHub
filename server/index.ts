@@ -78,7 +78,7 @@ function getUserFromReq(req: express.Request) {
 
 // ---------- Execute (Piston + simulator) ----------
 const MAX_CODE_LENGTH = 50_000;
-const PISTON_API = "https://emkc.org/api/v2/piston";
+const PISTON_API = process.env.PISTON_API_URL || "https://emkc.org/api/v2/piston";
 const AUTH_TOKEN = process.env.PISTON_AUTH_TOKEN || "";
 
 function getPistonLanguage(lang: string) {
@@ -95,7 +95,7 @@ function getPistonLanguage(lang: string) {
 
 app.post("/api/execute", async (req, res) => {
   const ip = clientIp(req as unknown as Request);
-  if (!rateLimit(`execute:${ip}`, 30, 60_000)) {
+  if (!(await rateLimit(`execute:${ip}`, 30, 60_000))) {
     return res.status(429).json({ error: "Too many requests. Try again in a minute." });
   }
   const { code, language } = req.body ?? {};
@@ -137,7 +137,7 @@ app.post("/api/execute", async (req, res) => {
 // ---------- Auth ----------
 app.post("/api/register", async (req, res) => {
   const ip = clientIp(req as unknown as Request);
-  if (!rateLimit(`register:${ip}`, 5, 10 * 60_000)) return res.status(429).json({ error: "Too many attempts" });
+  if (!(await rateLimit(`register:${ip}`, 5, 10 * 60_000))) return res.status(429).json({ error: "Too many attempts" });
   const validated = validateRegistration(req.body);
   if (!validated.ok) return res.status(validated.status).json({ error: validated.error });
   const { name, email, password } = validated;
@@ -150,7 +150,7 @@ app.post("/api/register", async (req, res) => {
 
 app.post("/api/auth/signin", async (req, res) => {
   const ip = clientIp(req as unknown as Request);
-  if (!rateLimit(`signin:${ip}`, 10, 60_000)) return res.status(429).json({ error: "Too many sign-in attempts. Try again in a minute." });
+  if (!(await rateLimit(`signin:${ip}`, 10, 60_000))) return res.status(429).json({ error: "Too many sign-in attempts. Try again in a minute." });
   const { email, password } = req.body ?? {};
   if (!email || !password) return res.status(400).json({ error: "Missing email/password" });
   const normalized = String(email).toLowerCase().trim();
@@ -429,7 +429,7 @@ app.get("/api/export", async (req, res) => {
 // ---------- Coach ----------
 app.post("/api/coach", async (req, res) => {
   const ip = clientIp(req as unknown as Request);
-  if (!rateLimit(`coach:${ip}`, 10, 60_000)) {
+  if (!(await rateLimit(`coach:${ip}`, 10, 60_000))) {
     return res.status(429).json({ error: "Too many requests. Try again in a minute." });
   }
   if (!isCoachConfigured()) {

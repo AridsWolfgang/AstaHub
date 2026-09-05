@@ -141,15 +141,25 @@ export const PROFICIENCY_TIERS: ProficiencyTier[] = [
   },
 ];
 
+/** Lesson tier — content difficulty by day (curriculum authoring, not learner progress). */
 export function getLevelForDay(day: number): ProficiencyLevel {
   for (const tier of PROFICIENCY_TIERS) {
     if (day >= tier.dayRange[0] && day <= tier.dayRange[1]) return tier.id;
   }
   return "master";
 }
+export const getTierForDay = getLevelForDay; // alias, preferred name
 
 export function getTierByLevel(level: ProficiencyLevel): ProficiencyTier {
   return PROFICIENCY_TIERS.find((t) => t.id === level)!;
+}
+
+/** Reconciled view: lesson tier vs learner level. Divergence is intentional — a day-30 lesson is "apprentice" content, but a learner stays "initiate" until 500 XP is earned. */
+export function tierReconciliation(day: number, xp: number): { lessonTier: ProficiencyLevel; learnerLevel: ProficiencyLevel; aligned: boolean } {
+  const lessonTier = getLevelForDay(day);
+  const learnerLevel = levelFromXp(xp);
+  const order: ProficiencyLevel[] = ["initiate", "apprentice", "adept", "expert", "master"];
+  return { lessonTier, learnerLevel, aligned: order.indexOf(learnerLevel) >= order.indexOf(lessonTier) - 1 };
 }
 
 export function xpForLevel(level: ProficiencyLevel): number {
