@@ -69,7 +69,7 @@ export default function QuestionDetailPage() {
 
   useEffect(() => {
     if (id) load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, [id]);
 
   const answer = async () => {

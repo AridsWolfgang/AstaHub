@@ -54,7 +54,7 @@ export default function PostDetailPage() {
 
   useEffect(() => {
     if (id) load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, [id]);
 
   const vote = async (value: 1 | -1) => {
