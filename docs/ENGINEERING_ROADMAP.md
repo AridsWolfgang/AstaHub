@@ -11,15 +11,15 @@
 
 ## 1. Current State
 
-**What this is today:** a production-shaped **Vite + React** learning platform (migrated 2026-09-03 from Next.js 15 for speed/stability) with **eight live
-tracks** (C, x86-64 Assembly, Python, C++, JavaScript/TypeScript, Rust, SQL & Databases,
+**What this is today:** a production-shaped **Vite + React** learning platform (migrated 2026-09-03 from Next.js 15 for speed/stability) with **seven live
+tracks** (C, x86-64 Assembly, Python, C++, JavaScript/TypeScript, SQL & Databases,
 Bash/Linux/Git), a working account/progress/achievement/certificate system, a Monaco
 playground with real (Piston) and simulated execution, **a live community layer
 (learnings feed, Q&A, study groups with realtime chat, moderation)**, **a Phase 3 Live layer
 (scheduled live classes/office hours/live-coding events hub, a live room with realtime chat,
 and an honest env-gated YouTube export engine)**, and a self-hosted black-and-white
-editorial UI. All 340 lessons
-(100 C/ASM + 40 Python + 40 C++ + 40 JS/TS + 40 Rust + 40 SQL + 40 Bash) resolve cleanly;
+editorial UI. All 300 lessons
+(100 C/ASM + 40 Python + 40 C++ + 40 JS/TS + 40 SQL + 40 Bash) resolve cleanly;
 tests, lint, typecheck and build are green.
 
 **Verified at audit time (2026-08-17):**
@@ -27,8 +27,8 @@ tests, lint, typecheck and build are green.
 - `npx tsc --noEmit` clean
 - `npm test` → 139/139 passing (simulator + curriculum integrity + validation + community + live + youtube + coach)
 - Clean `next build` green (39 routes incl. `/live/*` + `/api/coach`)
-- 100 C/ASM day files are hand-written (≥5 KB each); Python/C++/JS/Rust/SQL/Bash are generator-built from
-  blueprints (`src/lib/curriculum/{python,cpp,js,rust,sql,bash}/core.ts`)
+- 100 C/ASM day files are hand-written (≥5 KB each); Python/C++/JS/SQL/Bash are generator-built from
+  blueprints (`src/lib/curriculum/{python,cpp,js,sql,bash}/core.ts`)
 - Community migration `20260816235719_community` applied to Neon; full authenticated E2E smoke green
 - **Database is now Supabase Postgres** (all 4 migrations applied; realtime publications enabled on 10 tables) — live 2026-08-17
 
@@ -42,7 +42,7 @@ tests, lint, typecheck and build are green.
 | `/tracks`, `/tracks/[slug]` | Knowledge-bank hub | public |
 | `/curriculum` | C/ASM 100-day map (server-rendered metadata) | public |
 | `/lesson/[day]` | C/ASM lesson | middleware-protected |
-| `/lesson/{python,cpp,js,rust,sql,bash}/[day]` | Generated-track lesson | middleware-protected |
+| `/lesson/{python,cpp,js,sql,bash}/[day]` | Generated-track lesson | middleware-protected |
 | `/playground` | Free Monaco workbench (8 languages) | public |
 | `/signin` | Sign-in / register | public |
 | `/community` | Community hub (feed/Q&A/groups overview) | public |
@@ -98,14 +98,14 @@ Powered by Prosperity Systems Hub (ps-hub.org)
 │   ├── api/{register,auth,me,progress,leaderboard,password,export,execute}
 │   ├── api/{posts,comments,questions,groups,reports}  # Community (Phase 2)
 │   ├── lesson/[day]          # C/ASM
-│   ├── lesson/{python,cpp,js,rust,sql,bash}/[day]
+│   ├── lesson/{python,cpp,js,sql,bash}/[day]
 │   ├── community/            # feed, Q&A, groups+chat, moderation
 │   ├── tracks, curriculum, dashboard, profile, achievements, leaderboard,
 │   │   settings, certificates, playground, signin
 ├── src/components/           # Shared UI (CodePlayground, LessonView, Navbar, …)
 │   └── community/            # Avatar, VoteButtons, ReportButton
 ├── src/lib/
-│   ├── curriculum/           # Content engine (CORE + lazy day modules + python/cpp/js/rust/sql/bash)
+│   ├── curriculum/           # Content engine (CORE + lazy day modules + python/cpp/js/sql/bash)
 │   ├── community.ts          # Pure community logic (voting, moderation, pagination)
 │   ├── realtime.ts           # Supabase Realtime (graceful polling fallback)
 │   ├── simulator.ts          # In-browser C/Python/ASM interpreter (regex-based)
@@ -249,7 +249,6 @@ To watch:
 | Python | 40 | `[x]` live | Generator-built; code challenges gated (24/40 `expectedOutput`, sim-reproducible) |
 | C++ | 40 | `[x]` live | Generator-built; code challenges gated (38/40 `expectedOutput`, real-compiler path) |
 | JavaScript / TypeScript | 40 | `[x]` live | Generator-built; code challenges gated (32/40 `expectedOutput`, real-runtime path) |
-| Rust | 40 | `[x]` live | Generator-built; code challenges gated (32/40 `expectedOutput`, verified with rustc 1.97) |
 | SQL & Databases | 40 | `[x]` live | Generator-built; code challenges gated (39/40 `expectedOutput`, verified with sqlite) |
 | Bash / Linux / Git | 40 | `[x]` live | Generator-built; code challenges gated (22/40 `expectedOutput`, verified with Git Bash) |
 | Mathematics / Physics / EE / ML / Security / Full-stack / Ops | — | `[ ]` planned | Sciences group |
@@ -257,7 +256,7 @@ To watch:
 - **[x]** Curriculum page de-heavied (server component + `getLessonMetadata()`)
 - **[x]** `TOTAL_TRACKS` + track-aware lesson loading in `src/lib/curriculum/index.ts`
 - **[x]** JS/TS track end-to-end (content + store + `/api/execute` mapping + templates) (done 2026-08-16)
-- **[x]** Rust / SQL / Bash tracks end-to-end — **Phase 1 (Breadth) complete** (done 2026-08-17)
+- **[x]** SQL / Bash tracks end-to-end — **Phase 1 (Breadth) complete** (done 2026-08-17)
 
 ---
 
@@ -382,7 +381,7 @@ Order of the next major phases (see also §3–§18):
 4. **Learning engine depth** (§7–§9): ~~`expectedOutput` for python/cpp~~ (done 2026-08-16),
    ~~store tests~~ (done), ~~API route tests~~ (done 2026-08-16).
 5. **Breadth** (§8): ~~JavaScript/TypeScript track~~ (done 2026-08-16),
-   ~~Rust, SQL, Bash/Linux/Git~~ (done 2026-08-17) — **Phase 1 complete**.
+   ~~SQL, Bash/Linux/Git~~ (done 2026-08-17) — **Phase 1 complete**.
 6. **Community** (Phase 2): ~~posts, Q&A, groups+realtime chat, moderation~~ (done 2026-08-17).
 7. **Live** (Phase 3): ~~events hub + live room + YouTube export engine~~ (slice 1 done 2026-08-17),
    then the recording pipeline (R2/Stream) and WebRTC live-coding room.
@@ -431,9 +430,9 @@ Slice 1 (events hub + room + YouTube export engine) done 2026-08-17.
 | 7 | High | `expectedOutput` for python/cpp code challenges | `[x]` done (2026-08-16) |
 | 8 | High | Store unit tests + API route tests | `[x]` done (store + API, 2026-08-16) |
 | 9 | High | JS/TS track | `[x]` done (2026-08-16) |
-| 9b | High | Rust / SQL / Bash tracks (Phase 1 breadth) | `[x]` done (2026-08-17) |
+| 9b | High | SQL / Bash tracks (Phase 1 breadth) | `[x]` done (2026-08-17) |
 | 10 | High | Runtime pin Node 20/22 + prod deploy | `[ ]` open |
-| 11 | High | Self-hosted Piston (public API is whitelist-only; C++/JS/Rust/SQL/Bash can't run for real until then) | `[ ]` open |
+| 11 | High | Self-hosted Piston (public API is whitelist-only; C++/JS/SQL/Bash can't run for real until then) | `[ ]` open |
 | 12 | Medium | Redis rate limiting / leaderboard caching | `[ ]` open |
 | 13 | Medium | Track-agnostic achievements (data-driven) | `[ ]` open |
 | 14 | Medium | PWA offline support (service worker) | `[ ]` open |

@@ -3,7 +3,7 @@
  *
  * Each ConceptNode anchors a teachable idea to the curriculum day where
  * it first appears. Prereqs and related edges are hand-curated from the
- * blueprint sources in src/lib/curriculum/{core,python,cpp,js,rust,sql,bash}/core.ts
+ * blueprint sources in src/lib/curriculum/{core,python,cpp,js,sql,bash}/core.ts
  * so the graph mirrors the real course order, not an invented one.
  *
  * Until a full graph store exists, this is the single source of truth for
@@ -118,22 +118,6 @@ export const CONCEPT_GRAPH: Record<TrackKey, ConceptNode[]> = {
     { id: "js:fetch", label: "fetch & modules", track: "js", day: 30, prereqs: ["js:promises"], related: ["js:typescript"] },
     { id: "js:typescript", label: "TypeScript — types & generics", track: "js", day: 34, prereqs: ["js:classes", "js:fetch"], related: ["js:capstone"] },
     { id: "js:capstone", label: "Capstone CLI tool", track: "js", day: 40, prereqs: ["js:promises", "js:typescript"], related: [] },
-  ],
-  rust: [
-    { id: "rust:hello", label: "Hello, Rust & cargo", track: "rust", day: 1, prereqs: [], related: ["rust:variables"] },
-    { id: "rust:variables", label: "Variables & mutability", track: "rust", day: 2, prereqs: ["rust:hello"], related: ["rust:ownership"] },
-    { id: "rust:ownership", label: "Ownership & borrowing", track: "rust", day: 9, prereqs: ["rust:variables", "rust:control-flow"], related: ["rust:structs", "rust:enums"] },
-    { id: "rust:control-flow", label: "Control flow — if/match/loops", track: "rust", day: 6, prereqs: ["rust:variables"], related: ["rust:ownership"] },
-    { id: "rust:structs", label: "Structs & impl", track: "rust", day: 12, prereqs: ["rust:ownership"], related: ["rust:traits"] },
-    { id: "rust:enums", label: "Enums & Option/Result", track: "rust", day: 13, prereqs: ["rust:ownership", "rust:control-flow"], related: ["rust:error-handling"] },
-    { id: "rust:traits", label: "Traits & generics", track: "rust", day: 16, prereqs: ["rust:structs"], related: ["rust:collections"] },
-    { id: "rust:collections", label: "Collections — Vec & HashMap", track: "rust", day: 18, prereqs: ["rust:traits", "rust:enums"], related: ["rust:iterators"] },
-    { id: "rust:error-handling", label: "Error handling — Result", track: "rust", day: 21, prereqs: ["rust:enums"], related: ["rust:collections"] },
-    { id: "rust:iterators", label: "Iterators & closures", track: "rust", day: 23, prereqs: ["rust:collections"], related: ["rust:lifetimes"] },
-    { id: "rust:lifetimes", label: "Lifetimes", track: "rust", day: 31, prereqs: ["rust:ownership", "rust:iterators"], related: ["rust:smart-pointers"] },
-    { id: "rust:smart-pointers", label: "Smart pointers — Box/Rc", track: "rust", day: 32, prereqs: ["rust:lifetimes"], related: ["rust:concurrency"] },
-    { id: "rust:concurrency", label: "Concurrency — threads & channels", track: "rust", day: 34, prereqs: ["rust:smart-pointers"], related: ["rust:capstone"] },
-    { id: "rust:capstone", label: "Capstone CLI tool", track: "rust", day: 40, prereqs: ["rust:concurrency", "rust:iterators"], related: [] },
   ],
   sql: [
     { id: "sql:select", label: "SELECT basics", track: "sql", day: 2, prereqs: [], related: ["sql:filtering"] },

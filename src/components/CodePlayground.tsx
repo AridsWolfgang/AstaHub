@@ -138,8 +138,6 @@ export default function CodePlayground({
       ? "cpp"
       : language === "js"
       ? "javascript"
-      : language === "rust"
-      ? "rust"
       : language === "sql"
       ? "sql"
       : "shell";
@@ -179,8 +177,6 @@ export default function CodePlayground({
                 ? "C++20"
                 : language === "js"
                 ? "JavaScript"
-                : language === "rust"
-                ? "Rust 2021"
                 : language === "sql"
                 ? "SQLite"
                 : "Bash"}

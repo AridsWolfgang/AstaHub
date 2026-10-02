@@ -11,7 +11,6 @@
   <url><loc>https://astahub.dev/tracks/python</loc><priority>0.8</priority></url>
   <url><loc>https://astahub.dev/tracks/cpp</loc><priority>0.8</priority></url>
   <url><loc>https://astahub.dev/tracks/javascript</loc><priority>0.8</priority></url>
-  <url><loc>https://astahub.dev/tracks/rust</loc><priority>0.8</priority></url>
   <url><loc>https://astahub.dev/tracks/sql</loc><priority>0.8</priority></url>
   <url><loc>https://astahub.dev/tracks/toolkit</loc><priority>0.8</priority></url>
 </urlset>

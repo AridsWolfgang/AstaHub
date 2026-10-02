@@ -1,7 +1,7 @@
 import type { Lesson, TrackKey } from "../types";
 
 export const TOTAL_DAYS = 100;
-export const TOTAL_TRACKS: Record<TrackKey, number> = { c: 100, python: 40, cpp: 40, js: 40, rust: 40, sql: 40, bash: 40 };
+export const TOTAL_TRACKS: Record<TrackKey, number> = { c: 100, python: 40, cpp: 40, js: 40, sql: 40, bash: 40 };
 
 const loaders: Record<number, () => Promise<{ default: Partial<Lesson> }>> = {
   1: () => import("./days/day-1"),
@@ -155,10 +155,6 @@ export async function getTrackLesson(track: TrackKey, day: number): Promise<Less
     const js = await import("./js");
     return js.getJsLesson(day);
   }
-  if (track === "rust") {
-    const rust = await import("./rust");
-    return rust.getRustLesson(day);
-  }
   if (track === "sql") {
     const sql = await import("./sql");
     return sql.getSqlLesson(day);
@@ -183,10 +179,6 @@ export async function getTrackLessons(track: TrackKey): Promise<Lesson[]> {
     const js = await import("./js");
     return js.getJsLessons();
   }
-  if (track === "rust") {
-    const rust = await import("./rust");
-    return rust.getRustLessons();
-  }
   if (track === "sql") {
     const sql = await import("./sql");
     return sql.getSqlLessons();
@@ -210,10 +202,6 @@ export async function getTrackTotalDays(track: TrackKey): Promise<number> {
   if (track === "js") {
     const js = await import("./js");
     return js.JS_TOTAL_DAYS;
-  }
-  if (track === "rust") {
-    const rust = await import("./rust");
-    return rust.RUST_TOTAL_DAYS;
   }
   if (track === "sql") {
     const sql = await import("./sql");

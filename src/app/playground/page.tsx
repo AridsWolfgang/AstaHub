@@ -40,18 +40,11 @@ const TEMPLATES = {
     classes: `class Student {\n  constructor(name, grade) {\n    this.name = name;\n    this.grade = grade;\n  }\n  describe() {\n    return \`\${this.name} is in grade \${this.grade}\`;\n  }\n}\n\nconst s = new Student("Ada", 10);\nconsole.log(s.describe());`,
     fetch: `const getUsers = async () => {\n  try {\n    const res = await fetch("https://jsonplaceholder.typicode.com/users/1");\n    const user = await res.json();\n    console.log(user.name);\n  } catch (err) {\n    console.log("Error:", err.message);\n  }\n};\n\ngetUsers();`,
   },
-  rust: {
-    hello: `fn main() {\n    println!("Hello, World!");\n}`,
-    ownership: `fn main() {\n    let s = String::from("hello");\n    takes_ownership(s);\n    let x = 5;\n    makes_copy(x);\n}\n\nfn takes_ownership(some_string: String) {\n    println!("{some_string}");\n}\n\nfn makes_copy(some_integer: i32) {\n    println!("{some_integer}");\n}`,
-    structs: `struct Student {\n    name: String,\n    grade: u8,\n}\n\nimpl Student {\n    fn describe(&self) -> String {\n        format!("{} is in grade {}", self.name, self.grade)\n    }\n}\n\nfn main() {\n    let s = Student { name: String::from("Ada"), grade: 10 };\n    println!("{}", s.describe());\n}`,
-    loops: `fn main() {\n    let mut sum = 0;\n    for i in 1..=5 {\n        sum += i;\n    }\n    println!("sum = {sum}");\n    let mut n = 3;\n    while n > 0 {\n        println!("{n}");\n        n -= 1;\n    }\n}`,
-    errors: `fn parse_age(value: &str) -> Result<u8, String> {\n    value.parse::<u8>().map_err(|_| "not a number".to_string())\n}\n\nfn main() {\n    match parse_age("42") {\n        Ok(age) => println!("age: {age}"),\n        Err(e) => println!("error: {e}"),\n    }\n}`,
-  },
   sql: {
     hello: `CREATE TABLE users(name TEXT, age INT);\nINSERT INTO users VALUES ('Ada', 36), ('Grace', 45);\nSELECT name FROM users;`,
     joins: `CREATE TABLE users(id INT, name TEXT);\nCREATE TABLE orders(id INT, user_id INT, item TEXT);\nINSERT INTO users VALUES (1, 'Ada'), (2, 'Grace');\nINSERT INTO orders VALUES (101, 1, 'laptop'), (102, 1, 'mouse'), (103, 2, 'keyboard');\nSELECT u.name, o.item\nFROM users u\nJOIN orders o ON o.user_id = u.id\nORDER BY u.name;`,
     groupby: `CREATE TABLE sales(item TEXT, qty INT);\nINSERT INTO sales VALUES ('apple', 3), ('banana', 2), ('apple', 5);\nSELECT item, SUM(qty) AS total\nFROM sales\nGROUP BY item\nORDER BY item;`,
-    update: `CREATE TABLE books(title TEXT, pages INT);\nINSERT INTO books VALUES ('Rust Book', 300), ('SQL Book', 200);\nUPDATE books SET pages = pages + 50;\nSELECT title, pages FROM books;`,
+    update: `CREATE TABLE books(title TEXT, pages INT);\nINSERT INTO books VALUES ('SQL Book', 300), ('Data Book', 200);\nUPDATE books SET pages = pages + 50;\nSELECT title, pages FROM books;`,
   },
   bash: {
     hello: `#!/bin/bash\necho "Hello, World!"`,
@@ -67,7 +60,6 @@ const LANG_META: Record<Language, { label: string }> = {
   python: { label: "Python" },
   cpp: { label: "C++" },
   js: { label: "JavaScript" },
-  rust: { label: "Rust" },
   sql: { label: "SQL" },
   bash: { label: "Bash" },
 };
@@ -98,7 +90,7 @@ export default function PlaygroundPage() {
           Playground
         </h1>
         <p className="text-sm text-gray-500 font-mono">
-          A free workbench for C, x86-64 Assembly, Python, C++, JavaScript, Rust, SQL, and Bash — outside the curriculum
+          A free workbench for C, x86-64 Assembly, Python, C++, JavaScript, SQL, and Bash — outside the curriculum
         </p>
       </div>
 
@@ -211,25 +203,6 @@ echo $?    # exit code`}</pre>
                 <pre className="text-gray-400">{`g++ -std=c++20 -Wall -Wextra -o prog prog.cpp
 ./prog
 echo $?    # exit code`}</pre>
-              </div>
-            </>
-          ) : lang === "rust" ? (
-            <>
-              <div>
-                <p className="text-cyber-cyan mb-2">Core Concepts</p>
-                <pre className="text-gray-400">{`fn main() { ... }    // entry point
-let / let mut        // bindings
-String / &str        // owned vs borrowed
-Option<T> / Result<T> // safe null / errors
-& / &mut             // shared / exclusive
-impl / trait         // methods / contracts`}</pre>
-              </div>
-              <div>
-                <p className="text-cyber-cyan mb-2">Build & Run</p>
-                <pre className="text-gray-400">{`rustc program.rs -o program
-./program
-# or with cargo:
-cargo run`}</pre>
               </div>
             </>
           ) : lang === "sql" ? (

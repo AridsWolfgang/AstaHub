@@ -76,16 +76,6 @@ export const TRACK_GROUPS: TrackGroup[] = [
         days: 40,
       },
       {
-        slug: "rust",
-        name: "Rust",
-        status: "live",
-        outcome: "Memory safety without garbage collection",
-        description:
-          "Ownership, borrowing, and fearless concurrency — systems programming done right. Forty days from your first println! to traits, lifetimes, and threads.",
-        href: "/lesson/rust/1",
-        days: 40,
-      },
-      {
         slug: "sql",
         name: "SQL & Databases",
         status: "live",

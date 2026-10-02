@@ -84,7 +84,7 @@ export default function GroupsPage() {
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Group name (e.g. 'C Cohort', 'Lagos Devs', 'Rust Book Club')"
+            placeholder="Group name (e.g. 'C Cohort', 'Lagos Devs', 'Python Study Group')"
             className="w-full border-b border-white/10 bg-transparent pb-2 text-sm font-semibold text-white placeholder:text-gray-600 focus:border-white/30 focus:outline-none"
           />
           <textarea

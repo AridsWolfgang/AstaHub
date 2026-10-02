@@ -98,7 +98,6 @@ it like a reference library.
 | x86-64 Assembly | Live (Days 51–100) | Read and write code that talks to the metal |
 | Python | Live (40 days) | First language for automation, data, and AI |
 | JavaScript / TypeScript | Live (40 days) | Web and full-stack development |
-| Rust | Live (40 days) | Memory safety without garbage collection |
 | SQL & Databases | Live (40 days) | Design, query, and optimize real data systems |
 | Bash / Linux / Git | Live (40 days) | The working toolkit every engineer needs |
 
@@ -513,7 +512,7 @@ Concrete measures, reviewed regularly:
 | Phase | What | Why this order |
 |-------|------|----------------|
 | **0 — Foundation** | Accounts, profiles/avatars, progress sync, real leaderboard, certificates | Turns a course into an institution; nothing else works without identity |
-| **1 — Breadth** | ✅ **Done — Python, JS/TS, Rust, SQL, Bash all live** | Maximum knowledge-per-effort; validates the "hub" idea |
+| **1 — Breadth** | ✅ **Done — Python, JS/TS, SQL, Bash all live** | Maximum knowledge-per-effort; validates the "hub" idea |
 | **2 — Community** | Posts, Q&A, groups, chat — with moderation budgeted | Human layer; makes learning social and sticky |
 | **3 — Live** | Live coding, YouTube export, live classes | The "real human feeling" the notes asked for |
 | **4 — AI Companion** | Hint ladders, rainchecks, adaptive review | The differentiator; deserves focus, not haste |

@@ -8,7 +8,7 @@ Use this agent to:
 - Create exercises (quiz questions, code challenges)
 - Design assignments with rubrics
 - Explain low-level concepts (memory, pointers, calling conventions, etc.)
-- Add curriculum for new languages (Rust, Zig, Go, etc.)
+- Add curriculum for new languages (Go, Zig, etc.)
 
 ## Build & Verify Agent
 

@@ -58,13 +58,6 @@ const JS_TREE: SkillNode[] = [
   { id: "js-ts", label: "TypeScript & Apps", description: "TypeScript and full-stack patterns (Days 31-40)", day: 28, track: "js", prereqs: ["js-async"] },
 ];
 
-const RUST_TREE: SkillNode[] = [
-  { id: "rust-basics", label: "Basics", description: "Syntax and ownership intro (Days 1-7)", day: 1, track: "rust", prereqs: [] },
-  { id: "rust-ownership", label: "Ownership", description: "Ownership, borrowing, lifetimes (Days 9-15)", day: 9, track: "rust", prereqs: ["rust-basics"] },
-  { id: "rust-types", label: "Types & Traits", description: "Structs, enums, traits (Days 12-21)", day: 16, track: "rust", prereqs: ["rust-ownership"] },
-  { id: "rust-advanced", label: "Advanced", description: "Iterators, threads, and async (Days 22-40)", day: 23, track: "rust", prereqs: ["rust-types"] },
-];
-
 const SQL_TREE: SkillNode[] = [
   { id: "sql-basics", label: "Querying", description: "SELECT, filtering, and sorting (Days 1-7)", day: 1, track: "sql", prereqs: [] },
   { id: "sql-modeling", label: "Modeling", description: "Schemas, constraints, and joins (Days 8-20)", day: 13, track: "sql", prereqs: ["sql-basics"] },
@@ -82,7 +75,6 @@ export const SKILL_TREES: Record<TrackKey, SkillNode[]> = {
   python: PYTHON_TREE,
   cpp: CPP_TREE,
   js: JS_TREE,
-  rust: RUST_TREE,
   sql: SQL_TREE,
   bash: BASH_TREE,
 };

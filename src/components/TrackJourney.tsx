@@ -4,18 +4,17 @@ import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, Flame, Lock, Trophy } from "lucide-react";
 import { getTrackLessons } from "@/lib/curriculum";
-import { usePythonStore, useCppStore, useJsStore, useRustStore, useSqlStore, useBashStore, isDayUnlocked } from "@/lib/store";
+import { usePythonStore, useCppStore, useJsStore, useSqlStore, useBashStore, isDayUnlocked } from "@/lib/store";
 import { getTierByLevel } from "@/lib/types";
 import type { Lesson, TrackKey } from "@/lib/types";
 import { formatDay, cn } from "@/lib/utils";
 
-type JourneyTrack = "python" | "cpp" | "js" | "rust" | "sql" | "bash";
+type JourneyTrack = "python" | "cpp" | "js" | "sql" | "bash";
 
 const TRACK_NAMES: Record<JourneyTrack, string> = {
   python: "Python",
   cpp: "C++",
   js: "JavaScript / TypeScript",
-  rust: "Rust",
   sql: "SQL & Databases",
   bash: "Bash / Linux / Git",
 };
@@ -28,8 +27,6 @@ export default function TrackJourney({ track }: { track: JourneyTrack }) {
       ? useCppStore
       : track === "js"
       ? useJsStore
-      : track === "rust"
-      ? useRustStore
       : track === "sql"
       ? useSqlStore
       : useBashStore;

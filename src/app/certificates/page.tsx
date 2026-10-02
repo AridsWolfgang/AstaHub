@@ -21,7 +21,6 @@ const TRACK_HOME: Record<string, string> = {
   python: "/tracks/python",
   cpp: "/tracks/cpp",
   js: "/tracks/javascript",
-  rust: "/tracks/rust",
   sql: "/tracks/sql",
   bash: "/tracks/toolkit",
 };
@@ -31,7 +30,6 @@ const TRACK_LABEL: Record<string, string> = {
   python: "Python",
   cpp: "C++",
   js: "JavaScript / TypeScript",
-  rust: "Rust",
   sql: "SQL & Databases",
   bash: "Bash / Linux / Git",
 };

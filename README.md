@@ -8,7 +8,7 @@
 
 **Asta Knowledge Hub** is a free, hands-on, mastery-oriented technical learning platform — **powered by [Prosperity Systems Hub](https://ps-hub.org)**.
 The core product today is the original C + x86-64 Assembly curriculum (100 days), expanded
-with Python, C++, JavaScript/TypeScript, Rust, SQL, and Bash tracks on the same engine —
+with Python, C++, JavaScript/TypeScript, SQL, and Bash tracks on the same engine —
 with accounts, progress sync, achievements, leaderboards, certificates, and a working
 code playground.
 
@@ -26,7 +26,6 @@ code playground.
 | **Python** | 40 | Automation, data, and AI from first principles |
 | **C++** | 40 | Objects, templates, and the STL |
 | **JavaScript / TypeScript** | 40 | Web and full-stack development |
-| **Rust** | 40 | Memory safety without garbage collection |
 | **SQL & Databases** | 40 | Design, query, and optimize real data systems |
 | **Bash / Linux / Git** | 40 | The working toolkit every engineer needs |
 
@@ -37,7 +36,7 @@ Monaco playground, quizzes, code challenges, assignments with rubrics, and a cap
 
 - **100-day C/Assembly curriculum** — every day is a hand-written lesson with theory,
   playground code, exercises, and an assignment
-- **Python, C++, JavaScript/TypeScript, Rust, SQL, and Bash tracks** — generated from the same modular engine
+- **Python, C++, JavaScript/TypeScript, SQL, and Bash tracks** — generated from the same modular engine
 - **Code execution** — real compilation via [Piston](https://github.com/engineer-man/piston)
   when a token is configured, with a built-in in-browser simulator as the free fallback.
   The UI always labels execution as *Live* or *Simulated* — never misrepresents one as the other
@@ -127,7 +126,7 @@ src/
 ├── main.tsx              # BrowserRouter + theme init
 ├── App.tsx               # All routes (React Router)
 ├── app/                  # Pages (plain React components)
-│   ├── lesson/[day] + lesson/{python,cpp,js,rust,sql,bash}/[day]
+│   ├── lesson/[day] + lesson/{python,cpp,js,sql,bash}/[day]
 │   ├── tracks/, curriculum/, community/, live/, dashboard/, profile/
 │   ├── achievements/, leaderboard/, settings/, certificates/, playground/, signin/
 │   └── globals.css
@@ -135,7 +134,7 @@ src/
 │   ├── community/        # Avatar, VoteButtons, ReportButton
 │   └── live/             # Countdown, CreateEventForm, LiveRoomClient
 ├── lib/
-│   ├── curriculum/       # core + days/day-*.ts (100) + python/cpp/js/rust/sql/bash/core.ts
+│   ├── curriculum/       # core + days/day-*.ts (100) + python/cpp/js/sql/bash/core.ts
 │   ├── simulator.ts, store.ts, auth.ts, prisma.ts, tracks.ts, types.ts
 │   ├── community.ts, live.ts, youtube.ts, coach.ts, openrouter.ts, realtime.ts
 │   └── progressValidation.ts, rateLimit.ts, leaderboard.ts, registerValidation.ts
@@ -148,7 +147,7 @@ tests/                    # 9 suites, 139 tests
 
 ## Adding a track
 
-Mirror the Python/C++/JS/Rust/SQL/Bash pattern:
+Mirror the Python/C++/JS/SQL/Bash pattern:
 
 1. `TrackKey` in `src/lib/types.ts` + `src/lib/tracks.ts`
 2. `src/lib/curriculum/<track>/core.ts` + `index.ts` loader
@@ -180,7 +179,7 @@ npm run build                   # Vite → dist/
 ## Roadmap (short)
 
 - [x] 100-day C/Assembly curriculum (hand-written)
-- [x] Python, C++, JavaScript/TypeScript, Rust, SQL, and Bash tracks
+- [x] Python, C++, JavaScript/TypeScript, SQL, and Bash tracks
 - [x] Accounts, progress sync, achievements, leaderboard, certificates
 - [x] Real (Piston) + simulated execution with honest labeling
 - [x] Tests, CI, black & white redesign

@@ -18,7 +18,6 @@ import {
   usePythonStore,
   useCppStore,
   useJsStore,
-  useRustStore,
   useSqlStore,
   useBashStore,
   getOverallProgress,
@@ -35,7 +34,6 @@ const TRACK_NAMES: Record<TrackKey, string> = {
   python: "Python",
   cpp: "C++",
   js: "JavaScript / TypeScript",
-  rust: "Rust",
   sql: "SQL & Databases",
   bash: "Bash / Linux / Git",
 };
@@ -44,7 +42,6 @@ const STORES: Record<TrackKey, () => ProgressState> = {
   python: usePythonStore,
   cpp: useCppStore,
   js: useJsStore,
-  rust: useRustStore,
   sql: useSqlStore,
   bash: useBashStore,
 };
@@ -70,7 +67,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search).get("track");
-    if (q === "python" || q === "cpp" || q === "js" || q === "rust" || q === "sql" || q === "bash") setTrack(q);
+    if (q === "python" || q === "cpp" || q === "js" || q === "sql" || q === "bash") setTrack(q);
   }, []);
 
   const store = STORES[track];
@@ -127,7 +124,7 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-1 rounded-lg border border-white/10 p-1">
-            {(["c", "python", "cpp", "js", "rust", "sql", "bash"] as TrackKey[]).map((t) => (
+            {(["c", "python", "cpp", "js", "sql", "bash"] as TrackKey[]).map((t) => (
               <button
                 key={t}
                 onClick={() => setTrack(t)}
@@ -138,7 +135,7 @@ export default function DashboardPage() {
                     : "text-gray-400 hover:text-white"
                 )}
               >
-                {t === "c" ? "C" : t === "python" ? "Python" : t === "cpp" ? "C++" : t === "js" ? "JS/TS" : t === "rust" ? "Rust" : t === "sql" ? "SQL" : "Bash"}
+                {t === "c" ? "C" : t === "python" ? "Python" : t === "cpp" ? "C++" : t === "js" ? "JS/TS" : t === "sql" ? "SQL" : "Bash"}
               </button>
             ))}
           </div>

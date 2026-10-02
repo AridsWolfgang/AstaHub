@@ -24,7 +24,7 @@ Numbers from the actual Windows pwsh machine (i7-3540M era, 4 threads) — CI/Li
 
 **Other stability wins:**
 
-- **No `isomorphic` RSC graph.** App Router built a Server Component graph for all 340 lessons even though curriculum is pure data. Vite treats `src/lib/curriculum` as data, lazy `import()` per day, code-split — a broken day module doesn't break the whole build.
+- **No `isomorphic` RSC graph.** App Router built a Server Component graph for all 300 lessons even though curriculum is pure data. Vite treats `src/lib/curriculum` as data, lazy `import()` per day, code-split — a broken day module doesn't break the whole build.
 - **Shims removed.** Early migration used `src/shims/next-*` to bridge `next/link` etc. All `75` `from "next/"` imports are now `react-router-dom` — `grep -r "from \"next/"` returns 0. No alias magic to break.
 - **Honest gates.** Piston (`emkc.org`) is whitelist-only since 2026-02-15 (401). The app degrades to `simulateAnsi` (`src/lib/simulator.ts:1`) with label `(Simulated ...)` — never pretends to be real. Same for Google OAuth, YouTube export, Supabase Realtime — `501 NOT_CONFIGURED` until env is set.
 - **Type & test gates.** `npx tsc --noEmit --incremental false` clean, `npm test` **139/139** (Vitest), `vite build` green. CI (`.github/workflows/ci.yml:9`) runs `lint → tsc → test → build` on Node 20.

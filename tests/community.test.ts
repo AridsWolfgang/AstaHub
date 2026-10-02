@@ -14,7 +14,7 @@ import {
 
 describe("groupSlugify", () => {
   it("lowercases, replaces spaces/punctuation, trims dashes", () => {
-    expect(groupSlugify("Rust Book Club")).toBe("rust-book-club");
+    expect(groupSlugify("Python Study Group")).toBe("python-study-group");
     expect(groupSlugify("  C Cohort  ")).toBe("c-cohort");
     expect(groupSlugify("Lagos Devs!")).toBe("lagos-devs");
     expect(groupSlugify("A--B__C")).toBe("a-b-c");

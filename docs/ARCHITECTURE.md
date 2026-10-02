@@ -19,7 +19,7 @@
 ## Why separate is faster & more stable
 
 1. **No edge-middleware eval.** Next's `withAuth` middleware runs in an edge sandbox that uses `eval` — banned on Node 24 (`EvalError: Code generation from strings disallowed`). Express middleware is plain Node, no sandbox.
-2. **No webpack RSC graph.** App Router builds a full React Server Component graph even for static curriculum data (340 lessons). Vite builds only the client SPA; curriculum is lazy `import()` data, already code-split per day (`dist/assets/day-*.js` 2-6kB).
+2. **No webpack RSC graph.** App Router builds a full React Server Component graph even for static curriculum data (300 lessons). Vite builds only the client SPA; curriculum is lazy `import()` data, already code-split per day (`dist/assets/day-*.js` 2-6kB).
 3. **Independent scaling.** The SPA is static (`dist/`) — can be cached on Cloudflare CDN. The API is stateless Express — can be scaled horizontally, rate-limited via `src/lib/rateLimit.ts:1`, without rebuilding the frontend.
 4. **Simpler failure domains.** A Piston timeout or DB cold-start no longer stalls SSR. The API returns `{real:false}` simulator fallback; the UI labels it honestly ("Simulated").
 

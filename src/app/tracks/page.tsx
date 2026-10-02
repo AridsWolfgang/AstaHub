@@ -96,7 +96,7 @@ export default function TracksPage() {
             Not sure where to start?
           </h3>
           <p className="mt-1 max-w-md text-sm leading-relaxed text-gray-400">
-            C, Assembly, Python, C++, JavaScript, Rust, SQL, and Bash are live today. Start
+            C, Assembly, Python, C++, JavaScript, SQL, and Bash are live today. Start
             wherever you are — every track is free, and every track builds on the same
             hands-on engine.
           </p>

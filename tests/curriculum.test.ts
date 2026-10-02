@@ -120,25 +120,6 @@ describe("JavaScript/TypeScript track integrity", () => {
   });
 });
 
-describe("Rust track integrity", () => {
-  it("resolves every day to a well-formed lesson", async () => {
-    const total = await getTrackTotalDays("rust");
-    expect(total).toBe(TOTAL_TRACKS.rust);
-    for (let day = 1; day <= total; day++) {
-      const l = await getTrackLesson("rust", day);
-      expect(l).toBeDefined();
-      assertWellFormedLesson(l!, day);
-      expect(l!.language).toBe("rust");
-      expect(l!.track).toBe("rust");
-    }
-  });
-
-  it("getTrackLessons('rust') returns the full track", async () => {
-    const lessons = await getTrackLessons("rust");
-    expect(lessons).toHaveLength(TOTAL_TRACKS.rust);
-  });
-});
-
 describe("SQL track integrity", () => {
   it("resolves every day to a well-formed lesson", async () => {
     const total = await getTrackTotalDays("sql");
@@ -239,18 +220,6 @@ describe("Generated code-challenge verification", () => {
     expect(gated).toBeGreaterThan(25);
   });
 
-  it("rust code challenges that declare expectedOutput are non-empty", async () => {
-    const total = await getTrackTotalDays("rust");
-    let gated = 0;
-    for (let day = 1; day <= total; day++) {
-      const l = await getTrackLesson("rust", day);
-      const code = l?.exercises.find((e) => e.type === "code");
-      if (!code || !code.expectedOutput) continue;
-      gated++;
-      expect(code.expectedOutput.length).toBeGreaterThan(0);
-    }
-    expect(gated).toBeGreaterThan(25);
-  });
 
   it("sql code challenges that declare expectedOutput are non-empty", async () => {
     const total = await getTrackTotalDays("sql");
@@ -284,8 +253,7 @@ describe("Generated code-challenge verification", () => {
       ...(await getTrackLessons("python")),
       ...(await getTrackLessons("cpp")),
       ...(await getTrackLessons("js")),
-      ...(await getTrackLessons("rust")),
-      ...(await getTrackLessons("sql")),
+        ...(await getTrackLessons("sql")),
       ...(await getTrackLessons("bash")),
     ];
     const ids = new Set<string>();

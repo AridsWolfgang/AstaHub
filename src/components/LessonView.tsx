@@ -21,7 +21,7 @@ import CyberPanel from "@/components/CyberPanel";
 import CodePlayground from "@/components/CodePlayground";
 import CoachPanel from "@/components/coach/CoachPanel";
 import { getTrackLesson, getTrackTotalDays } from "@/lib/curriculum";
-import { useProgressStore, usePythonStore, useCppStore, useJsStore, useRustStore, useSqlStore, useBashStore } from "@/lib/store";
+import { useProgressStore, usePythonStore, useCppStore, useJsStore, useSqlStore, useBashStore } from "@/lib/store";
 import { getTierByLevel } from "@/lib/types";
 import { formatDay, cn } from "@/lib/utils";
 import type { Exercise, Lesson, TrackKey } from "@/lib/types";
@@ -33,7 +33,6 @@ const TRACK_META: Record<TrackKey, { home: string; next: string }> = {
   python: { home: "/tracks/python", next: "Day" },
   cpp: { home: "/tracks/cpp", next: "Day" },
   js: { home: "/tracks/javascript", next: "Day" },
-  rust: { home: "/tracks/rust", next: "Day" },
   sql: { home: "/tracks/sql", next: "Day" },
   bash: { home: "/tracks/toolkit", next: "Day" },
 };
@@ -47,7 +46,6 @@ const TRACK_BACK: Record<TrackKey, string> = {
   python: "Back to Python track",
   cpp: "Back to C++ track",
   js: "Back to JavaScript track",
-  rust: "Back to Rust track",
   sql: "Back to SQL track",
   bash: "Back to Bash track",
 };
@@ -55,7 +53,7 @@ const TRACK_BACK: Record<TrackKey, string> = {
 export default function LessonView({ track, day }: { track: TrackKey; day: number }) {
   const navigate = useNavigate();
   const store =
-    track === "python" ? usePythonStore : track === "cpp" ? useCppStore : track === "js" ? useJsStore : track === "rust" ? useRustStore : track === "sql" ? useSqlStore : track === "bash" ? useBashStore : useProgressStore;
+    track === "python" ? usePythonStore : track === "cpp" ? useCppStore : track === "js" ? useJsStore : track === "sql" ? useSqlStore : track === "bash" ? useBashStore : useProgressStore;
   const {
     completeDay,
     completeExercise,
@@ -200,8 +198,6 @@ export default function LessonView({ track, day }: { track: TrackKey; day: numbe
       ? "Python"
       : lesson.language === "js"
       ? "JavaScript"
-      : lesson.language === "rust"
-      ? "Rust"
       : lesson.language === "sql"
       ? "SQL"
       : lesson.language === "bash"

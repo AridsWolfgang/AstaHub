@@ -42,7 +42,7 @@ npm run dev
 ### Adding a New Language Track
 
 The project is structured to support multiple languages beyond C and Assembly.
-To add a new language (e.g., Rust, Zig):
+To add a new language (e.g., Go, Zig):
 
 1. Add the language to `src/lib/types.ts`:
    - Extend the `Language` type

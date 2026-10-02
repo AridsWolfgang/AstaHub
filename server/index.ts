@@ -76,10 +76,30 @@ function getUserFromReq(req: express.Request) {
   return payload as { uid: string; email: string };
 }
 
+// ---------- Ops ----------
+app.get("/health", (_req, res) => {
+  res.json({ ok: true, service: "astahub-api", time: new Date().toISOString() });
+});
+
+app.get("/ready", async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ ok: true, db: "up" });
+  } catch {
+    res.status(503).json({ ok: false, db: "down" });
+  }
+});
+
 // ---------- Execute (Piston + simulator) ----------
 const MAX_CODE_LENGTH = 50_000;
+const MAX_OUTPUT_LENGTH = 20_000;
 const PISTON_API = process.env.PISTON_API_URL || "https://emkc.org/api/v2/piston";
 const AUTH_TOKEN = process.env.PISTON_AUTH_TOKEN || "";
+
+function truncateOutput(s: string): string {
+  if (s.length <= MAX_OUTPUT_LENGTH) return s;
+  return s.slice(0, MAX_OUTPUT_LENGTH) + `\n\n// Output truncated at ${MAX_OUTPUT_LENGTH} chars`;
+}
 
 function getPistonLanguage(lang: string) {
   if (lang === "c") return { language: "c", version: "10.2.0" };
@@ -87,7 +107,6 @@ function getPistonLanguage(lang: string) {
   if (lang === "python") return { language: "python", version: "*" };
   if (lang === "cpp") return { language: "c++", version: "*" };
   if (lang === "js") return { language: "javascript", version: "*" };
-  if (lang === "rust") return { language: "rust", version: "*" };
   if (lang === "sql") return { language: "sqlite3", version: "*" };
   if (lang === "bash") return { language: "bash", version: "*" };
   return { language: lang, version: "*" };
@@ -101,7 +120,7 @@ app.post("/api/execute", async (req, res) => {
   const { code, language } = req.body ?? {};
   if (!code || !language) return res.status(400).json({ error: "Missing 'code' or 'language'" });
   if (typeof code !== "string" || code.length > MAX_CODE_LENGTH) return res.status(400).json({ error: "Invalid code" });
-  const allowed = ["c", "asm", "python", "cpp", "js", "rust", "sql", "bash"];
+  const allowed = ["c", "asm", "python", "cpp", "js", "sql", "bash"];
   if (!allowed.includes(language)) return res.status(400).json({ error: "Unsupported language" });
 
   let output: string;
@@ -116,10 +135,11 @@ app.post("/api/execute", async (req, res) => {
         method: "POST",
         headers,
         body: JSON.stringify({ language: pistonLang, version, files: [{ content: code }], run_timeout: 5000 }),
+        signal: AbortSignal.timeout(8000),
       });
       if (!r.ok) throw new Error(`Piston ${r.status}`);
       const data = (await r.json()) as { compile?: { stdout: string; stderr: string }; run: { stdout: string; stderr: string; code: number; signal: string | null; status: string | null } };
-      output = (data.compile ? `// Compiler:\n${data.compile.stderr || data.compile.stdout}\n` : "") + (data.run.stdout || "") + (data.run.stderr ? `\n// Stderr:\n${data.run.stderr}` : "") + `\n\n// exited ${data.run.code}`;
+      output = truncateOutput((data.compile ? `// Compiler:\n${data.compile.stderr || data.compile.stdout}\n` : "") + (data.run.stdout || "") + (data.run.stderr ? `\n// Stderr:\n${data.run.stderr}` : "") + `\n\n// exited ${data.run.code}`);
       error = data.run.status === "TO" ? "Execution timed out" : data.run.status === "SG" ? `Killed ${data.run.signal}` : data.run.stderr && !data.run.stdout ? data.run.stderr : null;
       real = true;
     } catch (e) {
@@ -204,6 +224,7 @@ app.get("/api/auth/google/callback", async (req, res) => {
         redirect_uri: GOOGLE_REDIRECT_URI,
         grant_type: "authorization_code",
       }),
+      signal: AbortSignal.timeout(10000),
     });
     if (!tokenRes.ok) {
       const t = await tokenRes.text();
@@ -213,6 +234,7 @@ app.get("/api/auth/google/callback", async (req, res) => {
     const tokenJson = (await tokenRes.json()) as { access_token: string };
     const userRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
       headers: { Authorization: `Bearer ${tokenJson.access_token}` },
+      signal: AbortSignal.timeout(10000),
     });
     if (!userRes.ok) return res.status(502).send("Failed to fetch Google profile");
     const profile = (await userRes.json()) as { id: string; email: string; name: string; picture?: string };
@@ -232,7 +254,9 @@ app.post("/api/auth/google", async (req, res) => {
     const { idToken } = req.body ?? {};
     if (!idToken) return res.status(400).json({ error: "Missing idToken" });
     if (!GOOGLE_CLIENT_ID) return res.status(501).json({ error: "Google OAuth not configured" });
-    const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
+    const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`, {
+      signal: AbortSignal.timeout(10000),
+    });
     if (!verifyRes.ok) return res.status(401).json({ error: "Invalid Google token" });
     const payload = (await verifyRes.json()) as { sub: string; email: string; name: string; picture?: string; aud: string };
     if (payload.aud !== GOOGLE_CLIENT_ID) return res.status(401).json({ error: "Token audience mismatch" });

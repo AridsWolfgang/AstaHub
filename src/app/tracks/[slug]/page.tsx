@@ -88,8 +88,8 @@ export default function TrackPage() {
         )}
       </div>
 
-      {(slug === "python" || slug === "cpp" || slug === "javascript" || slug === "rust" || slug === "sql" || slug === "toolkit") && (
-        <TrackJourney track={slug === "javascript" ? "js" : slug === "toolkit" ? "bash" : slug} />
+      {(slug === "python" || slug === "cpp" || slug === "javascript" || slug === "sql" || slug === "toolkit") && (
+        <TrackJourney track={slug === "javascript" ? "js" : slug === "toolkit" ? "bash" : slug as "python" | "cpp" | "js" | "sql" | "bash"} />
       )}
     </div>
   );

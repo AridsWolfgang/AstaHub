@@ -2,7 +2,7 @@
   "name": "asta-100",
   "version": "1.0.0",
   "private": false,
-  "description": "AstaHub — free, hands-on, mastery-oriented technical education. Live tracks in C, x86-64 Assembly, Python, C++, JavaScript/TypeScript, Rust, SQL, and Bash. Powered by Prosperity Systems Hub (ps-hub.org).",
+  "description": "AstaHub — free, hands-on, mastery-oriented technical education. Live tracks in C, x86-64 Assembly, Python, C++, JavaScript/TypeScript, SQL, and Bash. Powered by Prosperity Systems Hub (ps-hub.org).",
   "keywords": [
     "c",
     "assembly",
@@ -11,7 +11,6 @@
     "cpp",
     "javascript",
     "typescript",
-    "rust",
     "sql",
     "bash",
     "systems-programming",

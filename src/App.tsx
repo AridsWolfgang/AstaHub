@@ -32,7 +32,6 @@ import LessonCPage from "@/app/lesson/[day]/page";
 import LessonPythonPage from "@/app/lesson/python/[day]/page";
 import LessonCppPage from "@/app/lesson/cpp/[day]/page";
 import LessonJsPage from "@/app/lesson/js/[day]/page";
-import LessonRustPage from "@/app/lesson/rust/[day]/page";
 import LessonSqlPage from "@/app/lesson/sql/[day]/page";
 import LessonBashPage from "@/app/lesson/bash/[day]/page";
 import NotFound from "@/app/not-found";
@@ -75,10 +74,10 @@ export default function App() {
               <Route path="/lesson/python/:day" element={<Protected><LessonPythonPage /></Protected>} />
               <Route path="/lesson/cpp/:day" element={<Protected><LessonCppPage /></Protected>} />
               <Route path="/lesson/js/:day" element={<Protected><LessonJsPage /></Protected>} />
-              <Route path="/lesson/rust/:day" element={<Protected><LessonRustPage /></Protected>} />
               <Route path="/lesson/sql/:day" element={<Protected><LessonSqlPage /></Protected>} />
               <Route path="/lesson/bash/:day" element={<Protected><LessonBashPage /></Protected>} />
               {/* legacy redirects */}
+              <Route path="/lesson/rust/:day" element={<Navigate to="/tracks" replace />} />
               <Route path="/lesson/:track/:day" element={<Navigate to="/" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

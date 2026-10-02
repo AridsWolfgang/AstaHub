@@ -39,7 +39,6 @@ import {
   usePythonStore,
   useCppStore,
   useJsStore,
-  useRustStore,
   useSqlStore,
   useBashStore,
 } from "@/lib/store";
@@ -57,7 +56,6 @@ const STORES: Record<TrackKey, () => Snapshot> = {
   python: usePythonStore,
   cpp: useCppStore,
   js: useJsStore,
-  rust: useRustStore,
   sql: useSqlStore,
   bash: useBashStore,
 };
@@ -127,7 +125,7 @@ export default function AchievementsPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-1 rounded-lg border border-white/10 p-1">
-            {(["c", "python", "cpp", "js", "rust", "sql", "bash"] as TrackKey[]).map((t) => (
+            {(["c", "python", "cpp", "js", "sql", "bash"] as TrackKey[]).map((t) => (
               <button
                 key={t}
                 onClick={() => setTrack(t)}
@@ -142,10 +140,8 @@ export default function AchievementsPage() {
                     ? "Python"
                     : t === "cpp"
                       ? "C++"
-                      : t === "js"
-                        ? "JS/TS"
-                        : t === "rust"
-                          ? "Rust"
+                        : t === "js"
+                          ? "JS/TS"
                           : t === "sql"
                             ? "SQL"
                             : "Bash"}

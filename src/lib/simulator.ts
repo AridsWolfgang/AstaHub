@@ -1905,8 +1905,6 @@ export function simulateAnsi(code: string, language: string): string {
       ? "Simulated C++ (not available)"
       : language === "js"
       ? "Simulated JavaScript (not available)"
-      : language === "rust"
-      ? "Simulated Rust (not available)"
       : language === "sql"
       ? "Simulated SQL (not available)"
       : language === "bash"
@@ -1916,11 +1914,10 @@ export function simulateAnsi(code: string, language: string): string {
   output.push(`// ─────────────────────────────────────────────`);
   output.push("");
 
-  if (language === "cpp" || language === "js" || language === "rust" || language === "sql" || language === "bash") {
+  if (language === "cpp" || language === "js" || language === "sql" || language === "bash") {
     const what =
       language === "cpp" ? "C++"
       : language === "js" ? "JavaScript"
-      : language === "rust" ? "Rust"
       : language === "sql" ? "SQL"
       : "Bash";
     output.push(
