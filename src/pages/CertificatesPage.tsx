@@ -1,11 +1,9 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Award, Loader2, Printer, ChevronRight, ShieldCheck } from "lucide-react";
 import CyberPanel from "@/components/CyberPanel";
-import { LogoMark } from "@/components/Logo";
-import { certificateUrl, isCertificateVerifiable } from "@/lib/certificate";
+import Logo from "@/components/Logo";
+import { certificateUrl } from "@/lib/certificate";
 
 interface Certificate {
   id: string;
@@ -38,7 +36,6 @@ export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
-  const verifiable = isCertificateVerifiable();
 
   useEffect(() => {
     fetch("/api/me", { cache: "no-store" })
@@ -89,7 +86,7 @@ export default function CertificatesPage() {
               className="rounded-2xl border border-white/15 bg-gradient-to-b from-white/[0.04] to-transparent p-6"
             >
               <div className="flex items-start justify-between">
-                <LogoMark className="h-10 w-10" />
+                <Logo size="sm" />
                 <span className="text-[10px] font-mono uppercase tracking-widest text-gray-500">
                   {c.track === "c" ? "C / Assembly" : c.track}
                 </span>
@@ -123,11 +120,9 @@ export default function CertificatesPage() {
                   </button>
                 </div>
               </div>
-              {!verifiable && (
-                <p className="mt-3 text-[10px] font-mono leading-relaxed text-gray-500">
-                  Verification requires public link — coming with portal
-                </p>
-              )}
+              <p className="mt-3 text-[10px] font-mono leading-relaxed text-gray-500">
+                Share the Verify link — anyone can confirm it, no account needed.
+              </p>
             </div>
           ))}
         </div>
