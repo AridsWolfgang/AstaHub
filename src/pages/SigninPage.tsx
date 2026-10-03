@@ -1,14 +1,13 @@
-"use client";
-
 import { useState } from "react";
-import { signIn } from "@/lib/auth-client";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "@/lib/auth-client";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import { LogoMark } from "@/components/Logo";
+import Logo from "@/components/Logo";
 import { Link } from "react-router-dom";
 
 export default function SignInPage() {
   const navigate = useNavigate();
+  const { status, signIn } = useAuth();
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<"signin" | "register">("signin");
   const [name, setName] = useState("");
@@ -17,7 +16,13 @@ export default function SignInPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const callbackUrl = searchParams?.get("callbackUrl") ?? "/dashboard";
+  const callbackUrl = searchParams?.get("callbackUrl") ?? "/home";
+
+  // Already signed in (fresh login, back button, second tab) — don't strand
+  // the learner on the sign-in form; send them where they were headed.
+  if (status === "authenticated") {
+    return <Navigate to={callbackUrl} replace />;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -54,7 +59,7 @@ export default function SignInPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <LogoMark className="mx-auto mb-4 h-12 w-12" />
+          <Logo size="lg" className="mb-4 justify-center" />
           <h1 className="font-display text-2xl font-bold text-white">
             Welcome to AstaHub
           </h1>

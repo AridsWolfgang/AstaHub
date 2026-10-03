@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -120,7 +118,9 @@ export default function DashboardPage() {
               Dashboard — {TRACK_NAMES[track]}
             </h1>
             <p className="text-sm text-gray-500 font-mono">
-              Welcome back. Today is your next day.
+              {completedDays.length === 0
+                ? "Welcome. Your first day is waiting."
+                : "Welcome back. Today is your next day."}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-1 rounded-lg border border-white/10 p-1">
@@ -141,6 +141,27 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* First-day banner — zero progress on this track */}
+      {completedDays.length === 0 && (
+        <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+          <div>
+            <p className="font-display text-xl font-bold text-white">
+              Day one takes twenty minutes.
+            </p>
+            <p className="mt-1 text-sm text-gray-500">
+              One short lesson, a quiz, and something you build yourself.{" "}
+              <Link to="/tracks" className="text-gray-300 underline decoration-white/30 underline-offset-4 hover:decoration-white">
+                Compare all tracks
+              </Link>
+            </p>
+          </div>
+          <Link to={lessonHref(track, 1)} className="btn-primary shrink-0 text-sm">
+            Start day one
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      )}
 
       {/* Stats Row */}
       <div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-4 mb-8">

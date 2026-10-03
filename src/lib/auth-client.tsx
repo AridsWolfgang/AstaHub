@@ -28,19 +28,6 @@ export function useAuth() {
   return useContext(Ctx);
 }
 
-export async function signIn(email: string, password: string) {
-  const res = await fetch("/api/auth/signin", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) return { error: data.error || "Sign in failed" };
-  // token stored via httpOnly cookie by server; refresh in place
-  window.location.reload();
-  return {};
-}
-
 export async function signOut() {
   await fetch("/api/auth/signout", { method: "POST" });
   window.location.href = "/";
