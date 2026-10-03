@@ -4,7 +4,7 @@ import { isR2Configured } from "../src/lib/r2";
 import { isWebRTCConfigured } from "../src/lib/webrtc";
 import { buildAchievements } from "../src/lib/achievements";
 import { skillProgress } from "../src/lib/skillTree";
-import { certificateUrl, isCertificateVerifiable } from "../src/lib/certificate";
+import { certificateUrl, parseCertificateId } from "../src/lib/certificate";
 import { conceptForDay } from "../src/lib/knowledgeGraph";
 import { shouldShowRaincheck } from "../src/lib/raincheck";
 import { tierReconciliation } from "../src/lib/types";
@@ -19,11 +19,18 @@ describe("production gaps — honest gates", () => {
   it("webrtc not configured without env", () => {
     expect(isWebRTCConfigured({})).toBe(false);
   });
-  it("certificate not verifiable without env", () => {
-    expect(isCertificateVerifiable({})).toBe(false);
-  });
   it("certificate url is stable", () => {
     expect(certificateUrl("abc123")).toBe("/certificates/abc123/verify");
+  });
+  it("certificate id parsing accepts cuid-shaped codes", () => {
+    const r = parseCertificateId("cm3x8k9p20001abcdefghi");
+    expect(r.ok).toBe(true);
+  });
+  it("certificate id parsing rejects garbage", () => {
+    expect(parseCertificateId("").ok).toBe(false);
+    expect(parseCertificateId("!!!").ok).toBe(false);
+    expect(parseCertificateId("short").ok).toBe(false);
+    expect(parseCertificateId("x".repeat(65)).ok).toBe(false);
   });
   it("knowledge graph returns concept for day 1", () => {
     const c = conceptForDay("c", 1);
