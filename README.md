@@ -64,8 +64,9 @@ cp .env.example .env.local
 npx prisma migrate deploy   # against a database you own
 # or: npx prisma migrate dev --name init
 
-# 3. Run the app (Vite — fast, no Next.js)
-npm run dev
+# 3. Run the app — two terminals (Vite HMR, no build step while editing):
+npm run dev          # terminal 1: frontend :3000, instant updates on save
+npm run server:dev   # terminal 2: Express API :4000, auto-restarts on save
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
@@ -84,17 +85,17 @@ See `.env.example`:
 | `PORT` / `SERVER_PORT` | no | Express port (default `4000`) |
 | `PISTON_AUTH_TOKEN` | no | Enables real compilation via Piston; without it code runs simulated |
 | `MODERATOR_EMAILS` | no | Comma-separated emails that can moderate & schedule live events |
-| `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` | no | Supabase Realtime for live chat; without it polling fallback |
+| `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` | no | Supabase Realtime for live chat; without it polling fallback (`NEXT_PUBLIC_*` also accepted) |
 | `OPENROUTER_API_KEY` / `AI_MODEL` | no | AI coach (hint ladder) via OpenRouter; honest `503` when unset |
 | `YOUTUBE_CLIENT_ID` etc | no | YouTube export (lesson-linked metadata); honest `NOT_CONFIGURED` when unset |
 
 ## Commands
 
 ```bash
-npm run dev          # Vite :3000 (proxies /api → :4000)
-npm run server       # Express :4000 (in second terminal)
-npm run build        # Vite → dist/
-npm run preview      # Serve dist/ on :3000
+npm run dev          # Vite :3000 — instant HMR (proxies /api → :4000)
+npm run server:dev   # Express :4000 with auto-restart (in second terminal)
+npm run build        # Vite → dist/ (route-split chunks)
+npm run preview      # Serve dist/ on :3000 (STALE until you rebuild — use npm run dev while editing)
 npm run server:build # tsc -p tsconfig.server.json → dist-server/
 npm run lint         # ESLint
 npm test             # Vitest (139 tests)
@@ -124,21 +125,21 @@ npm run test:watch   # Vitest watch
 ```
 src/
 ├── main.tsx              # BrowserRouter + theme init
-├── App.tsx               # All routes (React Router)
-├── app/                  # Pages (plain React components)
-│   ├── lesson/[day] + lesson/{python,cpp,js,sql,bash}/[day]
-│   ├── tracks/, curriculum/, community/, live/, dashboard/, profile/
-│   ├── achievements/, leaderboard/, settings/, certificates/, playground/, signin/
-│   └── globals.css
+├── App.tsx               # All routes, React.lazy + Suspense (route-split)
+├── index.css             # Tailwind + theme tokens
+├── pages/                # Plain React pages, one file per route (lazy-loaded)
+│   ├── HomePage.tsx, TracksPage.tsx, TrackDetailPage.tsx, …
+│   └── lessons/          # LessonCPage + Lesson{Python,Cpp,Js,Sql,Bash}Page
 ├── components/           # CodePlayground, LessonView, Navbar, Footer, TrackJourney, CoachPanel …
 │   ├── community/        # Avatar, VoteButtons, ReportButton
 │   └── live/             # Countdown, CreateEventForm, LiveRoomClient
 ├── lib/
 │   ├── curriculum/       # core + days/day-*.ts (100) + python/cpp/js/sql/bash/core.ts
-│   ├── simulator.ts, store.ts, auth.ts, prisma.ts, tracks.ts, types.ts
-│   ├── community.ts, live.ts, youtube.ts, coach.ts, openrouter.ts, realtime.ts
+│   ├── simulator.ts, store.ts, tracks.ts, types.ts
+│   ├── auth-client.tsx, realtime.ts            # browser-safe (import.meta.env only)
+│   ├── auth.ts, prisma.ts, community.ts, live.ts, youtube.ts, coach.ts, openrouter.ts
 │   └── progressValidation.ts, rateLimit.ts, leaderboard.ts, registerValidation.ts
-server/index.ts           # Express API (all /api/*, helmet, JWT, rateLimit)
+server/index.ts           # Express API (all /api/*, helmet, JWT, rateLimit) — imports server-only lib files
 prisma/schema.prisma      # Postgres + 4 migrations
 public/                   # fonts, icons, manifest.json, favicon.svg
 vite.config.ts            # @ alias + /api proxy → :4000

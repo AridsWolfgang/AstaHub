@@ -32,7 +32,7 @@ JWT_SECRET=                # or NEXTAUTH_SECRET (fallback)
 | Route | Method | What it does |
 |-------|--------|--------------|
 | `/api/auth/google` | GET | If `GOOGLE_CLIENT_ID/SECRET` missing → 501 honest. Otherwise sets `oauth_state` cookie, redirects to `https://accounts.google.com/o/oauth2/v2/auth?client_id=...&redirect_uri=GOOGLE_REDIRECT_URI&scope=openid email profile` |
-| `/api/auth/google/callback` | GET | Validates `state`, exchanges `code` → `https://oauth2.googleapis.com/token`, fetches `https://www.googleapis.com/oauth2/v2/userinfo` (id/email/name/picture), calls `findOrCreateGoogleUser` (`src/lib/auth.ts:15`), `signJwt`, sets `token` cookie, `302` to `${FRONTEND_URL}/dashboard` |
+| `/api/auth/google/callback` | GET | Validates `state`, exchanges `code` → `https://oauth2.googleapis.com/token`, fetches `https://www.googleapis.com/oauth2/v2/userinfo` (id/email/name/picture), calls `findOrCreateGoogleUser` (`src/lib/auth.ts:15`), `signJwt`, sets `token` cookie, `302` to `${FRONTEND_URL}/home` |
 | `/api/auth/google` | POST | Accepts `{idToken}` (GIS One-Tap), verifies via `https://oauth2.googleapis.com/tokeninfo?id_token=...`, checks `aud===GOOGLE_CLIENT_ID`, then same `findOrCreateGoogleUser` flow, returns `{user}` JSON |
 
 **DB (`prisma/schema.prisma:10`):**
@@ -74,7 +74,7 @@ npx prisma migrate deploy
 
 1. Set the three env vars, register the redirect URI exactly in Google Console (Authorized redirect URIs).
 2. `npm run server` (4000) + `npm run dev` (3000).
-3. Visit `/signin` → "Continue with Google" → consent → redirect to `/dashboard` (authenticated). Check `GET /api/me` returns the user.
+3. Visit `/signin` → "Continue with Google" → consent → redirect to `/home` (authenticated). Check `GET /api/me` returns the user.
 
 ## Future
 
