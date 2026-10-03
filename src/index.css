@@ -1,0 +1,257 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --bg: 0 0 0;
+  --fg: 255 255 255;
+  --text-a: 229 229 229;
+  --text-b: 163 163 163;
+  --text-c: 107 107 107;
+  --surface: 26 26 26;
+  --line: 38 38 38;
+  --danger: 248 113 113;
+  --success: 34 197 94;
+  --warn: 245 158 11;
+  --info: 56 189 248;
+  --track-c: 249 115 22;
+  --track-assembly: 167 139 250;
+  --track-python: 56 189 248;
+  --track-cpp: 244 114 182;
+  --track-js: 250 204 21;
+  --track-sql: 45 212 191;
+  --track-bash: 74 222 128;
+  --tier-1: #94a3b8;
+  --tier-2: #38bdf8;
+  --tier-3: #a78bfa;
+  --tier-4: #f59e0b;
+  --tier-5: #facc15;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: 255 255 255;
+  --fg: 17 17 17;
+  --text-a: 42 42 42;
+  --text-b: 84 84 84;
+  --text-c: 122 122 122;
+  --surface: 245 245 245;
+  --line: 230 230 230;
+  --danger: 220 38 38;
+  --success: 21 128 61;
+  --warn: 180 83 9;
+  --info: 2 132 199;
+  --track-c: 194 65 12;
+  --track-assembly: 124 58 237;
+  --track-python: 2 132 199;
+  --track-cpp: 219 39 119;
+  --track-js: 161 98 7;
+  --track-sql: 13 148 136;
+  --track-bash: 22 163 74;
+  --tier-1: #64748b;
+  --tier-2: #0284c7;
+  --tier-3: #7c3aed;
+  --tier-4: #b45309;
+  --tier-5: #a16207;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/space-grotesk-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/space-grotesk-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("/fonts/space-grotesk-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/space-grotesk-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/inter-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/inter-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("/fonts/inter-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/inter-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/jetbrains-mono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/jetbrains-mono-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/jetbrains-mono-700.woff2") format("woff2");
+}
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.2);
+    border-radius: 3px;
+  }
+
+  body {
+    @apply bg-cyber-dark text-gray-200 font-sans antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  ::selection {
+    @apply bg-white/25 text-black;
+  }
+}
+
+@layer components {
+  .hairline {
+    @apply border border-white/5;
+  }
+
+  /* Wordmark terminal cursor — the logo's single distinctive cut. */
+  .logo-cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    margin-left: 0.14em;
+    align-self: center;
+    background-color: rgb(var(--fg) / 1);
+    animation: logo-blink 1.2s steps(1) infinite;
+  }
+
+  @keyframes logo-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .logo-cursor {
+      animation: none;
+    }
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-white/10 px-4 py-2 text-sm font-medium text-gray-200 transition-colors hover:border-white/25 hover:bg-white/5;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-cyber-cyan px-4 py-2 text-sm font-semibold text-cyber-dark transition-colors hover:bg-cyber-cyan/90;
+  }
+
+  .input {
+    @apply w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-gray-200 placeholder:text-gray-600 focus:border-cyber-cyan/40 focus:outline-none transition-colors;
+  }
+
+  .btn-cyber {
+    @apply inline-flex items-center gap-2 rounded-md border border-white/10 px-4 py-2 text-sm text-gray-200 transition-colors hover:border-white/25 hover:bg-white/5;
+  }
+
+  .btn-cyber-solid {
+    @apply inline-flex items-center gap-2 rounded-md bg-cyber-cyan px-4 py-2 text-sm font-semibold text-cyber-dark transition-colors hover:bg-cyber-cyan/90;
+  }
+
+  .text-glow-cyan {
+    @apply text-cyber-cyan;
+  }
+
+  .text-glow-purple {
+    @apply text-cyber-purple;
+  }
+
+  .theory-content h2 {
+    @apply text-lg font-display font-bold text-white mb-3 mt-6;
+  }
+
+  .theory-content p {
+    @apply text-gray-400 leading-relaxed mb-4;
+  }
+
+  .theory-content pre {
+    @apply rounded-lg border border-white/5 bg-black/40 p-4 font-mono text-sm text-matrix-400 overflow-x-auto mb-4;
+  }
+}
+
+@layer utilities {
+  .animate-in {
+    animation: fadeInUp 0.5s ease-out forwards;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hero-glow {
+    background: radial-gradient(
+      60% 55% at 50% 0%,
+      rgb(var(--fg) / 0.06),
+      transparent
+    );
+  }
+}

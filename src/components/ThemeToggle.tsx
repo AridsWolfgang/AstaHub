@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { Sun, Moon } from "lucide-react";
 import { applyTheme, getStoredTheme, toggleTheme, type Theme } from "@/lib/theme";

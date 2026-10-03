@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, XCircle, Trash2, Loader2 } from "lucide-react";

@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 // Image -> img (migrated from next/image)
 import { signOut  } from "@/lib/auth-client";

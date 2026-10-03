@@ -1,23 +1,31 @@
-"use client";
-
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Real-time layer for community features (group chat, presence, live activity).
  *
  * Uses Supabase Realtime when a Supabase project is configured
- * (`NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`). The app's
- * source of truth is Postgres via Prisma; Supabase Realtime reads that same
- * database through logical replication. When it is not configured (or the
- * database is not a Supabase Postgres), every consumer falls back to polling —
+ * (`VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` — Vite only exposes
+ * `VITE_*` vars to the browser). The app's source of truth is Postgres
+ * via Prisma; Supabase Realtime reads that same database through logical
+ * replication. When it is not configured (or the database is not a
+ * Supabase Postgres), every consumer falls back to polling —
  * never a fake "live" state.
  */
+
+/** Browser-safe env read. Vite exposes import.meta.env (never process.env). */
+function browserEnv(): Record<string, string | undefined> {
+  const env =
+    (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
+  return {
+    url: env.VITE_SUPABASE_URL ?? env.NEXT_PUBLIC_SUPABASE_URL,
+    key: env.VITE_SUPABASE_ANON_KEY ?? env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  };
+}
+
 export function isRealtimeConfigured(): boolean {
-  return Boolean(
-    typeof window !== "undefined" &&
-      process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
+  if (typeof window === "undefined") return false;
+  const { url, key } = browserEnv();
+  return Boolean(url && key);
 }
 
 let client: SupabaseClient | null | undefined;
@@ -25,8 +33,7 @@ let client: SupabaseClient | null | undefined;
 export function getRealtime(): SupabaseClient | null {
   if (typeof window === "undefined") return null;
   if (client !== undefined) return client;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const { url, key } = browserEnv();
   if (!url || !key) {
     client = null;
     return null;

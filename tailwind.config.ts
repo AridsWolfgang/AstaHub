@@ -29,6 +29,18 @@ const config: Config = {
           panel: "rgb(var(--surface) / <alpha-value>)",
           border: "rgb(var(--line) / <alpha-value>)",
         },
+        success: "rgb(var(--success) / <alpha-value>)",
+        warning: "rgb(var(--warn) / <alpha-value>)",
+        info: "rgb(var(--info) / <alpha-value>)",
+        track: {
+          c: "rgb(var(--track-c) / <alpha-value>)",
+          assembly: "rgb(var(--track-assembly) / <alpha-value>)",
+          python: "rgb(var(--track-python) / <alpha-value>)",
+          cpp: "rgb(var(--track-cpp) / <alpha-value>)",
+          js: "rgb(var(--track-js) / <alpha-value>)",
+          sql: "rgb(var(--track-sql) / <alpha-value>)",
+          bash: "rgb(var(--track-bash) / <alpha-value>)",
+        },
         white: "rgb(var(--fg) / <alpha-value>)",
         black: "rgb(var(--bg) / <alpha-value>)",
         gray: {

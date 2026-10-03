@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, Lock, Filter, Search, BookOpen, Cpu } from "lucide-react";

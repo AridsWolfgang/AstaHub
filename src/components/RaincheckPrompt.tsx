@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import type { RaincheckProgress, RaincheckInput } from "@/lib/raincheck";
 import { shouldShowRaincheck } from "@/lib/raincheck";

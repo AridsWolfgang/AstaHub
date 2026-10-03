@@ -1,21 +1,12 @@
-"use client";
-
 import * as React from "react";
-const dynamic = (loader: () => Promise<{ default: React.ComponentType<any> }>, _opts?: unknown) => React.lazy(loader); // shimmed for Vite
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { Play, RotateCcw, Copy, Check, Terminal, Cpu } from "lucide-react";
 import CyberPanel from "./CyberPanel";
 import { cn } from "@/lib/utils";
+import { TRACK_BADGE, trackColorKey } from "@/lib/trackColors";
 import type { Language } from "@/lib/types";
 
-const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center font-mono text-sm text-gray-500">
-      Loading editor...
-    </div>
-  ),
-});
+const MonacoEditor = React.lazy(() => import("@monaco-editor/react"));
 
 function EditorFallback() {
   return (
@@ -144,8 +135,8 @@ export default function CodePlayground({
 
   const modeColor = {
     idle: "text-gray-500",
-    real: "text-cyber-cyan",
-    simulated: "text-gray-300",
+    real: "text-success",
+    simulated: "text-warning",
     error: "text-cyber-red",
   }[executionMode];
 
@@ -162,10 +153,8 @@ export default function CodePlayground({
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <span className={cn(
-              "rounded px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider",
-              language === "c"
-                ? "bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/20"
-                : "bg-white/5 text-gray-300 border border-white/10"
+              "rounded border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider",
+              TRACK_BADGE[trackColorKey(language)]
             )}>
               {language === "c"
                 ? "C11"
@@ -216,7 +205,8 @@ export default function CodePlayground({
 
         <div className="rounded-lg border border-white/5 overflow-hidden" style={{ height }}>
           {editorReady ? (
-            <MonacoEditor
+            <Suspense fallback={<EditorFallback />}>
+              <MonacoEditor
               language={monacoLang}
               value={code}
               onChange={(v: string | undefined) => {
@@ -238,8 +228,9 @@ export default function CodePlayground({
                 cursorBlinking: "smooth",
                 smoothScrolling: true,
                 tabSize: 4,
-              }}
-            />
+                }}
+              />
+            </Suspense>
           ) : (
             <EditorFallback />
           )}

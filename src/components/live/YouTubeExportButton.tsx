@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { Youtube, Loader2 } from "lucide-react";
 

@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Sparkles, Loader2, Lightbulb, Send } from "lucide-react";

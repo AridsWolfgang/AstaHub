@@ -2,9 +2,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
-import "./app/globals.css";
+import "./index.css";
 
-// Apply stored theme before paint (mirrors src/app/layout.tsx themeInitScript)
+// Apply the stored theme before first paint to avoid a flash of the wrong theme.
 try {
   const t = localStorage.getItem("asta-theme");
   if (t === "light") document.documentElement.setAttribute("data-theme", "light");
