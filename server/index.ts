@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -8,6 +9,7 @@ import { rateLimit, clientIp } from "../src/lib/rateLimit";
 import { validateRegistration } from "../src/lib/registerValidation";
 import { signJwt, verifyJwt, findOrCreateGoogleUser } from "../src/lib/auth";
 import { parseLeaderboardQuery } from "../src/lib/leaderboard";
+import { parseCertificateId } from "../src/lib/certificate";
 import {
   TRACKS,
   TRACK_TOTAL_DAYS,
@@ -57,6 +59,12 @@ import bcrypt from "bcryptjs";
 const app = express();
 const PORT = Number(process.env.PORT || process.env.SERVER_PORT || 4000);
 const isProd = process.env.NODE_ENV === "production";
+
+// Never let one bad request take the whole API down (Express 4 does not
+// catch async handler rejections — without this the process exits).
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled rejection (server stays up):", err);
+});
 
 app.set("trust proxy", 1);
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
@@ -242,7 +250,7 @@ app.get("/api/auth/google/callback", async (req, res) => {
     const user = await findOrCreateGoogleUser({ id: profile.id, email: profile.email, name: profile.name, picture: profile.picture });
     const token = signJwt({ uid: user.id, email: user.email });
     res.cookie("token", token, cookieOpts());
-    res.redirect(`${FRONTEND_URL}/dashboard`);
+    res.redirect(`${FRONTEND_URL}/home`);
   } catch (e) {
     console.error("Google callback error", e);
     res.status(500).send("Google sign-in failed");
@@ -402,6 +410,52 @@ app.get("/api/leaderboard", async (req, res) => {
     currentDay: r.currentDay,
   }));
   return res.json({ users });
+});
+
+// ---------- Public certificate verification ----------
+// No auth: anyone with the link can confirm a credential is real.
+// Exposes only the credential itself plus the earner's display name.
+app.get("/api/certificates/:id/verify", async (req, res) => {
+  const ip = clientIp(req);
+  if (!(await rateLimit(`verify:${ip}`, 30, 60_000))) {
+    return res.status(429).json({ error: "Too many attempts. Try again in a minute." });
+  }
+  const parsed = parseCertificateId(req.params.id);
+  if (!parsed.ok) return res.status(400).json({ error: parsed.error, code: parsed.code });
+  try {
+    const cert = await prisma.certificate.findUnique({
+      where: { id: parsed.id },
+      select: {
+        id: true,
+        track: true,
+        title: true,
+        day: true,
+        xp: true,
+        issuedAt: true,
+        user: { select: { name: true } },
+      },
+    });
+    if (!cert) {
+      return res.status(404).json({
+        error: "No certificate exists with this code. Check the link and try again.",
+        code: "NOT_FOUND",
+      });
+    }
+    return res.json({
+      certificate: {
+        id: cert.id,
+        track: cert.track,
+        title: cert.title,
+        day: cert.day,
+        xp: cert.xp,
+        issuedAt: cert.issuedAt,
+      },
+      earner: { name: cert.user.name ?? "Anonymous" },
+    });
+  } catch (err) {
+    console.error("certificate verify error", err);
+    return res.status(500).json({ error: "Verification is temporarily unavailable. Try again shortly." });
+  }
 });
 
 // ---------- Password ----------
