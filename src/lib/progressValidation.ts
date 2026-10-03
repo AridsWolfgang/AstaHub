@@ -1,7 +1,7 @@
 import { levelFromXp } from "./types";
 
 export const TRACKS = new Set(["c", "python", "cpp", "js", "sql", "bash"]);
-export const TRACK_TOTAL_DAYS: Record<string, number> = { c: 100, python: 40, cpp: 40, js: 40, sql: 40, bash: 40 };
+export const TRACK_TOTAL_DAYS: Record<string, number> = { c: 100, python: 100, cpp: 100, js: 100, sql: 100, bash: 100 };
 export const TRACK_CERT_TITLES: Record<string, string> = {
   c: "C / x86-64 Assembly",
   python: "Python",

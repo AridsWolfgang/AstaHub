@@ -1,6 +1,6 @@
 import type { Lesson } from "../../types";
 
-export const SQL_TOTAL_DAYS = 40;
+export const SQL_TOTAL_DAYS = 100;
 
 let corePromise: Promise<typeof import("./core")> | null = null;
 function getCore(): Promise<typeof import("./core")> {

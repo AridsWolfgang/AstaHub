@@ -1,7 +1,7 @@
 import type { Lesson, TrackKey } from "../types";
 
 export const TOTAL_DAYS = 100;
-export const TOTAL_TRACKS: Record<TrackKey, number> = { c: 100, python: 40, cpp: 40, js: 40, sql: 40, bash: 40 };
+export const TOTAL_TRACKS: Record<TrackKey, number> = { c: 100, python: 100, cpp: 100, js: 100, sql: 100, bash: 100 };
 
 const loaders: Record<number, () => Promise<{ default: Partial<Lesson> }>> = {
   1: () => import("./days/day-1"),

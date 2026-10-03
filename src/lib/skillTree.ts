@@ -41,33 +41,39 @@ const PYTHON_TREE: SkillNode[] = [
   { id: "py-data", label: "Data Structures", description: "Lists, dicts, and comprehensions (Days 8-14)", day: 10, track: "python", prereqs: ["py-basics"] },
   { id: "py-functions", label: "Functions", description: "Functions, scope, and modules (Days 15-20)", day: 15, track: "python", prereqs: ["py-data"] },
   { id: "py-errors", label: "Error Handling", description: "Exceptions and file I/O (Days 21-27)", day: 21, track: "python", prereqs: ["py-functions"] },
-  { id: "py-oop", label: "OOP & Advanced", description: "Classes, decorators, and generators (Days 28-40)", day: 34, track: "python", prereqs: ["py-errors"] },
+  { id: "py-oop", label: "OOP & Advanced", description: "Classes, decorators, and generators (Days 28-56)", day: 34, track: "python", prereqs: ["py-errors"] },
+  { id: "py-pro", label: "Professional Python", description: "Testing, packaging, and asyncio (Days 57-80)", day: 57, track: "python", prereqs: ["py-oop"] },
+  { id: "py-mastery", label: "Mastery", description: "Concurrency, typing, and the capstone (Days 81-100)", day: 81, track: "python", prereqs: ["py-pro"] },
 ];
 
 const CPP_TREE: SkillNode[] = [
   { id: "cpp-basics", label: "Basics", description: "Syntax, types, and I/O (Days 1-7)", day: 1, track: "cpp", prereqs: [] },
   { id: "cpp-oop", label: "Objects", description: "Functions, classes, and memory (Days 8-21)", day: 10, track: "cpp", prereqs: ["cpp-basics"] },
   { id: "cpp-styles", label: "Idioms", description: "Templates, STL, and idioms (Days 22-30)", day: 21, track: "cpp", prereqs: ["cpp-oop"] },
-  { id: "cpp-modern", label: "Modern C++", description: "Smart pointers and move semantics (Days 31-40)", day: 30, track: "cpp", prereqs: ["cpp-styles"] },
+  { id: "cpp-modern", label: "Modern C++", description: "Smart pointers and move semantics (Days 31-60)", day: 30, track: "cpp", prereqs: ["cpp-styles"] },
+  { id: "cpp-systems", label: "Systems C++", description: "Concurrency, ranges, and the capstone (Days 61-100)", day: 61, track: "cpp", prereqs: ["cpp-modern"] },
 ];
 
 const JS_TREE: SkillNode[] = [
   { id: "js-basics", label: "Fundamentals", description: "Variables, types, and control flow (Days 1-7)", day: 1, track: "js", prereqs: [] },
   { id: "js-data", label: "Data & Functions", description: "Arrays, functions, and objects (Days 8-15)", day: 10, track: "js", prereqs: ["js-basics"] },
   { id: "js-async", label: "Async", description: "Promises, async/await, and events (Days 16-30)", day: 15, track: "js", prereqs: ["js-data"] },
-  { id: "js-ts", label: "TypeScript & Apps", description: "TypeScript and full-stack patterns (Days 31-40)", day: 28, track: "js", prereqs: ["js-async"] },
+  { id: "js-ts", label: "TypeScript & Apps", description: "TypeScript and full-stack patterns (Days 31-60)", day: 28, track: "js", prereqs: ["js-async"] },
+  { id: "js-ship", label: "Ship It", description: "Node services, testing, and the capstone (Days 61-100)", day: 61, track: "js", prereqs: ["js-ts"] },
 ];
 
 const SQL_TREE: SkillNode[] = [
   { id: "sql-basics", label: "Querying", description: "SELECT, filtering, and sorting (Days 1-7)", day: 1, track: "sql", prereqs: [] },
   { id: "sql-modeling", label: "Modeling", description: "Schemas, constraints, and joins (Days 8-20)", day: 13, track: "sql", prereqs: ["sql-basics"] },
-  { id: "sql-ops", label: "Operations", description: "Indexes, transactions, and tuning (Days 21-40)", day: 27, track: "sql", prereqs: ["sql-modeling"] },
+  { id: "sql-ops", label: "Operations", description: "Indexes, transactions, and tuning (Days 21-60)", day: 27, track: "sql", prereqs: ["sql-modeling"] },
+  { id: "sql-analytics", label: "Analytics", description: "Window functions, FTS, and the capstone (Days 61-100)", day: 61, track: "sql", prereqs: ["sql-ops"] },
 ];
 
 const BASH_TREE: SkillNode[] = [
   { id: "bash-basics", label: "Shell Basics", description: "Echo, navigation, and redirection (Days 1-7)", day: 1, track: "bash", prereqs: [] },
   { id: "bash-text", label: "Text Processing", description: "Pipes, grep, and awk (Days 6-20)", day: 6, track: "bash", prereqs: ["bash-basics"] },
-  { id: "bash-git", label: "Git & Automation", description: "Git, scripting, and deploys (Days 21-40)", day: 23, track: "bash", prereqs: ["bash-text"] },
+  { id: "bash-git", label: "Git & Automation", description: "Git, scripting, and deploys (Days 21-60)", day: 23, track: "bash", prereqs: ["bash-text"] },
+  { id: "bash-craft", label: "Script Craft", description: "awk, git mastery, and the capstone (Days 61-100)", day: 61, track: "bash", prereqs: ["bash-git"] },
 ];
 
 export const SKILL_TREES: Record<TrackKey, SkillNode[]> = {

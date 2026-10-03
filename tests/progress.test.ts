@@ -53,8 +53,8 @@ describe("sanitizeCompletedDays", () => {
   });
 
   it("respects the track's total day count", () => {
-    const days = sanitizeCompletedDays([1, 40, 41, 99], TRACK_TOTAL_DAYS.python);
-    expect(days).toEqual([1, 40]);
+    const days = sanitizeCompletedDays([1, 40, 41, 99, 101], TRACK_TOTAL_DAYS.python);
+    expect(days).toEqual([1, 40, 41, 99]);
   });
 });
 

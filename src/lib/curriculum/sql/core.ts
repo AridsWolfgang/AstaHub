@@ -53,6 +53,66 @@ const SQL_CURRICULUM: SqlBlueprint[] = [
   { title: "Query Tuning", subtitle: "EXPLAIN QUERY PLAN and index usage", language: "sql", tags: ["performance"], theoryTopics: ["EXPLAIN QUERY PLAN", "Index usage", "Scan vs seek"], codeTemplate: `CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);\nINSERT INTO users VALUES (1, 'Ada');\nINSERT INTO users VALUES (2, 'Bob');\nCREATE INDEX idx_users_name ON users (name);\nEXPLAIN QUERY PLAN SELECT name FROM users WHERE name = 'Ada';` },
   { title: "SQL vs NoSQL", subtitle: "The relational model and its trade-offs", language: "sql", tags: ["concepts"], theoryTopics: ["The relational model", "When SQL fits", "NoSQL trade-offs"], codeTemplate: `CREATE TABLE notes (id INTEGER PRIMARY KEY, body TEXT);\nINSERT INTO notes VALUES (1, 'relational data stays consistent');\nSELECT body FROM notes;` },
   { title: "Capstone: A Library Database", subtitle: "Schema, seed data, and reports", language: "sql", tags: ["capstone"], theoryTopics: ["Schema design", "Seed data", "Reporting queries"], codeTemplate: `CREATE TABLE members (id INTEGER PRIMARY KEY, name TEXT);\nCREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT);\nCREATE TABLE loans (member_id INTEGER, book_id INTEGER);\nINSERT INTO members VALUES (1, 'Ada');\nINSERT INTO books VALUES (1, 'Dune');\nINSERT INTO loans VALUES (1, 1);\nSELECT COUNT(*) FROM loans;` },
+  { title: "SELECT Expressions", subtitle: "Computed columns with math and text", language: "sql", tags: ["sql"], theoryTopics: ["Computed columns", "Arithmetic in SELECT", "String concatenation"], codeTemplate: `CREATE TABLE products (name TEXT, price REAL, qty INTEGER);\nINSERT INTO products VALUES ('pen', 1.5, 10);\nINSERT INTO products VALUES ('book', 12.0, 3);\nSELECT price * qty FROM products ORDER BY price * qty;` },
+  { title: "DISTINCT Deep", subtitle: "One column, many columns, dedup choices", language: "sql", tags: ["sql"], theoryTopics: ["DISTINCT on one column", "DISTINCT on multiple columns", "DISTINCT vs GROUP BY"], codeTemplate: `CREATE TABLE visits (city TEXT, day TEXT);\nINSERT INTO visits VALUES ('Paris', 'mon'), ('Paris', 'tue'), ('Rome', 'mon');\nSELECT DISTINCT city FROM visits ORDER BY city;` },
+  { title: "Aliases Mastery", subtitle: "Naming every output column", language: "sql", tags: ["sql"], theoryTopics: ["AS aliases", "Aliases in ORDER BY", "Quoted aliases"], codeTemplate: `CREATE TABLE staff (first_name TEXT, last_name TEXT);\nINSERT INTO staff VALUES ('Ada', 'Lovelace');\nINSERT INTO staff VALUES ('Grace', 'Hopper');\nSELECT first_name AS given FROM staff ORDER BY given;` },
+  { title: "Boolean Logic", subtitle: "AND, OR, NOT, and precedence", language: "sql", tags: ["sql"], theoryTopics: ["AND and OR", "NOT negation", "Parentheses and precedence"], codeTemplate: `CREATE TABLE applicants (name TEXT, age INTEGER, city TEXT);\nINSERT INTO applicants VALUES ('Ada', 36, 'London');\nINSERT INTO applicants VALUES ('Bob', 17, 'London');\nINSERT INTO applicants VALUES ('Cy', 40, 'Paris');\nSELECT name FROM applicants WHERE age >= 18 AND (city = 'London' OR city = 'Paris') ORDER BY name;` },
+  { title: "WHERE Deep", subtitle: "BETWEEN, IN, and IS NULL", language: "sql", tags: ["sql"], theoryTopics: ["BETWEEN ranges", "IN lists", "IS NULL tests"], codeTemplate: `CREATE TABLE inventory (item TEXT, qty INTEGER, supplier TEXT);\nINSERT INTO inventory VALUES ('pen', 5, NULL);\nINSERT INTO inventory VALUES ('book', 50, 'Acme');\nINSERT INTO inventory VALUES ('desk', 500, 'Acme');\nSELECT item FROM inventory WHERE qty BETWEEN 10 AND 100 ORDER BY item;` },
+  { title: "ORDER BY Deep", subtitle: "Multi-column sorts that stay stable", language: "sql", tags: ["sql"], theoryTopics: ["Multi-column ordering", "Mixed ASC and DESC", "Stable sort keys"], codeTemplate: `CREATE TABLE leaderboard (game TEXT, score INTEGER, player TEXT);\nINSERT INTO leaderboard VALUES ('chess', 10, 'Bob');\nINSERT INTO leaderboard VALUES ('chess', 10, 'Ada');\nINSERT INTO leaderboard VALUES ('chess', 20, 'Cy');\nSELECT player FROM leaderboard ORDER BY score DESC, player ASC;` },
+  { title: "Keyset Pagination", subtitle: "WHERE-based pages instead of OFFSET", language: "sql", tags: ["sql"], theoryTopics: ["OFFSET mechanics", "Keyset pagination", "Ties and deterministic pages"], codeTemplate: `CREATE TABLE logs (id INTEGER PRIMARY KEY, msg TEXT);\nINSERT INTO logs VALUES (1, 'boot'), (2, 'login'), (3, 'click'), (4, 'logout'), (5, 'halt');\nSELECT msg FROM logs WHERE id > 2 ORDER BY id LIMIT 2;` },
+  { title: "GLOB & Patterns", subtitle: "Case-sensitive matching and ESCAPE", language: "sql", tags: ["sql"], theoryTopics: ["GLOB patterns", "Case sensitivity", "ESCAPE clauses"], codeTemplate: `CREATE TABLE docs (name TEXT);\nINSERT INTO docs VALUES ('Report.TXT'), ('report.txt'), ('notes.md');\nSELECT name FROM docs WHERE name GLOB '*.txt' ORDER BY name;` },
+  { title: "COUNT Deep", subtitle: "Star, column, and distinct counts", language: "sql", tags: ["aggregates"], theoryTopics: ["COUNT(*) vs COUNT(column)", "COUNT(DISTINCT column)", "COUNT with filters"], codeTemplate: `CREATE TABLE signups (email TEXT, city TEXT);\nINSERT INTO signups VALUES ('a@x.com', 'London');\nINSERT INTO signups VALUES ('b@x.com', NULL);\nINSERT INTO signups VALUES ('a@x.com', 'Paris');\nSELECT COUNT(DISTINCT email) FROM signups;` },
+  { title: "SUM & AVG Deep", subtitle: "NULL semantics in totals", language: "sql", tags: ["aggregates"], theoryTopics: ["SUM ignores NULLs", "AVG denominators", "Sums over filtered rows"], codeTemplate: `CREATE TABLE donations (amount INTEGER);\nINSERT INTO donations VALUES (10);\nINSERT INTO donations VALUES (NULL);\nINSERT INTO donations VALUES (30);\nSELECT SUM(amount) FROM donations;` },
+  { title: "MIN, MAX & TOTAL", subtitle: "Extremes on text and numbers", language: "sql", tags: ["aggregates"], theoryTopics: ["MIN and MAX on text", "TOTAL vs SUM", "Aggregates over empty sets"], codeTemplate: `CREATE TABLE words (w TEXT);\nINSERT INTO words VALUES ('pear');\nINSERT INTO words VALUES ('apple');\nINSERT INTO words VALUES ('fig');\nSELECT MIN(w) FROM words;` },
+  { title: "GROUP_CONCAT", subtitle: "Rolling many rows into one string", language: "sql", tags: ["aggregates"], theoryTopics: ["GROUP_CONCAT basics", "Custom separators", "DISTINCT inside GROUP_CONCAT"], codeTemplate: `CREATE TABLE team (name TEXT);\nINSERT INTO team VALUES ('Ada');\nINSERT INTO team VALUES ('Bob');\nINSERT INTO team VALUES ('Ada');\nSELECT GROUP_CONCAT(name, ';') FROM team;` },
+  { title: "GROUP BY Deep", subtitle: "Composite keys and group order", language: "sql", tags: ["aggregates"], theoryTopics: ["Composite grouping keys", "GROUP BY with ORDER BY", "Group cardinality"], codeTemplate: `CREATE TABLE sales (year INTEGER, region TEXT, amount INTEGER);\nINSERT INTO sales VALUES (2024, 'north', 10);\nINSERT INTO sales VALUES (2024, 'south', 20);\nINSERT INTO sales VALUES (2025, 'north', 30);\nSELECT year, region FROM sales GROUP BY year, region ORDER BY year, region;` },
+  { title: "HAVING Deep", subtitle: "Group filters with teeth", language: "sql", tags: ["aggregates"], theoryTopics: ["HAVING on aggregates", "HAVING without GROUP BY", "Multiple HAVING conditions"], codeTemplate: `CREATE TABLE orders (customer TEXT, amount INTEGER);\nINSERT INTO orders VALUES ('Ada', 100);\nINSERT INTO orders VALUES ('Ada', 150);\nINSERT INTO orders VALUES ('Bob', 40);\nSELECT customer FROM orders GROUP BY customer HAVING SUM(amount) > 200 ORDER BY customer;` },
+  { title: "WHERE vs HAVING", subtitle: "The full filtering pipeline", language: "sql", tags: ["aggregates"], theoryTopics: ["Row filters before grouping", "Group filters after aggregation", "Combining both clauses"], codeTemplate: `CREATE TABLE events (kind TEXT, n INTEGER);\nINSERT INTO events VALUES ('click', 5);\nINSERT INTO events VALUES ('click', 50);\nINSERT INTO events VALUES ('view', 60);\nSELECT kind FROM events WHERE n > 10 GROUP BY kind HAVING COUNT(*) >= 1 ORDER BY kind;` },
+  { title: "Self Joins Deep", subtitle: "Hierarchies inside one table", language: "sql", tags: ["joins"], theoryTopics: ["Employee-manager patterns", "Mandatory table aliases", "Multi-level hierarchies"], codeTemplate: `CREATE TABLE staff (id INTEGER PRIMARY KEY, name TEXT, boss INTEGER);\nINSERT INTO staff VALUES (1, 'Ada', NULL);\nINSERT INTO staff VALUES (2, 'Bob', 1);\nINSERT INTO staff VALUES (3, 'Cy', 1);\nSELECT e.name FROM staff e JOIN staff m ON e.boss = m.id WHERE m.name = 'Ada' ORDER BY e.name;` },
+  { title: "RIGHT JOIN Emulation", subtitle: "SQLite has none — rewrite as LEFT JOIN", language: "sql", tags: ["joins"], theoryTopics: ["RIGHT JOIN concept", "Rewriting as LEFT JOIN", "SQLite's supported joins"], codeTemplate: `CREATE TABLE authors (id INTEGER PRIMARY KEY, name TEXT);\nCREATE TABLE books (author_id INTEGER, title TEXT);\nINSERT INTO authors VALUES (1, 'Frank');\nINSERT INTO authors VALUES (2, 'Ursula');\nINSERT INTO books VALUES (1, 'Dune');\nSELECT a.name, COALESCE(b.title, 'none') FROM authors a LEFT JOIN books b ON b.author_id = a.id ORDER BY a.name;` },
+  { title: "FULL OUTER JOIN Emulation", subtitle: "Two LEFT JOINs plus UNION", language: "sql", tags: ["joins"], theoryTopics: ["FULL OUTER JOIN concept", "UNION of two LEFT JOINs", "NULL on both sides"], codeTemplate: `CREATE TABLE left_t (id INTEGER, v TEXT);\nCREATE TABLE right_t (id INTEGER, w TEXT);\nINSERT INTO left_t VALUES (1, 'L1'), (2, 'L2');\nINSERT INTO right_t VALUES (2, 'R2'), (3, 'R3');\nSELECT l.id, COALESCE(r.w, 'none') FROM left_t l LEFT JOIN right_t r ON r.id = l.id UNION SELECT r.id, r.w FROM right_t r LEFT JOIN left_t l ON l.id = r.id WHERE l.id IS NULL ORDER BY 1;` },
+  { title: "Semi Joins", subtitle: "IN and EXISTS keep one side", language: "sql", tags: ["joins"], theoryTopics: ["IN as a semi join", "EXISTS short-circuits", "Semi joins vs INNER JOIN"], codeTemplate: `CREATE TABLE members (id INTEGER PRIMARY KEY, name TEXT);\nCREATE TABLE dues (member_id INTEGER);\nINSERT INTO members VALUES (1, 'Ada'), (2, 'Bob'), (3, 'Cy');\nINSERT INTO dues VALUES (1), (3);\nSELECT name FROM members WHERE id IN (SELECT member_id FROM dues) ORDER BY name;` },
+  { title: "Milestone: Shop Reports", subtitle: "E-commerce schema and revenue queries", language: "sql", tags: ["project"], theoryTopics: ["Project schema design", "Seed realistic data", "Multi-table report queries"], codeTemplate: `CREATE TABLE customers (id INTEGER PRIMARY KEY, name TEXT);\nCREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT, price REAL);\nCREATE TABLE purchases (customer_id INTEGER, product_id INTEGER, qty INTEGER);\nINSERT INTO customers VALUES (1, 'Ada'), (2, 'Bob');\nINSERT INTO products VALUES (1, 'pen', 2.0), (2, 'book', 10.0);\nINSERT INTO purchases VALUES (1, 1, 3), (1, 2, 1), (2, 2, 2);\nSELECT SUM(p.price * pu.qty) FROM products p JOIN purchases pu ON pu.product_id = p.id;` },
+  { title: "Anti Joins", subtitle: "Rows with no match, two ways", language: "sql", tags: ["joins"], theoryTopics: ["NOT EXISTS anti join", "LEFT JOIN with IS NULL", "NOT IN and NULL pitfalls"], codeTemplate: `CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);\nCREATE TABLE banned (user_id INTEGER);\nINSERT INTO users VALUES (1, 'Ada'), (2, 'Bob'), (3, 'Cy');\nINSERT INTO banned VALUES (2);\nSELECT name FROM users u LEFT JOIN banned b ON b.user_id = u.id WHERE b.user_id IS NULL ORDER BY name;` },
+  { title: "Correlated Subqueries", subtitle: "Inner queries that read the outer row", language: "sql", tags: ["subqueries"], theoryTopics: ["Per-row inner queries", "Above-average-per-group", "Correlated UPDATE patterns"], codeTemplate: `CREATE TABLE emp (name TEXT, dept TEXT, salary INTEGER);\nINSERT INTO emp VALUES ('Ada', 'eng', 100), ('Bob', 'eng', 60), ('Cy', 'ops', 70);\nSELECT name FROM emp e WHERE salary > (SELECT AVG(salary) FROM emp WHERE dept = e.dept) ORDER BY name;` },
+  { title: "Scalar & Derived Tables", subtitle: "Subqueries in SELECT and FROM", language: "sql", tags: ["subqueries"], theoryTopics: ["Scalar values in SELECT", "Derived tables in FROM", "Subqueries in ORDER BY"], codeTemplate: `CREATE TABLE films (title TEXT, year INTEGER, rating REAL);\nINSERT INTO films VALUES ('Dune', 1965, 4.8), ('Jaws', 1975, 4.2), ('Alien', 1979, 4.6);\nSELECT title FROM (SELECT title, rating FROM films WHERE year > 1970) ORDER BY rating DESC LIMIT 1;` },
+  { title: "CTEs Deep", subtitle: "Chained, multiple, and readable", language: "sql", tags: ["advanced"], theoryTopics: ["Chained CTEs", "Multiple CTEs", "CTEs vs subqueries"], codeTemplate: `CREATE TABLE nums (n INTEGER);\nINSERT INTO nums VALUES (1), (2), (3), (4);\nWITH evens AS (SELECT n FROM nums WHERE n % 2 = 0), doubled AS (SELECT n * 2 AS d FROM evens) SELECT d FROM doubled ORDER BY d;` },
+  { title: "Recursive CTEs I", subtitle: "Sequences from self-reference", language: "sql", tags: ["advanced"], theoryTopics: ["Anchor and recursive members", "UNION ALL recursion", "Termination conditions"], codeTemplate: `WITH RECURSIVE cnt(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM cnt WHERE n < 5) SELECT n FROM cnt WHERE n % 2 = 0 ORDER BY n;` },
+  { title: "Recursive CTEs II", subtitle: "Walking trees with depth", language: "sql", tags: ["advanced"], theoryTopics: ["Walking org charts", "Depth tracking", "Path building"], codeTemplate: `CREATE TABLE nodes (id INTEGER PRIMARY KEY, parent INTEGER, name TEXT);\nINSERT INTO nodes VALUES (1, NULL, 'root'), (2, 1, 'a'), (3, 2, 'b');\nWITH RECURSIVE chain(id, name, depth) AS (SELECT id, name, 0 FROM nodes WHERE parent IS NULL UNION ALL SELECT n.id, n.name, c.depth + 1 FROM nodes n JOIN chain c ON n.parent = c.id) SELECT name FROM chain ORDER BY depth DESC LIMIT 1;` },
+  { title: "Windows I: Ranking", subtitle: "ROW_NUMBER, RANK, DENSE_RANK", language: "sql", tags: ["advanced"], theoryTopics: ["ROW_NUMBER basics", "RANK with gaps", "DENSE_RANK without gaps"], codeTemplate: `CREATE TABLE racers (name TEXT, score INTEGER);\nINSERT INTO racers VALUES ('Ada', 100), ('Bob', 100), ('Cy', 80);\nSELECT name, DENSE_RANK() OVER (ORDER BY score DESC) AS r FROM racers ORDER BY r, name;` },
+  { title: "Windows II: Neighbors", subtitle: "LAG, LEAD, and NTILE", language: "sql", tags: ["advanced"], theoryTopics: ["LAG previous rows", "LEAD next rows", "NTILE buckets"], codeTemplate: `CREATE TABLE temps (day TEXT, t INTEGER);\nINSERT INTO temps VALUES ('mon', 10), ('tue', 14), ('wed', 12);\nSELECT day, t - LAG(t) OVER (ORDER BY day) AS delta FROM temps ORDER BY day LIMIT 1 OFFSET 1;` },
+  { title: "Windows III: Frames", subtitle: "Running totals with ROWS BETWEEN", language: "sql", tags: ["advanced"], theoryTopics: ["ROWS BETWEEN frames", "Running totals", "Moving averages"], codeTemplate: `CREATE TABLE ledger (day INTEGER, amount INTEGER);\nINSERT INTO ledger VALUES (1, 10), (2, 20), (3, 30);\nSELECT day, SUM(amount) OVER (ORDER BY day ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running FROM ledger ORDER BY day LIMIT 1;` },
+  { title: "INTERSECT & EXCEPT", subtitle: "Overlap and difference of sets", language: "sql", tags: ["sets"], theoryTopics: ["INTERSECT", "EXCEPT", "Set-operator precedence"], codeTemplate: `CREATE TABLE a (x TEXT);\nCREATE TABLE b (x TEXT);\nINSERT INTO a VALUES ('p'), ('q'), ('r');\nINSERT INTO b VALUES ('q'), ('r'), ('s');\nSELECT x FROM a INTERSECT SELECT x FROM b ORDER BY x;` },
+  { title: "UNION Deep", subtitle: "Dedup cost vs ALL speed", language: "sql", tags: ["sets"], theoryTopics: ["UNION dedup cost", "UNION ALL speed", "ORDER BY over unions"], codeTemplate: `CREATE TABLE east (city TEXT);\nCREATE TABLE west (city TEXT);\nINSERT INTO east VALUES ('Boston'), ('Chicago');\nINSERT INTO west VALUES ('Boston'), ('Denver');\nSELECT COUNT(*) FROM (SELECT city FROM east UNION ALL SELECT city FROM west);` },
+  { title: "Views Deep", subtitle: "Joins behind a clean name", language: "sql", tags: ["schema"], theoryTopics: ["CREATE VIEW with joins", "DROP VIEW", "Views stay current"], codeTemplate: `CREATE TABLE writers (id INTEGER PRIMARY KEY, name TEXT);\nCREATE TABLE novels (writer_id INTEGER, title TEXT);\nINSERT INTO writers VALUES (1, 'Frank');\nINSERT INTO novels VALUES (1, 'Dune'), (1, 'Messiah');\nCREATE VIEW catalog AS SELECT w.name, n.title FROM writers w JOIN novels n ON n.writer_id = w.id;\nSELECT COUNT(*) FROM catalog;` },
+  { title: "Updatable Views", subtitle: "INSTEAD OF triggers route writes", language: "sql", tags: ["schema"], theoryTopics: ["Updatable view limits", "INSTEAD OF triggers", "Routing writes"], codeTemplate: `CREATE TABLE people (id INTEGER PRIMARY KEY, name TEXT);\nINSERT INTO people VALUES (1, 'Ada');\nCREATE VIEW v_people AS SELECT id, name FROM people;\nCREATE TRIGGER v_people_insert INSTEAD OF INSERT ON v_people BEGIN INSERT INTO people (id, name) VALUES (NEW.id, NEW.name); END;\nINSERT INTO v_people VALUES (2, 'Bob');\nSELECT COUNT(*) FROM people;` },
+  { title: "Indexes Deep", subtitle: "Composite keys and column order", language: "sql", tags: ["performance"], theoryTopics: ["Composite indexes", "Column order", "Covering indexes"], codeTemplate: `CREATE TABLE events (id INTEGER PRIMARY KEY, kind TEXT, ts TEXT);\nCREATE INDEX idx_events_kind_ts ON events (kind, ts);\nINSERT INTO events VALUES (1, 'click', '2024-01-01'), (2, 'view', '2024-01-02'), (3, 'click', '2024-01-03');\nSELECT COUNT(*) FROM events WHERE kind = 'click';` },
+  { title: "Reading Query Plans", subtitle: "EXPLAIN QUERY PLAN, SCAN vs SEARCH", language: "sql", tags: ["performance"], theoryTopics: ["EXPLAIN QUERY PLAN syntax", "SCAN vs SEARCH lines", "Version-dependent text"], codeTemplate: `CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);\nCREATE INDEX idx_users_name ON users (name);\nINSERT INTO users VALUES (1, 'Ada');\nINSERT INTO users VALUES (2, 'Bob');\nEXPLAIN QUERY PLAN SELECT name FROM users WHERE name = 'Ada';` },
+  { title: "Tuning with Plans", subtitle: "Comparing plans before and after", language: "sql", tags: ["performance"], theoryTopics: ["Forcing index use", "Comparing plans", "When plans change"], codeTemplate: `CREATE TABLE items (id INTEGER PRIMARY KEY, sku TEXT, price REAL);\nINSERT INTO items VALUES (1, 'A1', 9.99);\nINSERT INTO items VALUES (2, 'B2', 4.50);\nCREATE INDEX idx_items_sku ON items (sku);\nEXPLAIN QUERY PLAN SELECT sku FROM items WHERE sku = 'A1';` },
+  { title: "Atomic Transfers", subtitle: "Two updates, one COMMIT", language: "sql", tags: ["data"], theoryTopics: ["Multi-statement transfers", "Balance invariants", "COMMIT finality"], codeTemplate: `CREATE TABLE account (id INTEGER PRIMARY KEY, balance INTEGER);\nINSERT INTO account VALUES (1, 100), (2, 50);\nBEGIN;\nUPDATE account SET balance = balance - 30 WHERE id = 1;\nUPDATE account SET balance = balance + 30 WHERE id = 2;\nCOMMIT;\nSELECT balance FROM account WHERE id = 2;` },
+  { title: "ACID & ROLLBACK", subtitle: "Aborting leaves no trace", language: "sql", tags: ["data"], theoryTopics: ["Atomicity recap", "Consistency guarantees", "Isolation in SQLite"], codeTemplate: `CREATE TABLE vault (id INTEGER PRIMARY KEY, gems INTEGER);\nINSERT INTO vault VALUES (1, 10);\nBEGIN;\nUPDATE vault SET gems = gems + 5 WHERE id = 1;\nROLLBACK;\nSELECT gems FROM vault WHERE id = 1;` },
+  { title: "SAVEPOINTs", subtitle: "Partial rollback inside a transaction", language: "sql", tags: ["data"], theoryTopics: ["SAVEPOINT syntax", "ROLLBACK TO", "RELEASE"], codeTemplate: `CREATE TABLE cart (id INTEGER PRIMARY KEY, item TEXT);\nINSERT INTO cart VALUES (1, 'pen');\nSAVEPOINT sp1;\nINSERT INTO cart VALUES (2, 'book');\nROLLBACK TO sp1;\nRELEASE sp1;\nSELECT COUNT(*) FROM cart;` },
+  { title: "Milestone: Bank Ledger", subtitle: "Transfers plus an audit trigger", language: "sql", tags: ["project"], theoryTopics: ["Ledger schema", "Audit trigger", "Transfer procedure"], codeTemplate: `CREATE TABLE accounts (id INTEGER PRIMARY KEY, owner TEXT, balance INTEGER);\nCREATE TABLE audit (id INTEGER PRIMARY KEY AUTOINCREMENT, note TEXT);\nCREATE TRIGGER log_big AFTER UPDATE ON accounts WHEN NEW.balance > 100 BEGIN INSERT INTO audit (note) VALUES ('big:' || NEW.owner); END;\nINSERT INTO accounts VALUES (1, 'Ada', 90), (2, 'Bob', 40);\nBEGIN;\nUPDATE accounts SET balance = balance + 30 WHERE id = 1;\nUPDATE accounts SET balance = balance - 30 WHERE id = 2;\nCOMMIT;\nSELECT COUNT(*) FROM audit;` },
+  { title: "CHECK & DEFAULT", subtitle: "Rules and fallbacks in the schema", language: "sql", tags: ["schema"], theoryTopics: ["CHECK expressions", "DEFAULT values", "Constraint violations abort"], codeTemplate: `CREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT, price REAL CHECK (price >= 0) DEFAULT 0);\nINSERT INTO products (name) VALUES ('mystery');\nSELECT price FROM products;` },
+  { title: "Foreign Key Actions", subtitle: "CASCADE and SET NULL on delete", language: "sql", tags: ["schema"], theoryTopics: ["ON DELETE CASCADE", "ON DELETE SET NULL", "PRAGMA foreign_keys"], codeTemplate: `PRAGMA foreign_keys = ON;\nCREATE TABLE teams (id INTEGER PRIMARY KEY, name TEXT);\nCREATE TABLE players (id INTEGER PRIMARY KEY, team_id INTEGER REFERENCES teams(id) ON DELETE CASCADE, name TEXT);\nINSERT INTO teams VALUES (1, 'A');\nINSERT INTO players VALUES (1, 1, 'Ada'), (2, 1, 'Bob');\nDELETE FROM teams WHERE id = 1;\nSELECT COUNT(*) FROM players;` },
+  { title: "Normalization Refactor", subtitle: "Splitting a flat table into 3NF", language: "sql", tags: ["design"], theoryTopics: ["Spotting repeating groups", "Splitting tables", "Joining it back"], codeTemplate: `CREATE TABLE dept (id INTEGER PRIMARY KEY, name TEXT);\nCREATE TABLE worker (id INTEGER PRIMARY KEY, name TEXT, dept_id INTEGER REFERENCES dept(id));\nINSERT INTO dept VALUES (1, 'eng'), (2, 'ops');\nINSERT INTO worker VALUES (1, 'Ada', 1), (2, 'Bob', 2);\nSELECT w.name FROM worker w JOIN dept d ON d.id = w.dept_id WHERE d.name = 'eng';` },
+  { title: "Denormalization", subtitle: "Breaking rules for read speed", language: "sql", tags: ["design"], theoryTopics: ["Read vs write trade-offs", "Cached counters", "Materialized summaries"], codeTemplate: `CREATE TABLE posts (id INTEGER PRIMARY KEY, title TEXT, likes INTEGER DEFAULT 0);\nCREATE TABLE likes (post_id INTEGER, who TEXT);\nINSERT INTO posts VALUES (1, 'hello', 0);\nINSERT INTO likes VALUES (1, 'Ada'), (1, 'Bob');\nUPDATE posts SET likes = (SELECT COUNT(*) FROM likes WHERE post_id = 1) WHERE id = 1;\nSELECT likes FROM posts WHERE id = 1;` },
+  { title: "Triggers I: Audit", subtitle: "AFTER INSERT logs every row", language: "sql", tags: ["data"], theoryTopics: ["AFTER INSERT triggers", "NEW row values", "Audit tables"], codeTemplate: `CREATE TABLE orders (id INTEGER PRIMARY KEY, item TEXT);\nCREATE TABLE order_log (id INTEGER PRIMARY KEY AUTOINCREMENT, msg TEXT);\nCREATE TRIGGER after_order_insert AFTER INSERT ON orders BEGIN INSERT INTO order_log (msg) VALUES ('added:' || NEW.item); END;\nINSERT INTO orders VALUES (1, 'pen');\nSELECT msg FROM order_log;` },
+  { title: "Triggers II: Validation", subtitle: "BEFORE INSERT guards with RAISE", language: "sql", tags: ["data"], theoryTopics: ["BEFORE INSERT guards", "RAISE(ABORT, ...)", "Enforcing rules"], codeTemplate: `CREATE TABLE ages (name TEXT, age INTEGER);\nCREATE TRIGGER check_age BEFORE INSERT ON ages WHEN NEW.age < 0 BEGIN SELECT RAISE(ABORT, 'age must be non-negative'); END;\nINSERT INTO ages VALUES ('Ada', 36);\nSELECT age FROM ages WHERE name = 'Ada';` },
+  { title: "Trigger Limits", subtitle: "SQLite is FOR EACH ROW only", language: "sql", tags: ["data"], theoryTopics: ["FOR EACH ROW only", "No FOR EACH STATEMENT", "Workarounds with temp tables"], codeTemplate: `CREATE TABLE t (x INTEGER);\nCREATE TABLE t_log (n INTEGER);\nCREATE TRIGGER t_row_trigger AFTER INSERT ON t BEGIN INSERT INTO t_log VALUES (NEW.x); END;\nINSERT INTO t VALUES (1), (2);\nSELECT COUNT(*) FROM t_log;` },
+  { title: "JSON I: Extraction", subtitle: "json_extract reads document fields", language: "sql", tags: ["functions"], theoryTopics: ["JSON text columns", "json_extract paths", "json_object building"], codeTemplate: `CREATE TABLE configs (id INTEGER PRIMARY KEY, data TEXT);\nINSERT INTO configs VALUES (1, '{"theme":"dark","font":14}');\nSELECT json_extract(data, '$.theme') FROM configs WHERE id = 1;` },
+  { title: "JSON II: json_each", subtitle: "Unnesting arrays into rows", language: "sql", tags: ["functions"], theoryTopics: ["json_each table function", "Unnesting arrays", "Filtering extracted values"], codeTemplate: `CREATE TABLE carts (id INTEGER PRIMARY KEY, items TEXT);\nINSERT INTO carts VALUES (1, '["pen","book","pen"]');\nSELECT COUNT(*) FROM carts, json_each(carts.items) WHERE value = 'pen';` },
+  { title: "FTS I: MATCH", subtitle: "Full-text search with FTS5", language: "sql", tags: ["advanced"], theoryTopics: ["FTS5 virtual tables", "MATCH queries", "Tokenization basics"], codeTemplate: `CREATE VIRTUAL TABLE docs USING fts5(title, body);\nINSERT INTO docs VALUES ('Dune', 'desert planet spice');\nINSERT INTO docs VALUES ('Jaws', 'shark ocean terror');\nSELECT title FROM docs WHERE docs MATCH 'desert';` },
+  { title: "FTS II: Ranking", subtitle: "bm25 orders the matches", language: "sql", tags: ["advanced"], theoryTopics: ["bm25 ranking", "snippet highlights", "Column filters"], codeTemplate: `CREATE VIRTUAL TABLE articles USING fts5(title, body);\nINSERT INTO articles VALUES ('sql guide', 'sql indexes speed up sql queries');\nINSERT INTO articles VALUES ('sql intro', 'tables rows and columns');\nSELECT title FROM articles WHERE articles MATCH 'sql' ORDER BY bm25(articles) LIMIT 1;` },
+  { title: "Analytics I: Periods", subtitle: "Running totals and windows of time", language: "sql", tags: ["advanced"], theoryTopics: ["Daily deltas with LAG", "Running totals over time", "Week-over-week compare"], codeTemplate: `CREATE TABLE revenue (day INTEGER, amount INTEGER);\nINSERT INTO revenue VALUES (1, 100), (2, 150), (3, 120);\nSELECT SUM(amount) FROM revenue WHERE day <= 2;` },
+  { title: "Analytics II: Top-N", subtitle: "Best row per group with windows", language: "sql", tags: ["advanced"], theoryTopics: ["ROW_NUMBER per partition", "Top-N filter", "Ties handling"], codeTemplate: `CREATE TABLE scores (region TEXT, player TEXT, pts INTEGER);\nINSERT INTO scores VALUES ('north', 'Ada', 90), ('north', 'Bob', 70), ('south', 'Cy', 95);\nSELECT player FROM (SELECT player, ROW_NUMBER() OVER (PARTITION BY region ORDER BY pts DESC) AS rn FROM scores) WHERE rn = 1 ORDER BY player;` },
+  { title: "Analytics III: Cohorts", subtitle: "Retention with a self join", language: "sql", tags: ["advanced"], theoryTopics: ["Cohort week grouping", "Retention self join", "Percent retained"], codeTemplate: `CREATE TABLE logins (user_id INTEGER, week INTEGER);\nINSERT INTO logins VALUES (1, 1), (1, 2), (2, 1), (3, 2);\nSELECT COUNT(*) FROM logins a JOIN logins b ON a.user_id = b.user_id AND b.week = a.week + 1 WHERE a.week = 1;` },
+  { title: "UPSERT", subtitle: "INSERT ON CONFLICT keeps counters", language: "sql", tags: ["data"], theoryTopics: ["ON CONFLICT DO NOTHING", "ON CONFLICT DO UPDATE", "excluded row values"], codeTemplate: `CREATE TABLE counters (key TEXT PRIMARY KEY, hits INTEGER);\nINSERT INTO counters VALUES ('home', 1);\nINSERT INTO counters (key, hits) VALUES ('home', 1) ON CONFLICT(key) DO UPDATE SET hits = hits + 1;\nSELECT hits FROM counters WHERE key = 'home';` },
+  { title: "Funnel Queries", subtitle: "CTEs plus windows measure drop-off", language: "sql", tags: ["advanced"], theoryTopics: ["Staged CTE pipelines", "Conversion ratios", "Funnel drop-off"], codeTemplate: `CREATE TABLE funnel (user_id INTEGER, step TEXT);\nINSERT INTO funnel VALUES (1, 'visit'), (1, 'signup'), (2, 'visit');\nWITH steps AS (SELECT step, COUNT(DISTINCT user_id) AS users FROM funnel GROUP BY step) SELECT users FROM steps WHERE step = 'signup';` },
+  { title: "Data Cleaning", subtitle: "Dedup with rowid and repair NULLs", language: "sql", tags: ["data"], theoryTopics: ["Finding duplicates", "DELETE with rowid", "Filling NULLs"], codeTemplate: `CREATE TABLE contacts (name TEXT, email TEXT);\nINSERT INTO contacts VALUES ('Ada', 'a@x.com'), ('Ada', 'a@x.com'), ('Bob', NULL);\nDELETE FROM contacts WHERE rowid NOT IN (SELECT MIN(rowid) FROM contacts GROUP BY name, email);\nSELECT COUNT(*) FROM contacts;` },
+  { title: "Schema Migrations", subtitle: "Evolving tables without losing data", language: "sql", tags: ["schema"], theoryTopics: ["ADD COLUMN with defaults", "Backfilling data", "Renaming tables"], codeTemplate: `CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);\nINSERT INTO users VALUES (1, 'Ada'), (2, 'Bob');\nALTER TABLE users ADD COLUMN status TEXT DEFAULT 'active';\nUPDATE users SET status = 'vip' WHERE name = 'Ada';\nSELECT status FROM users WHERE name = 'Bob';` },
+  { title: "Index Audit", subtitle: "Finding missing indexes in sqlite_master", language: "sql", tags: ["performance"], theoryTopics: ["sqlite_master inventory", "Missing-index smells", "Audit checklists"], codeTemplate: `CREATE TABLE fast (id INTEGER PRIMARY KEY, email TEXT);\nCREATE TABLE slow (id INTEGER PRIMARY KEY, email TEXT);\nCREATE INDEX idx_fast_email ON fast (email);\nINSERT INTO fast VALUES (1, 'a@x.com');\nINSERT INTO slow VALUES (1, 'a@x.com');\nSELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'fast' AND name NOT LIKE 'sqlite_%';` },
+  { title: "Capstone: Market Database", subtitle: "Sellers, goods, sales, and a dashboard", language: "sql", tags: ["capstone"], theoryTopics: ["Capstone schema", "Seed and constraints", "Executive dashboard query"], codeTemplate: `CREATE TABLE sellers (id INTEGER PRIMARY KEY, name TEXT);\nCREATE TABLE goods (id INTEGER PRIMARY KEY, seller_id INTEGER REFERENCES sellers(id), name TEXT, price REAL);\nCREATE TABLE sales (id INTEGER PRIMARY KEY AUTOINCREMENT, goods_id INTEGER, qty INTEGER);\nINSERT INTO sellers VALUES (1, 'Ada'), (2, 'Bob');\nINSERT INTO goods VALUES (1, 1, 'pen', 2.0), (2, 2, 'book', 10.0);\nINSERT INTO sales (goods_id, qty) VALUES (1, 5), (2, 3);\nSELECT SUM(g.price * s.qty) FROM goods g JOIN sales s ON s.goods_id = g.id;` },
 ];
 /* ─── Hand-written topic content ─── */
 
@@ -176,6 +236,173 @@ const SQL_TOPIC_CONTENT: Record<string, string> = {
   "Schema design": "A library database is the classic design exercise: members, books, and loans as tables, with keys tying them together. Members hold reader identity, books hold catalog identity, and loans join them with their own history. Draw the entities and relationships first, then CREATE TABLE.",
   "Seed data": "Seed data is a small, realistic set of rows inserted so queries have something real to answer. A few members, a few books, a few loans — enough to exercise every join and report. Seed data turns an empty schema into a demonstrable, testable system.",
   "Reporting queries": "The payoff of a designed schema is reporting: counts of loans, overdue books by member, popular titles. Each report is a SELECT that joins tables and aggregates them into an answer. When every report reads as a short, obvious query, the schema has done its job.",
+  "Computed columns": "SELECT can output values that exist in no column — `price * qty` computes a line total per row on the fly. Computed columns turn stored facts into answers without changing the data. Any expression the database understands can become an output column.",
+  "Arithmetic in SELECT": "SQL does arithmetic inside SELECT: `+ - * / %` over numeric columns and literals. `price * qty` multiplies two columns row by row; mixing INTEGER and REAL promotes the result to REAL. Arithmetic in the select list keeps derived numbers next to the rows they describe.",
+  "String concatenation": "SQLite joins text with the `||` operator: `'Ada' || ' ' || 'Lovelace'` makes one full name. Concatenation builds labels, messages, and composite keys inside the query. If either side is NULL the result is NULL, so wrap nullable parts in COALESCE.",
+  "DISTINCT on one column": "`SELECT DISTINCT city` collapses repeats into one row per value. It answers \"which values occur?\" without caring how many times. Single-column DISTINCT is the cheapest possible unique-list query.",
+  "DISTINCT on multiple columns": "DISTINCT applies to the whole selected row: `SELECT DISTINCT city, day` dedupes on the combination. Two rows sharing a city but not a day both survive. Multi-column DISTINCT finds unique pairs, triples, and full-row duplicates.",
+  "OFFSET mechanics": "`LIMIT n OFFSET m` skips the first m rows, then returns n — `LIMIT 10 OFFSET 20` is page three of ten-row pages. OFFSET counts from zero, so page p of size s starts at `(p - 1) * s`. Simple, but the database still walks every skipped row.",
+  "Keyset pagination": "Keyset pagination replaces OFFSET with a filter on the last seen key: `WHERE id > 42 ORDER BY id LIMIT 10`. Each page starts exactly where the previous one ended, immune to rows inserted or deleted mid-browse. It needs a unique, ordered column — usually the primary key.",
+  "Ties and deterministic pages": "OFFSET is only stable when ORDER BY is total: ties in the sort key can shuffle rows between pages. Order by a unique column (or add the primary key as the final sort key) so every row has exactly one slot. Deterministic order is what makes page two contain what page one promised.",
+  "GLOB patterns": "GLOB matches text with Unix-file wildcards: `*` for any run, `?` for one character, `[abc]` for a set. Unlike LIKE it is case-sensitive — `'*.txt'` never matches `'Report.TXT'`. GLOB is the precise tool when case matters.",
+  "Case sensitivity": "SQLite's LIKE is case-insensitive for ASCII by default while GLOB and `=` on text are case-sensitive. `'Report.TXT' LIKE '%.txt'` matches; the same pattern with GLOB does not. Know which comparison your query uses before trusting a filter on mixed-case data.",
+  "ESCAPE clauses": "LIKE and GLOB can match their own wildcards literally with ESCAPE: `LIKE '100\\%' ESCAPE '\\'` finds the text 100%. The escape character you declare strips special meaning from the next character. Escaping keeps pattern searches correct when the data contains `%`, `_`, or `*`.",
+  "COUNT(*) vs COUNT(column)": "`COUNT(*)` counts rows; `COUNT(column)` counts non-NULL values in that column. A nullable column makes the two differ — empty slots count as rows but not as values. Pick `*` for \"how many rows\" and a column for \"how many known values\".",
+  "COUNT(DISTINCT column)": "`COUNT(DISTINCT email)` counts each different value once — unique users, not signups. It merges dedup and aggregation into one pass. It is the standard distinct-count metric behind \"how many unique X\" reports.",
+  "COUNT with filters": "COUNT obeys WHERE and HAVING like any aggregate: `COUNT(*) ... WHERE city = 'London'` counts only matching rows. Conditional counting — `COUNT(CASE WHEN ...)` or filtered subqueries — splits one table into per-segment totals. Filters decide what gets counted, not just what gets shown.",
+  "SUM ignores NULLs": "SUM and AVG skip NULLs entirely: the total of 10, NULL, 30 is 40, not NULL. Missing values contribute nothing instead of poisoning the result. If you need NULLs to count as zero, COALESCE them first — otherwise the aggregate quietly pretends they are absent.",
+  "AVG denominators": "AVG divides by the count of non-NULL values, not by the row count: AVG of 10, NULL, 30 is 20, not 13.33. The denominator is \"values seen\", which surprises anyone expecting NULLs to drag the mean down. For an average over all rows, COALESCE the NULLs to zero first.",
+  "Sums over filtered rows": "A WHERE before SUM restricts what is totaled: `SELECT SUM(amount) FROM revenue WHERE day <= 2` sums two days, not three. Filtering first is how period totals, per-status sums, and conditional revenue are built. The filter runs before the aggregate ever sees a row.",
+  "MIN and MAX on text": "MIN and MAX work on text by collation order: MIN of pear, apple, fig is apple. On dates stored as ISO text they give earliest and latest for free. Extremes are type-agnostic — whatever ordering the type defines, MIN/MAX honor.",
+  "TOTAL vs SUM": "SUM returns NULL over zero rows while TOTAL returns 0.0 — TOTAL never yields NULL, which makes it safer for arithmetic and display. Use SUM when \"no rows\" should stay unknown, TOTAL when it should read as zero.",
+  "Aggregates over empty sets": "Aggregates over an empty input return NULL (or 0/0.0 for COUNT/TOTAL) with no error — `SUM` of nothing is NULL, not a crash. A query that matches zero rows still returns one summary row. Guard with COALESCE when downstream math needs a real number.",
+  "GROUP_CONCAT basics": "`GROUP_CONCAT(name)` folds a group's values into one comma-separated string. It is the aggregate for lists: members per team, tags per post. Aggregation collapses rows into one value — GROUP_CONCAT just chooses text as the shape.",
+  "Custom separators": "`GROUP_CONCAT(name, ';')` joins with your separator instead of a comma. Pick one that cannot appear in the data — semicolons, pipes, newlines. The separator is presentation, so choose whatever the consumer parses.",
+  "DISTINCT inside GROUP_CONCAT": "`GROUP_CONCAT(DISTINCT name)` lists each value once even when it repeats across rows. Dedup inside the aggregate keeps tag lists and member lists clean. Combine with a separator for a tidy unique list in one cell.",
+  "Composite grouping keys": "GROUP BY accepts several columns at once: `GROUP BY year, region` makes one group per distinct pair. Composite keys build nested summaries — sales per region within each year. Each added column multiplies the groups and sharpens the picture.",
+  "GROUP BY with ORDER BY": "Grouped output has no natural order, so add ORDER BY to arrange it: `GROUP BY region ORDER BY SUM(amount) DESC` ranks groups by their totals. Sort by the grouping key for stable reports, by the aggregate for leaderboards. Ordering is cosmetic — it never changes the groups.",
+  "Group cardinality": "Cardinality is how many groups a GROUP BY produces — distinct values for one column, distinct combinations for several. High-cardinality groupings (per user, per day) return many thin rows; low-cardinality ones (per region) return few thick rows. Know your cardinality before promising a dashboard it scales.",
+  "HAVING on aggregates": "HAVING tests the group's summary: `HAVING SUM(amount) > 200` keeps only big spenders. It runs after grouping, so aggregates are legal where WHERE forbids them. Every HAVING condition is a bar the whole group must clear.",
+  "HAVING without GROUP BY": "HAVING works without GROUP BY too — the whole result becomes one implicit group. `SELECT SUM(x) FROM t HAVING SUM(x) > 10` returns a row only when the total clears the bar. It is a compact idiom for \"answer only if the threshold holds\".",
+  "Multiple HAVING conditions": "HAVING takes AND/OR like any filter: `HAVING SUM(a) > 100 AND COUNT(*) >= 3` demands both volume and size. Complex bars compose from simple ones. Each condition sees the same group summary, so they combine freely.",
+  "Row filters before grouping": "WHERE runs before GROUP BY: it decides which rows may form groups at all. `WHERE n > 10` drops small events before any counting happens. Pre-filtering keeps irrelevant rows out of every summary, not just out of the display.",
+  "Group filters after aggregation": "HAVING runs after GROUP BY: it judges finished groups by their summaries. WHERE picks the ingredients, HAVING picks the dishes. A query with both filters twice — once on rows, once on groups.",
+  "Combining both clauses": "The full pipeline reads WHERE → GROUP BY → HAVING → ORDER BY → LIMIT: filter rows, form groups, filter groups, sort, cap. Each clause has exactly one job and one position. Writing them in pipeline order keeps even long queries readable.",
+  "Employee-manager patterns": "A hierarchy table points at itself: each row's `boss` holds another row's id. Joining the table to itself on `boss = id` pairs every employee with their manager row. One table, one foreign key, and the whole org chart is queryable.",
+  "Mandatory table aliases": "A self join mentions the same table twice, so aliases stop being optional: `FROM staff e JOIN staff m` gives the two roles names. Without aliases the database cannot tell employee columns from manager columns. Alias every self join — employee side and manager side.",
+  "Multi-level hierarchies": "Chained self joins climb several levels: employee → manager → director is two joins on the same table. Each join ascends one rung using fresh aliases. For unknown depth, switch to a recursive CTE — fixed joins only reach as far as you write them.",
+  "RIGHT JOIN concept": "RIGHT JOIN keeps every row of the right table, filling NULLs where the left has no match — the mirror of LEFT JOIN. It answers \"all of these, plus whatever matches\" from the other side. Conceptually symmetric; in practice rarely written.",
+  "Rewriting as LEFT JOIN": "Every RIGHT JOIN rewrites as a LEFT JOIN with the tables swapped: `A RIGHT JOIN B` is `B LEFT JOIN A`. SQLite omits RIGHT JOIN entirely, so the rewrite is not style — it is the only spelling. Swap the tables, keep the condition, and the result is identical.",
+  "SQLite's supported joins": "SQLite supports INNER, LEFT (OUTER), CROSS, and self joins — but no RIGHT or FULL OUTER JOIN syntax. Missing variants are emulated: LEFT JOIN with swapped tables, FULL OUTER with UNION. Knowing the supported set stops you writing syntax the engine will reject.",
+  "FULL OUTER JOIN concept": "FULL OUTER JOIN keeps every row from both tables, NULL-filling whichever side lacks a match. It is the union of LEFT and RIGHT: matched pairs plus both kinds of orphans. The complete \"show me everything lined up\" join.",
+  "UNION of two LEFT JOINs": "Emulate FULL OUTER JOIN as `left LEFT JOIN right UNION (right LEFT JOIN left WHERE left.key IS NULL)`. The first half contributes matches plus left orphans; the second adds right orphans only. UNION (not ALL) dedupes the shared middle.",
+  "NULL on both sides": "In a FULL OUTER emulation each side's orphans arrive with NULLs on the other side's columns. COALESCE them for display: `COALESCE(r.w, 'none')`. NULL marks \"no counterpart here\" — the whole point of the outer join.",
+  "IN as a semi join": "`WHERE id IN (SELECT ...)` returns left rows that have at least one match on the right — a semi join: it filters but never duplicates or adds columns. One left row yields at most one output row no matter how many right rows match. Semi joins test membership without joining data together.",
+  "EXISTS short-circuits": "EXISTS stops scanning the instant it finds one matching row — it never counts, never collects. On a correlated subquery that early exit is a real performance win over building the full match set. Existence is cheaper than enumeration.",
+  "Semi joins vs INNER JOIN": "INNER JOIN multiplies rows when several right rows match and carries right columns along; a semi join (IN/EXISTS) returns each left row at most once with left columns only. Use INNER JOIN to combine data, semi joins to filter by membership.",
+  "Project schema design": "A shop database centers on customers, products, and the purchases between them: two entity tables plus a line-item table holding quantities. Prices live on products, counts on purchases — each fact in exactly one place. Design the entities before writing a single INSERT.",
+  "Seed realistic data": "Seed data should exercise every relationship: two customers, two products at different prices, purchases covering single and multi-item baskets. Realistic seeds make totals hand-checkable — 3 pens at 2.0 plus a 10.0 book is 16.0 for Ada. If you cannot verify the seed by hand, it is too big.",
+  "NOT EXISTS anti join": "NOT EXISTS returns left rows with zero matches on the right: `WHERE NOT EXISTS (SELECT 1 FROM banned b WHERE b.user_id = u.id)`. It reads as \"keep rows nothing points at\" and handles NULLs correctly. The anti join is the idiomatic \"unmatched rows\" query.",
+  "LEFT JOIN with IS NULL": "An anti join written as `LEFT JOIN ... WHERE right.key IS NULL` keeps left rows whose join found nothing. The LEFT JOIN preserves every left row, then IS NULL discards the matched ones. Same answer as NOT EXISTS — pick whichever reads clearer in context.",
+  "NOT IN and NULL pitfalls": "`NOT IN` with a NULL in the list matches nothing at all — `x NOT IN (1, NULL)` is never true, because NULL comparisons are never true. A single NULL in the subquery silently empties the result. Prefer NOT EXISTS, which has no such trap.",
+  "Per-row inner queries": "A correlated subquery runs once per outer row with that row's values in scope: `WHERE salary > (SELECT AVG(salary) FROM emp WHERE dept = e.dept)`. Each employee is compared against their own department's average, not the company-wide one. Per-row context is what makes correlation powerful — and expensive without indexes.",
+  "Above-average-per-group": "The classic correlated query finds rows beating their group: above-average salary within each department. The inner query aggregates the group; the outer row tests itself against it. One statement replaces a round-trip per group.",
+  "Correlated UPDATE patterns": "Correlation works in writes too: `UPDATE emp SET salary = salary * 1.1 WHERE salary < (SELECT AVG(salary) FROM ...)` raises only below-average rows. The same per-row test guards a bulk change. Always SELECT the affected rows first — updates cannot be previewed after the fact.",
+  "Scalar values in SELECT": "A subquery returning one value can sit in the select list: `SELECT name, (SELECT COUNT(*) FROM orders WHERE customer_id = c.id) FROM customers c`. Each row carries its own computed number. Scalar subqueries in SELECT are per-row summaries without any GROUP BY.",
+  "Derived tables in FROM": "A subquery in FROM is a derived table — a temporary result you SELECT from: `SELECT title FROM (SELECT title, rating FROM films WHERE year > 1970)`. The inner query shapes the data, the outer query finishes it. Alias the derived table when the outer query needs to reference it twice.",
+  "Subqueries in ORDER BY": "ORDER BY accepts expressions, including subqueries: sort customers by their order count computed inline. It keeps one-off sort keys out of the select list. For repeated use, prefer a CTE or a joined aggregate — inline subqueries in ORDER BY are hard to read at a glance.",
+  "Chained CTEs": "A CTE can reference an earlier CTE: `evens` filters the numbers, `doubled` doubles them. Each step names one transformation, and the final SELECT reads the last name. Chaining turns nested logic into a top-to-bottom pipeline.",
+  "Multiple CTEs": "`WITH a AS (...), b AS (...) SELECT ...` declares several named queries up front. Later CTEs may use earlier ones, and the main query may use any of them. Multiple CTEs split a complex question into independently testable parts.",
+  "CTEs vs subqueries": "CTEs and subqueries compute the same things — CTEs name each step once at the top, subqueries nest them inline. Prefer CTEs when a step is reused or the nesting runs deep; prefer subqueries for single-use one-liners. Readability, not power, decides.",
+  "Anchor and recursive members": "A recursive CTE has two parts: the anchor SELECT producing the first rows, and the recursive SELECT producing each next level from the previous one. `SELECT 1 UNION ALL SELECT n + 1 FROM cnt WHERE n < 5` starts at 1 and grows. Anchor seeds, recursion extends.",
+  "UNION ALL recursion": "The recursive member must use UNION ALL, not UNION: duplicates are part of the process and dedup would break or slow the iteration. Each round appends new rows until the WHERE stops producing them. UNION ALL is the engine of the loop.",
+  "Termination conditions": "Without a stopping WHERE, recursion never ends — SQLite caps it at a depth limit and errors. `WHERE n < 5` bounds the sequence; parent-exists checks bound tree walks. Every recursive CTE needs a condition that eventually yields zero new rows.",
+  "Walking org charts": "A recursive CTE climbs a self-referencing table: start at the root row, repeatedly join children to the chain built so far. One query returns the whole subtree no matter how deep. Fixed self joins reach a fixed depth; recursion reaches whatever exists.",
+  "Depth tracking": "Carry a depth counter through the recursion: anchor at 0, add 1 per level. Depth orders the output (deepest last), limits it (`WHERE depth < 3`), and measures the tree. A counter column turns a walk into a leveled traversal.",
+  "Path building": "Accumulate a path string as you recurse: `'root' || '/' || name` per level gives `root/a/b`. Paths show where each row sits in the tree at a glance. String building inside recursion is how trees become browsable breadcrumbs.",
+  "ROW_NUMBER basics": "`ROW_NUMBER() OVER (ORDER BY col)` numbers rows 1..N in window order with no ties — every row gets a distinct number. It is the tool for \"first N rows\" and exact pagination. Ties break arbitrarily, so add a unique column to the ORDER BY when determinism matters.",
+  "RANK with gaps": "RANK gives tied rows the same number, then skips: two rows tied at 1 make the next rank 3. Gaps reflect how many rows truly precede each row. Use RANK when \"3rd place after a two-way tie\" is the honest label.",
+  "DENSE_RANK without gaps": "DENSE_RANK also ties rows equally but never skips: 1, 1, 2. Consecutive ranks suit tiering — gold, silver, bronze with no missing medals. RANK counts rows before you; DENSE_RANK counts distinct values before you.",
+  "LAG previous rows": "`LAG(col) OVER (ORDER BY day)` reads the previous row's value — yesterday's temperature beside today's. Subtracting gives the delta in one pass. The first row's LAG is NULL: there is no previous row yet.",
+  "LEAD next rows": "LEAD is LAG mirrored: it reads the next row's value instead of the previous one. `LEAD(t) OVER (ORDER BY day)` puts tomorrow beside today for forward-looking deltas. Together LAG and LEAD turn sequences into pairwise comparisons.",
+  "NTILE buckets": "`NTILE(4) OVER (ORDER BY score)` splits rows into four near-equal buckets — quartiles from one function. Bucket numbers label each row's band without manual cutoffs. NTILE distributes rows evenly; value ranges per bucket may still differ.",
+  "ROWS BETWEEN frames": "A frame narrows the window to nearby rows: `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` means \"this row plus everything before it\". Frames define running totals, moving averages, and sliding windows. The frame is the window function's sense of \"nearby\".",
+  "Running totals": "SUM over an expanding frame is a running total: each row shows the sum of everything up to itself. `SUM(amount) OVER (ORDER BY day ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)` accumulates day by day. One pass replaces a self join per row.",
+  "Moving averages": "AVG over a bounded frame smooths noise: `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` averages each row with its two predecessors. Moving averages reveal trends that raw daily values hide. Frame size is the smoothness dial.",
+  "INTERSECT": "INTERSECT returns only rows present in both SELECTs: shared cities, common members. It is set logic's \"and\" — membership in both lists at once. Like UNION, both sides need matching column counts and types.",
+  "EXCEPT": "EXCEPT returns rows in the first SELECT but not the second: customers without orders, products never sold. It is set difference — \"these minus those\". EXCEPT answers absence questions no join states as directly.",
+  "Set-operator precedence": "Compound SELECTs evaluate INTERSECT before UNION/EXCEPT unless parentheses say otherwise. `A UNION B INTERSECT C` means A UNION (B INTERSECT C). Parenthesize compound sets explicitly — precedence surprises are silent, returning plausible but wrong rows.",
+  "UNION dedup cost": "UNION removes duplicates, which requires sorting or hashing the combined result — real work on big sets. When you know the inputs cannot overlap (or overlaps are fine), that work is pure overhead. UNION's cleanliness has a price; pay it only when dedup matters.",
+  "UNION ALL speed": "UNION ALL skips the dedup pass and concatenates results directly — always at least as fast as UNION. Logs, line items, and pre-deduped inputs are UNION ALL's natural habitat. Default to ALL; switch to UNION only when duplicates would corrupt the answer.",
+  "ORDER BY over unions": "In a compound SELECT, ORDER BY applies once to the whole result and column names come from the first SELECT: `... UNION ... ORDER BY 1`. You cannot sort the halves independently. One result, one ordering, decided at the end.",
+  "CREATE VIEW with joins": "Views shine over joins: `CREATE VIEW catalog AS SELECT ... FROM writers JOIN novels ...` hides the pairing behind one name. Consumers SELECT from the view as if it were a table. The join logic lives in exactly one place.",
+  "DROP VIEW": "`DROP VIEW name` removes a view without touching its underlying tables — data survives, only the saved query goes. Views are metadata, so dropping is instant and safe. Recreate freely when the logic changes.",
+  "Views stay current": "A view reruns its query on every access, so it always reflects current tables — inserts appear immediately with no refresh step. Staleness is impossible by construction. The cost is recomputation per read, which indexes on the base tables keep cheap.",
+  "Updatable view limits": "Simple views over one table accept INSERT/UPDATE directly; views with joins, aggregates, or DISTINCT are read-only. SQLite routes single-table view writes to the base table automatically. Anything more complex needs an explicit trigger.",
+  "INSTEAD OF triggers": "An INSTEAD OF trigger on a view replaces the write with your logic: `INSTEAD OF INSERT ON v_people` inserts into the real table. The view becomes writable on your terms. This is how join views and filtered views gain controlled writes.",
+  "Routing writes": "INSTEAD OF triggers route each write to the right base table: split a joined view's NEW row into two inserts. The trigger body is the write path — validate, split, and store. Reads stay declarative while writes follow your procedure.",
+  "Composite indexes": "One index can cover several columns: `CREATE INDEX idx ON events (kind, ts)` speeds filters on kind, and on kind-plus-ts together. Multi-column indexes serve multi-column queries the way single ones serve single filters. Build them for the queries you actually run.",
+  "Column order": "In a composite index, order matters: the index serves filters on its leftmost columns. `(kind, ts)` helps `WHERE kind = ?` but not `WHERE ts = ?` alone. Put the most-filtered, most-selective column first — leading columns decide what the index can answer.",
+  "Covering indexes": "An index containing every column a query needs answers it without touching the table — a covering index. `SEARCH ... USING COVERING INDEX` in the plan is the tell. Covering turns lookups into pure index walks.",
+  "EXPLAIN QUERY PLAN syntax": "`EXPLAIN QUERY PLAN SELECT ...` prefixes any query and returns its plan as rows: SCAN lines for full reads, SEARCH lines for index use. It never runs the query — it describes the run. Every tuning session starts here.",
+  "SCAN vs SEARCH lines": "SCAN means the engine reads the whole table; SEARCH means it seeks via an index to matching rows. A selective WHERE with a SCAN plan is the classic \"missing index\" smell. The plan vocabulary is small — SCAN, SEARCH, USE TEMP B-TREE — and each word prescribes a fix.",
+  "Version-dependent text": "Plan text includes node ids and index names that shift between SQLite versions — `2|0|56|SEARCH ...` numbers are not stable output. Read plans for their shape (SCAN vs SEARCH), never as exact strings. Diagnostics, not contracts: assert behavior, not plan text.",
+  "Forcing index use": "To compare plans, create the index and re-run EXPLAIN: SCAN should become SEARCH on the indexed column. The before/after pair proves the index matters. If the plan does not change, the filter may not be selective enough for the planner to care.",
+  "Comparing plans": "Tuning is diffing plans: capture EXPLAIN output before the change, capture it after, and read what moved. SCAN→SEARCH is a win; new USE TEMP B-TREE for sorting may need its own index. Change one thing at a time or the diff lies.",
+  "When plans change": "Plans change with data size, indexes, and SQLite versions — the planner adapts. A plan that was optimal at a thousand rows may flip at a million. Re-check plans after big loads and upgrades; yesterday's SEARCH can become tomorrow's SCAN.",
+  "Multi-statement transfers": "A transfer is two UPDATEs — debit one account, credit another — wrapped in BEGIN...COMMIT. Between the statements the books are briefly unbalanced; after COMMIT they balance again. The transaction boundary is what makes two statements one fact.",
+  "Balance invariants": "Money logic rests on invariants: total balances never change in a transfer, no account goes negative. Transactions enforce the first; CHECK constraints enforce the second. State every invariant, then enforce each with the mechanism that fits.",
+  "COMMIT finality": "COMMIT makes every statement since BEGIN permanent and visible at once — readers never see the halfway state. Until COMMIT, everything is provisional and ROLLBACK can erase it. Finality is a single statement, not a gradual process.",
+  "Atomicity recap": "Atomicity guarantees all-or-nothing: a committed transaction's every statement lands; a rolled-back one's every statement vanishes. Partial application is impossible by construction. It is why the transfer either moves money or moves nothing.",
+  "Consistency guarantees": "Consistency means each transaction moves the database from one valid state to another — constraints hold before and after. Atomicity protects the unit, consistency protects the rules. Together they keep invariants true across crashes and mistakes.",
+  "Isolation in SQLite": "Isolation hides uncommitted work from other connections: SQLite locks the database for writers, so concurrent transactions serialize. One writer at a time is simple and correct for most apps. Readers never block, writers take turns.",
+  "SAVEPOINT syntax": "`SAVEPOINT name` marks a point inside a transaction; `ROLLBACK TO name` undoes everything after it; `RELEASE name` clears the marker. Savepoints nest — inner ones roll back less. They bring partial undo to all-or-nothing transactions.",
+  "ROLLBACK TO": "ROLLBACK TO rewinds to the savepoint but keeps the transaction alive — later statements can still COMMIT. It discards the mistake, not the whole unit of work. Contrast with bare ROLLBACK, which abandons everything since BEGIN.",
+  "RELEASE": "RELEASE removes a savepoint, merging its work into the enclosing transaction — the statements stay, the marker goes. Releasing is bookkeeping, not committing: nothing is durable until the outer COMMIT. Forget RELEASE and the savepoint simply lingers harmlessly.",
+  "Ledger schema": "A ledger needs accounts (owners and balances) plus an audit table recording notable events. Money lives in one table, history in another — balances are state, audit rows are evidence. Two tables separate \"what is true\" from \"what happened\".",
+  "Audit trigger": "A trigger with a WHEN clause logs selectively: `AFTER UPDATE ... WHEN NEW.balance > 100` records only big balances. The database watches itself — every qualifying change appends evidence with no app code. WHEN keeps the audit table signal, not noise.",
+  "Transfer procedure": "The transfer procedure is BEGIN, debit, credit, COMMIT — plus the trigger firing mid-flight when thresholds cross. Procedure plus automation: the statements move money, the trigger notices. Wrap both in one transaction so money and evidence stay consistent.",
+  "CHECK expressions": "CHECK constrains values with a boolean expression: `price REAL CHECK (price >= 0)` rejects negative prices at INSERT and UPDATE. The rule lives in the schema, so every writer obeys it without remembering. Violations abort the statement — no bad row ever lands.",
+  "DEFAULT values": "DEFAULT supplies a value when INSERT omits the column: `status TEXT DEFAULT 'active'` fills 'active' automatically. Defaults make common cases terse while staying explicit in the schema. Omitted means defaulted, never accidental.",
+  "Constraint violations abort": "A CHECK or UNIQUE violation aborts the offending statement with an error — the row is not stored, and inside a transaction nothing up to that point is either (unless caught). Aborts are loud by design: bad data fails visibly instead of slipping in quietly.",
+  "ON DELETE CASCADE": "ON DELETE CASCADE deletes child rows automatically when their parent is deleted: remove a team and its players vanish too. Cascades keep referential integrity without manual cleanup. Powerful and irreversible — cascade only where orphans must never survive.",
+  "ON DELETE SET NULL": "ON DELETE SET NULL keeps child rows but clears their foreign key when the parent is deleted: players remain, teamless. It suits optional relationships where children outlive parents. NULL marks \"was linked, now is not\" — query it with IS NULL.",
+  "PRAGMA foreign_keys": "SQLite parses foreign keys but enforces them only with `PRAGMA foreign_keys = ON` per connection. Without it, cascades sleep and orphans accumulate silently. Enable the pragma in every session that writes related tables — declarations without enforcement are comments.",
+  "Spotting repeating groups": "A flat table repeats facts: department name copied onto every worker row. Repeating groups are the 1NF alarm — one column holding several values, or one fact stored many times. Spot the repetition and you have found the next table to extract.",
+  "Splitting tables": "Refactoring to 3NF moves each repeated fact to its own table with a key: departments out, `dept_id` stays. Rows shrink to IDs plus their own attributes. Splitting is mechanical — one entity per table, keys between them.",
+  "Joining it back": "Normalized data reassembles with JOINs: workers joined to departments read exactly like the old flat table. Storage is split, presentation is whole. If the join reads as simply as the original, the refactor succeeded.",
+  "Read vs write trade-offs": "Normalization optimizes writes (one place to update); denormalization optimizes reads (no joins to assemble). Every redundant copy buys read speed with write complexity — each update must touch all copies. Choose by workload: read-heavy dashboards denormalize, write-heavy ledgers normalize.",
+  "Cached counters": "A `likes` counter on posts caches `COUNT(*)` from the likes table — reads become one column instead of an aggregate. The cache must be refreshed on every like, trading write work for read speed. Counters are the most common deliberate redundancy.",
+  "Materialized summaries": "Materialized summaries precompute reports into tables: nightly revenue per region, refreshed by a job. Queries read answers instead of computing them. Staleness is the price — summaries lag the source by design, so they suit reports that tolerate yesterday's numbers.",
+  "AFTER INSERT triggers": "An AFTER INSERT trigger runs once per inserted row after it lands: `AFTER INSERT ON orders BEGIN INSERT INTO order_log ... END`. It observes committed facts — the row exists and its values are final. Audit logging is the canonical use: record what happened, automatically.",
+  "NEW row values": "Inside a trigger, NEW holds the row being written: `NEW.item`, `NEW.id`. NEW is how triggers see the data that fired them (OLD holds the pre-image for UPDATE/DELETE). Reference NEW to log, validate, or propagate the exact values.",
+  "Audit tables": "Audit tables store append-only history: who changed what, when — an id plus a message per event. Triggers fill them without app code, so no writer can forget. History tables grow forever; archive or partition when size bites.",
+  "BEFORE INSERT guards": "A BEFORE INSERT trigger inspects NEW before the row lands and can reject it: negative ages never reach the table. Guards run pre-commit, so rejected rows leave no trace. Validation in the database protects every writer, including future ones.",
+  "RAISE(ABORT, ...)": "`SELECT RAISE(ABORT, 'message')` inside a trigger aborts the statement with your message. ABORT undoes the statement (or the transaction, if one is open and uncaught). Custom messages turn constraint failures into actionable errors.",
+  "Enforcing rules": "Triggers enforce rules constraints cannot express: cross-table checks, conditional logic, custom messages. BEFORE triggers guard, AFTER triggers record, WHEN clauses scope. Rules in the database apply to every connection — no client can bypass them.",
+  "FOR EACH ROW only": "SQLite fires triggers once per affected row — FOR EACH ROW is the only granularity. Inserting two rows fires the trigger twice, logging twice. Row-level firing is simple and predictable: one row in, one trigger run.",
+  "No FOR EACH STATEMENT": "Many databases offer FOR EACH STATEMENT triggers that fire once per statement regardless of row count — SQLite has no such syntax. There is nothing to write, nothing to verify, and no output to gate. This lesson stays ungated: row-level behavior is already gated on the trigger days around it.",
+  "Workarounds with temp tables": "Without statement triggers, emulate them: a row trigger writes to a TEMP staging table, and a later statement processes the batch. Collect per-row, act per-statement. Two-phase handling recovers most of what statement triggers provide.",
+  "JSON text columns": "SQLite stores JSON as TEXT and queries it with the JSON1 functions — no special column type needed. Documents sit beside relational columns in the same row. TEXT storage plus JSON functions gives document flexibility inside a relational engine.",
+  "json_extract paths": "`json_extract(data, '$.theme')` reads a nested value by path: `$` for the document, `.field` per level, `[0]` for array slots. Paths address any scalar inside the document. Extraction turns documents back into queryable values.",
+  "json_object building": "`json_object('theme', 'dark', 'font', 14)` builds a JSON document from SQL values. Construct documents from relational data for APIs and exports. Building and extracting round-trip: object in, paths out.",
+  "json_each table function": "`json_each` is a table-valued function turning a JSON array into rows: `FROM carts, json_each(carts.items)` yields one row per element. Arrays become joinable relations. Unnesting bridges document storage and set logic.",
+  "Unnesting arrays": "Unnested elements behave like ordinary rows: filter them, count them, join them. `WHERE value = 'pen'` counts matching elements across all documents. One array column fans out into analyzable rows.",
+  "Filtering extracted values": "Filters apply to extracted values exactly like columns — equality, ranges, LIKE. Push the filter into the same query as the unnesting to count or list matches. Documents filter as fluently as tables once unnested.",
+  "FTS5 virtual tables": "`CREATE VIRTUAL TABLE docs USING fts5(title, body)` builds a full-text index over text columns. Virtual tables look like tables but are backed by an inverted index. FTS5 tokenizes, stems, and ranks — everything LIKE cannot do at scale.",
+  "MATCH queries": "`WHERE docs MATCH 'desert'` finds documents containing the term — fast via the index, unlike `LIKE '%desert%'`. MATCH is the full-text operator: terms, phrases in quotes, column filters. One MATCH replaces several LIKEs and runs in logarithmic time.",
+  "Tokenization basics": "FTS5 splits text into tokens (words, roughly) and indexes those — searches match tokens, not substrings. 'desert' matches the word desert, not 'deserted'. Tokenizers decide case folding and stemming; the default unicode61 lowercases and splits on punctuation.",
+  "bm25 ranking": "`ORDER BY bm25(table)` ranks matches by relevance: rare terms score higher, short documents score higher. Best matches surface first instead of in rowid order. Ranking turns a match list into a results page.",
+  "snippet highlights": "`snippet()` returns the matching text with the term marked, for result previews. Show users why each document matched. Snippets are presentation — MATCH finds, bm25 orders, snippet explains.",
+  "Column filters": "FTS MATCH can target columns: `{title} : sql` matches sql in the title only. Scoped search beats global search when fields have different meanings. Column filters combine with phrases and boolean operators in one MATCH string.",
+  "Daily deltas with LAG": "Period analytics starts with deltas: today's value minus LAG's yesterday, partitioned by metric. Deltas turn levels into changes — growth, not size. One window function replaces a self join per comparison.",
+  "Running totals over time": "Analytics running totals accumulate over ordered rows: revenue-so-far by day. The expanding-frame SUM answers \"how much by now\" at every point. Totals over time are the backbone of progress charts.",
+  "Week-over-week compare": "Self-joining a table to itself offset by seven days compares each day to its counterpart last week. Same-weekday comparisons remove weekly seasonality. Retention, revenue, and traffic all read cleaner week-over-week than day-over-day.",
+  "ROW_NUMBER per partition": "`ROW_NUMBER() OVER (PARTITION BY region ORDER BY pts DESC)` ranks within each group independently — every region gets its own 1, 2, 3. Partitioned numbering scopes competition to the group. Top-N per group starts here.",
+  "Top-N filter": "Wrap the ranked query and filter `WHERE rn = 1`: one row per group, the best by your ordering. The subquery ranks, the outer query keeps winners. Top-N per group is a window plus a filter — no GROUP BY can do this shape.",
+  "Ties handling": "ROW_NUMBER breaks ties arbitrarily — exactly N rows per group, but which tied row wins is luck. For fair ties, rank with RANK/DENSE_RANK and keep `rnk = 1` (possibly more than N rows), or add a unique tiebreaker to the ORDER BY. Decide what ties mean before filtering.",
+  "Cohort week grouping": "Cohorts group users by their first week: `MIN(week) GROUP BY user_id` assigns each user a cohort. Grouping by start time aligns lifecycles — week-one behavior compares across cohorts fairly. Cohorts turn timestamps into generations.",
+  "Retention self join": "Retention joins activity to itself offset by one period: `a.week + 1 = b.week` pairs each user's consecutive weeks. Matches are retained users; misses are churn. The self join counts loyalty directly from raw logins.",
+  "Percent retained": "Retention rate divides the retained count by the cohort size: `100.0 * retained / total`. Absolute counts mislead across different-sized cohorts; percentages compare fairly. Multiply by 100.0 (not 100) to keep the decimal part.",
+  "ON CONFLICT DO NOTHING": "`INSERT ... ON CONFLICT(key) DO NOTHING` skips rows that would violate a unique constraint instead of erroring. Idempotent inserts — reruns change nothing. DO NOTHING suits seeds and syncs where \"already there\" is success.",
+  "ON CONFLICT DO UPDATE": "`ON CONFLICT(key) DO UPDATE SET hits = hits + 1` turns a duplicate insert into an update — the UPSERT. Counters, last-seen timestamps, and caches all update-or-insert in one statement. Atomic read-modify-write with no race between SELECT and INSERT.",
+  "excluded row values": "In DO UPDATE, `excluded` refers to the row that failed to insert: `SET hits = excluded.hits` takes the proposed value. The failed insert's values stay available for merging. excluded is the \"what you tried\" row beside the \"what is there\" row.",
+  "Staged CTE pipelines": "Funnel queries stage CTEs: raw events, per-step user counts, then ratios. Each CTE is one funnel stage computed cleanly. Pipelines read top-to-bottom — stages in, conversion out.",
+  "Conversion ratios": "Conversion divides each step's users by the first step's: signup users over visit users. Ratios need the stage counts first — hence the CTE. One division per step turns counts into a funnel shape.",
+  "Funnel drop-off": "Drop-off is where users vanish between steps: visit 2 → signup 1 means half lost. The step with the steepest fall is the product problem. Funnels locate the leak; fixing it is product work, not SQL.",
+  "Finding duplicates": "Duplicates hide in plain sight: `GROUP BY name, email HAVING COUNT(*) > 1` lists every repeated combination. Detection groups by the natural key and counts. Find first — deletion without a list is guessing.",
+  "DELETE with rowid": "`DELETE WHERE rowid NOT IN (SELECT MIN(rowid) ... GROUP BY key)` keeps the first copy of each duplicate and removes the rest. MIN(rowid) elects the survivor; everything else goes. One statement dedupes the whole table.",
+  "Filling NULLs": "Repair NULLs with targeted UPDATEs: `SET email = 'unknown' WHERE email IS NULL` or COALESCE in views. Backfill from sources when they exist; defaults when they do not. Clean data downstream starts with no NULLs where values are required.",
+  "ADD COLUMN with defaults": "Migrations add columns without losing rows: `ADD COLUMN status TEXT DEFAULT 'active'` fills every existing row at once. Additive changes are safe — old queries keep working. Defaults make the new column meaningful from the first second.",
+  "Backfilling data": "After adding a column, backfill special cases: `UPDATE users SET status = 'vip' WHERE ...` corrects the rows the default mislabels. Defaults handle the many, backfills handle the few. Verify with a SELECT per affected segment.",
+  "Renaming tables": "`ALTER TABLE old RENAME TO new` renames without rewriting data — instant metadata surgery. Rename during migrations to version schemas (`users_v2`) or fix naming mistakes. Dependents (views, triggers) follow the rename in modern SQLite.",
+  "sqlite_master inventory": "sqlite_master lists every table, index, view, and trigger: `SELECT name FROM sqlite_master WHERE type = 'index'`. The schema is queryable — audit it like data. Inventory queries answer \"what exists\" without opening a GUI.",
+  "Missing-index smells": "Tables with selective WHERE columns but no matching index are slow queries waiting to happen. Compare sqlite_master's index list against your frequent filters. Every unindexed selective filter is a future SCAN.",
+  "Audit checklists": "A performance audit checklist: inventory indexes, EXPLAIN the top queries, index the SCANs, re-check plans. Checklists turn tuning from art into procedure. Run the audit after every schema or workload change.",
+  "Capstone schema": "The market database unites the track: sellers own goods, goods accumulate sales — entities plus two relationship depths. Foreign keys declare the shape; AUTOINCREMENT gives sales their history. Design once, query everything.",
+  "Seed and constraints": "Capstone seeds must satisfy every constraint: valid seller ids on goods, positive quantities on sales. Seeds prove the schema accepts real data. If the seed violates a rule, the rule — or the seed — is wrong; decide loudly.",
+  "Executive dashboard query": "The dashboard query joins sellers to goods to sales and aggregates revenue in one statement. One query, whole business: total revenue, per-seller breakdowns, best goods. When the capstone query reads cleanly, the hundred days did their job.",
+  "Multi-table report queries": "Revenue is a three-table query: purchases joined to products for prices, summed into one number. Joins assemble the facts, aggregates summarize them. Every business question — revenue, best seller, top customer — is a join plus an aggregate away.",
 };
 /* ─── Quiz map ─── */
 
@@ -1216,6 +1443,1626 @@ const SQL_QUIZ_MAP: Record<string, { q: string; opts: { id: string; text: string
       { id: "d", text: "Manual work", correct: false },
     ],
   },
+  "Computed columns": {
+    q: "SELECT price * qty outputs:",
+    opts: [
+      { id: "a", text: "A per-row computed value that exists in no column", correct: true },
+      { id: "b", text: "A new stored column", correct: false },
+      { id: "c", text: "The table's schema", correct: false },
+      { id: "d", text: "An error", correct: false },
+    ],
+  },
+  "Arithmetic in SELECT": {
+    q: "In SQLite, 1.5 * 10 evaluates to:",
+    opts: [
+      { id: "a", text: "15.0 (REAL)", correct: true },
+      { id: "b", text: "15 (INTEGER)", correct: false },
+      { id: "c", text: "NULL", correct: false },
+      { id: "d", text: "An error", correct: false },
+    ],
+  },
+  "String concatenation": {
+    q: "SQLite's string concatenation operator is:",
+    opts: [
+      { id: "a", text: "||", correct: true },
+      { id: "b", text: "+", correct: false },
+      { id: "c", text: "CONCAT()", correct: false },
+      { id: "d", text: "&&", correct: false },
+    ],
+  },
+  "DISTINCT on one column": {
+    q: "SELECT DISTINCT city returns:",
+    opts: [
+      { id: "a", text: "One row per unique city", correct: true },
+      { id: "b", text: "All rows unchanged", correct: false },
+      { id: "c", text: "A count per city", correct: false },
+      { id: "d", text: "Only the first city", correct: false },
+    ],
+  },
+  "DISTINCT on multiple columns": {
+    q: "SELECT DISTINCT city, day dedupes on:",
+    opts: [
+      { id: "a", text: "The combination of city and day", correct: true },
+      { id: "b", text: "City only", correct: false },
+      { id: "c", text: "Day only", correct: false },
+      { id: "d", text: "Neither column", correct: false },
+    ],
+  },
+  "DISTINCT vs GROUP BY": {
+    q: "Prefer GROUP BY over DISTINCT when you want:",
+    opts: [
+      { id: "a", text: "Per-value summaries like counts or sums", correct: true },
+      { id: "b", text: "Just the unique values", correct: false },
+      { id: "c", text: "Faster sorting", correct: false },
+      { id: "d", text: "Fewer columns", correct: false },
+    ],
+  },
+  "AS aliases": {
+    q: "SELECT first_name AS given:",
+    opts: [
+      { id: "a", text: "Names the output column given", correct: true },
+      { id: "b", text: "Renames the table", correct: false },
+      { id: "c", text: "Creates a new column in the table", correct: false },
+      { id: "d", text: "Filters the rows", correct: false },
+    ],
+  },
+  "Aliases in ORDER BY": {
+    q: "Can ORDER BY use a SELECT alias?",
+    opts: [
+      { id: "a", text: "Yes — ORDER BY given sorts by the aliased column", correct: true },
+      { id: "b", text: "No — aliases are invisible to ORDER BY", correct: false },
+      { id: "c", text: "Only with GROUP BY", correct: false },
+      { id: "d", text: "Only for INTEGER columns", correct: false },
+    ],
+  },
+  "Quoted aliases": {
+    q: "An alias containing a space needs:",
+    opts: [
+      { id: "a", text: "Double quotes: AS \"full name\"", correct: true },
+      { id: "b", text: "Single quotes", correct: false },
+      { id: "c", text: "No special handling", correct: false },
+      { id: "d", text: "Parentheses", correct: false },
+    ],
+  },
+  "AND and OR": {
+    q: "WHERE age >= 18 AND city = 'London' keeps rows where:",
+    opts: [
+      { id: "a", text: "Both conditions are true", correct: true },
+      { id: "b", text: "Either condition is true", correct: false },
+      { id: "c", text: "Neither condition is true", correct: false },
+      { id: "d", text: "The first condition is true", correct: false },
+    ],
+  },
+  "NOT negation": {
+    q: "WHERE NOT (age >= 18) keeps rows where:",
+    opts: [
+      { id: "a", text: "Age is below 18 (or NULL)", correct: true },
+      { id: "b", text: "Age is 18 or more", correct: false },
+      { id: "c", text: "Age is exactly 18", correct: false },
+      { id: "d", text: "Age is NULL only", correct: false },
+    ],
+  },
+  "Parentheses and precedence": {
+    q: "Why parenthesize OR inside AND?",
+    opts: [
+      { id: "a", text: "AND binds tighter, so parentheses change which rows match", correct: true },
+      { id: "b", text: "Parentheses are required by SQLite", correct: false },
+      { id: "c", text: "They make the query run faster", correct: false },
+      { id: "d", text: "They sort the result", correct: false },
+    ],
+  },
+  "BETWEEN ranges": {
+    q: "qty BETWEEN 10 AND 100 matches:",
+    opts: [
+      { id: "a", text: "Values from 10 to 100 inclusive", correct: true },
+      { id: "b", text: "Values strictly between 10 and 100", correct: false },
+      { id: "c", text: "Only 10 and 100", correct: false },
+      { id: "d", text: "Values outside 10 to 100", correct: false },
+    ],
+  },
+  "IN lists": {
+    q: "WHERE city IN ('London', 'Paris') keeps rows where city is:",
+    opts: [
+      { id: "a", text: "Either London or Paris", correct: true },
+      { id: "b", text: "Both London and Paris", correct: false },
+      { id: "c", text: "Neither London nor Paris", correct: false },
+      { id: "d", text: "NULL", correct: false },
+    ],
+  },
+  "IS NULL tests": {
+    q: "To find rows where supplier is missing, use:",
+    opts: [
+      { id: "a", text: "WHERE supplier IS NULL", correct: true },
+      { id: "b", text: "WHERE supplier = NULL", correct: false },
+      { id: "c", text: "WHERE supplier = 0", correct: false },
+      { id: "d", text: "WHERE supplier LIKE NULL", correct: false },
+    ],
+  },
+  "Multi-column ordering": {
+    q: "ORDER BY score DESC, player ASC sorts by:",
+    opts: [
+      { id: "a", text: "Score descending, breaking ties by player ascending", correct: true },
+      { id: "b", text: "Player first, then score", correct: false },
+      { id: "c", text: "Score only", correct: false },
+      { id: "d", text: "Random order within each score", correct: false },
+    ],
+  },
+  "Mixed ASC and DESC": {
+    q: "In ORDER BY a DESC, b ASC, ties in a are broken by b:",
+    opts: [
+      { id: "a", text: "Ascending", correct: true },
+      { id: "b", text: "Descending", correct: false },
+      { id: "c", text: "Randomly", correct: false },
+      { id: "d", text: "They are not broken", correct: false },
+    ],
+  },
+  "Stable sort keys": {
+    q: "A stable pagination sort needs:",
+    opts: [
+      { id: "a", text: "A unique column in the ORDER BY so every row has one slot", correct: true },
+      { id: "b", text: "No ORDER BY at all", correct: false },
+      { id: "c", text: "DESC on every column", correct: false },
+      { id: "d", text: "A LIMIT without OFFSET", correct: false },
+    ],
+  },
+  "OFFSET mechanics": {
+    q: "LIMIT 2 OFFSET 2 on five ordered rows returns rows:",
+    opts: [
+      { id: "a", text: "3 and 4", correct: true },
+      { id: "b", text: "1 and 2", correct: false },
+      { id: "c", text: "2 and 3", correct: false },
+      { id: "d", text: "2 only", correct: false },
+    ],
+  },
+  "Keyset pagination": {
+    q: "Keyset pagination pages with:",
+    opts: [
+      { id: "a", text: "A WHERE filter on the last seen key instead of OFFSET", correct: true },
+      { id: "b", text: "A larger OFFSET each time", correct: false },
+      { id: "c", text: "No ORDER BY", correct: false },
+      { id: "d", text: "A temporary table per page", correct: false },
+    ],
+  },
+  "Ties and deterministic pages": {
+    q: "OFFSET pages can skip or duplicate rows when:",
+    opts: [
+      { id: "a", text: "The ORDER BY has ties and no unique tiebreaker", correct: true },
+      { id: "b", text: "LIMIT is used", correct: false },
+      { id: "c", text: "The table has a primary key", correct: false },
+      { id: "d", text: "Pages are small", correct: false },
+    ],
+  },
+  "GLOB patterns": {
+    q: "WHERE name GLOB '*.txt' matches:",
+    opts: [
+      { id: "a", text: "Values ending in .txt with exact case", correct: true },
+      { id: "b", text: "Values ending in .TXT too", correct: false },
+      { id: "c", text: "Any value containing t, x, or t", correct: false },
+      { id: "d", text: "Only the literal string *.txt", correct: false },
+    ],
+  },
+  "Case sensitivity": {
+    q: "Which comparison is case-sensitive in SQLite?",
+    opts: [
+      { id: "a", text: "GLOB", correct: true },
+      { id: "b", text: "LIKE on ASCII text", correct: false },
+      { id: "c", text: "All comparisons are case-sensitive", correct: false },
+      { id: "d", text: "None are", correct: false },
+    ],
+  },
+  "ESCAPE clauses": {
+    q: "ESCAPE in a LIKE pattern lets you:",
+    opts: [
+      { id: "a", text: "Match a literal % or _ character", correct: true },
+      { id: "b", text: "Skip the WHERE clause", correct: false },
+      { id: "c", text: "Escape the whole query", correct: false },
+      { id: "d", text: "Sort case-insensitively", correct: false },
+    ],
+  },
+  "COUNT(*) vs COUNT(column)": {
+    q: "With a NULL in the column, COUNT(*) vs COUNT(column):",
+    opts: [
+      { id: "a", text: "COUNT(*) is larger — it counts the NULL row too", correct: true },
+      { id: "b", text: "They are always equal", correct: false },
+      { id: "c", text: "COUNT(column) is larger", correct: false },
+      { id: "d", text: "Both return NULL", correct: false },
+    ],
+  },
+  "COUNT(DISTINCT column)": {
+    q: "COUNT(DISTINCT email) counts:",
+    opts: [
+      { id: "a", text: "Each different email once", correct: true },
+      { id: "b", text: "Every row including repeats", correct: false },
+      { id: "c", text: "Only NULL emails", correct: false },
+      { id: "d", text: "The longest email", correct: false },
+    ],
+  },
+  "COUNT with filters": {
+    q: "To count only London signups, add:",
+    opts: [
+      { id: "a", text: "WHERE city = 'London'", correct: true },
+      { id: "b", text: "HAVING city = 'London'", correct: false },
+      { id: "c", text: "ORDER BY city", correct: false },
+      { id: "d", text: "LIMIT 1", correct: false },
+    ],
+  },
+  "SUM ignores NULLs": {
+    q: "SUM of 10, NULL, 30 is:",
+    opts: [
+      { id: "a", text: "40", correct: true },
+      { id: "b", text: "NULL", correct: false },
+      { id: "c", text: "20", correct: false },
+      { id: "d", text: "An error", correct: false },
+    ],
+  },
+  "AVG denominators": {
+    q: "AVG of 10, NULL, 30 divides by:",
+    opts: [
+      { id: "a", text: "2 — NULLs are excluded from the count", correct: true },
+      { id: "b", text: "3 — all rows count", correct: false },
+      { id: "c", text: "1 — only the first value", correct: false },
+      { id: "d", text: "0 — it errors", correct: false },
+    ],
+  },
+  "Sums over filtered rows": {
+    q: "SUM with WHERE day <= 2 totals:",
+    opts: [
+      { id: "a", text: "Only rows matching the filter", correct: true },
+      { id: "b", text: "All rows regardless", correct: false },
+      { id: "c", text: "The first two columns", correct: false },
+      { id: "d", text: "Nothing — aggregates ignore WHERE", correct: false },
+    ],
+  },
+  "MIN and MAX on text": {
+    q: "MIN of 'pear', 'apple', 'fig' is:",
+    opts: [
+      { id: "a", text: "apple", correct: true },
+      { id: "b", text: "pear", correct: false },
+      { id: "c", text: "fig", correct: false },
+      { id: "d", text: "NULL", correct: false },
+    ],
+  },
+  "TOTAL vs SUM": {
+    q: "Over zero rows, TOTAL returns:",
+    opts: [
+      { id: "a", text: "0.0, while SUM returns NULL", correct: true },
+      { id: "b", text: "NULL, while SUM returns 0.0", correct: false },
+      { id: "c", text: "An error in both cases", correct: false },
+      { id: "d", text: "The same as SUM", correct: false },
+    ],
+  },
+  "Aggregates over empty sets": {
+    q: "SELECT SUM(x) over zero matching rows returns:",
+    opts: [
+      { id: "a", text: "One row holding NULL", correct: true },
+      { id: "b", text: "Zero rows", correct: false },
+      { id: "c", text: "An error", correct: false },
+      { id: "d", text: "One row holding 0", correct: false },
+    ],
+  },
+  "GROUP_CONCAT basics": {
+    q: "GROUP_CONCAT(name) produces:",
+    opts: [
+      { id: "a", text: "One comma-separated string of the group's values", correct: true },
+      { id: "b", text: "One row per value", correct: false },
+      { id: "c", text: "A count of the values", correct: false },
+      { id: "d", text: "A sorted table", correct: false },
+    ],
+  },
+  "Custom separators": {
+    q: "GROUP_CONCAT(name, ';') joins values with:",
+    opts: [
+      { id: "a", text: "Semicolons", correct: true },
+      { id: "b", text: "Commas", correct: false },
+      { id: "c", text: "Spaces", correct: false },
+      { id: "d", text: "Newlines", correct: false },
+    ],
+  },
+  "DISTINCT inside GROUP_CONCAT": {
+    q: "GROUP_CONCAT(DISTINCT name) lists:",
+    opts: [
+      { id: "a", text: "Each value once even if it repeats", correct: true },
+      { id: "b", text: "Every occurrence including repeats", correct: false },
+      { id: "c", text: "Only the first value", correct: false },
+      { id: "d", text: "Values in random order", correct: false },
+    ],
+  },
+  "Composite grouping keys": {
+    q: "GROUP BY year, region creates:",
+    opts: [
+      { id: "a", text: "One group per distinct year-region pair", correct: true },
+      { id: "b", text: "One group per year only", correct: false },
+      { id: "c", text: "One group per region only", correct: false },
+      { id: "d", text: "A single group", correct: false },
+    ],
+  },
+  "GROUP BY with ORDER BY": {
+    q: "ORDER BY after GROUP BY:",
+    opts: [
+      { id: "a", text: "Arranges the groups without changing them", correct: true },
+      { id: "b", text: "Changes which rows fall in each group", correct: false },
+      { id: "c", text: "Is forbidden in SQLite", correct: false },
+      { id: "d", text: "Removes duplicates", correct: false },
+    ],
+  },
+  "Group cardinality": {
+    q: "Grouping sales by year and region vs by region alone gives:",
+    opts: [
+      { id: "a", text: "More, finer groups", correct: true },
+      { id: "b", text: "Fewer, coarser groups", correct: false },
+      { id: "c", text: "The same groups", correct: false },
+      { id: "d", text: "No groups", correct: false },
+    ],
+  },
+  "HAVING on aggregates": {
+    q: "HAVING SUM(amount) > 200 keeps:",
+    opts: [
+      { id: "a", text: "Only groups whose total exceeds 200", correct: true },
+      { id: "b", text: "Only rows above 200", correct: false },
+      { id: "c", text: "All groups", correct: false },
+      { id: "d", text: "The first 200 groups", correct: false },
+    ],
+  },
+  "HAVING without GROUP BY": {
+    q: "HAVING with no GROUP BY treats the result as:",
+    opts: [
+      { id: "a", text: "One implicit group", correct: true },
+      { id: "b", text: "An error", correct: false },
+      { id: "c", text: "One group per row", correct: false },
+      { id: "d", text: "An empty result", correct: false },
+    ],
+  },
+  "Multiple HAVING conditions": {
+    q: "HAVING SUM(a) > 100 AND COUNT(*) >= 3 demands:",
+    opts: [
+      { id: "a", text: "Both conditions on each group", correct: true },
+      { id: "b", text: "Either condition on each group", correct: false },
+      { id: "c", text: "Neither condition", correct: false },
+      { id: "d", text: "Exactly 3 groups", correct: false },
+    ],
+  },
+  "Row filters before grouping": {
+    q: "In WHERE → GROUP BY → HAVING, WHERE filters:",
+    opts: [
+      { id: "a", text: "Rows before any grouping happens", correct: true },
+      { id: "b", text: "Groups after aggregation", correct: false },
+      { id: "c", text: "The final display only", correct: false },
+      { id: "d", text: "Nothing — it sorts", correct: false },
+    ],
+  },
+  "Group filters after aggregation": {
+    q: "HAVING can reference aggregates because it runs:",
+    opts: [
+      { id: "a", text: "After grouping", correct: true },
+      { id: "b", text: "Before grouping", correct: false },
+      { id: "c", text: "During INSERT", correct: false },
+      { id: "d", text: "Instead of WHERE", correct: false },
+    ],
+  },
+  "Combining both clauses": {
+    q: "The correct clause order is:",
+    opts: [
+      { id: "a", text: "WHERE, GROUP BY, HAVING, ORDER BY", correct: true },
+      { id: "b", text: "HAVING, WHERE, GROUP BY, ORDER BY", correct: false },
+      { id: "c", text: "GROUP BY, HAVING, WHERE, ORDER BY", correct: false },
+      { id: "d", text: "ORDER BY first", correct: false },
+    ],
+  },
+  "Employee-manager patterns": {
+    q: "An org chart in one table pairs employees to managers with:",
+    opts: [
+      { id: "a", text: "A self join on boss = id", correct: true },
+      { id: "b", text: "A UNION", correct: false },
+      { id: "c", text: "A second table", correct: false },
+      { id: "d", text: "GROUP BY", correct: false },
+    ],
+  },
+  "Mandatory table aliases": {
+    q: "Self joins require aliases because:",
+    opts: [
+      { id: "a", text: "The same table appears twice and columns would be ambiguous", correct: true },
+      { id: "b", text: "SQLite requires aliases on all joins", correct: false },
+      { id: "c", text: "They speed up the query", correct: false },
+      { id: "d", text: "They rename the database", correct: false },
+    ],
+  },
+  "Multi-level hierarchies": {
+    q: "To climb two levels (employee → manager → director) you need:",
+    opts: [
+      { id: "a", text: "Two self joins with fresh aliases", correct: true },
+      { id: "b", text: "One self join", correct: false },
+      { id: "c", text: "A UNION", correct: false },
+      { id: "d", text: "GROUP BY", correct: false },
+    ],
+  },
+  "RIGHT JOIN concept": {
+    q: "A RIGHT JOIN keeps:",
+    opts: [
+      { id: "a", text: "Every row of the right table, NULL-filling missing left matches", correct: true },
+      { id: "b", text: "Only matching rows", correct: false },
+      { id: "c", text: "Every row of the left table", correct: false },
+      { id: "d", text: "The first row of each table", correct: false },
+    ],
+  },
+  "Rewriting as LEFT JOIN": {
+    q: "A RIGHT JOIN in SQLite is written as:",
+    opts: [
+      { id: "a", text: "A LEFT JOIN with the tables swapped", correct: true },
+      { id: "b", text: "An INNER JOIN", correct: false },
+      { id: "c", text: "A CROSS JOIN", correct: false },
+      { id: "d", text: "It cannot be expressed", correct: false },
+    ],
+  },
+  "SQLite's supported joins": {
+    q: "Which join does SQLite NOT support?",
+    opts: [
+      { id: "a", text: "RIGHT JOIN", correct: true },
+      { id: "b", text: "LEFT JOIN", correct: false },
+      { id: "c", text: "INNER JOIN", correct: false },
+      { id: "d", text: "CROSS JOIN", correct: false },
+    ],
+  },
+  "FULL OUTER JOIN concept": {
+    q: "A FULL OUTER JOIN keeps:",
+    opts: [
+      { id: "a", text: "Every row from both tables, NULL-filling whichever side lacks a match", correct: true },
+      { id: "b", text: "Only matching rows", correct: false },
+      { id: "c", text: "Left rows only", correct: false },
+      { id: "d", text: "Right rows only", correct: false },
+    ],
+  },
+  "UNION of two LEFT JOINs": {
+    q: "The FULL OUTER emulation UNIONs a LEFT JOIN with:",
+    opts: [
+      { id: "a", text: "The mirrored LEFT JOIN restricted to right-only orphans", correct: true },
+      { id: "b", text: "An INNER JOIN", correct: false },
+      { id: "c", text: "The same LEFT JOIN again", correct: false },
+      { id: "d", text: "A CROSS JOIN", correct: false },
+    ],
+  },
+  "NULL on both sides": {
+    q: "Orphan rows in the emulation show NULLs, usually handled with:",
+    opts: [
+      { id: "a", text: "COALESCE to a display default", correct: true },
+      { id: "b", text: "COUNT(*)", correct: false },
+      { id: "c", text: "DROP TABLE", correct: false },
+      { id: "d", text: "ORDER BY", correct: false },
+    ],
+  },
+  "IN as a semi join": {
+    q: "WHERE id IN (SELECT ...) returns each left row:",
+    opts: [
+      { id: "a", text: "At most once, no matter how many right rows match", correct: true },
+      { id: "b", text: "Once per matching right row", correct: false },
+      { id: "c", text: "With the right row's columns attached", correct: false },
+      { id: "d", text: "Only if exactly one right row matches", correct: false },
+    ],
+  },
+  "EXISTS short-circuits": {
+    q: "EXISTS is efficient because it:",
+    opts: [
+      { id: "a", text: "Stops at the first matching row", correct: true },
+      { id: "b", text: "Counts all matches first", correct: false },
+      { id: "c", text: "Sorts the subquery", correct: false },
+      { id: "d", text: "Caches the whole table", correct: false },
+    ],
+  },
+  "Semi joins vs INNER JOIN": {
+    q: "Use a semi join instead of INNER JOIN when you want to:",
+    opts: [
+      { id: "a", text: "Filter by membership without duplicating rows or adding columns", correct: true },
+      { id: "b", text: "Combine columns from both tables", correct: false },
+      { id: "c", text: "Multiply rows per match", correct: false },
+      { id: "d", text: "Sort the result", correct: false },
+    ],
+  },
+  "Project schema design": {
+    q: "A shop database's core tables are:",
+    opts: [
+      { id: "a", text: "Customers, products, and purchases", correct: true },
+      { id: "b", text: "Users and posts", correct: false },
+      { id: "c", text: "Files and folders", correct: false },
+      { id: "d", text: "A single wide table", correct: false },
+    ],
+  },
+  "Seed realistic data": {
+    q: "Good seed data is:",
+    opts: [
+      { id: "a", text: "Small, relational, and hand-verifiable", correct: true },
+      { id: "b", text: "As large as possible", correct: false },
+      { id: "c", text: "Random and unchecked", correct: false },
+      { id: "d", text: "A production backup", correct: false },
+    ],
+  },
+  "Multi-table report queries": {
+    q: "Shop revenue is computed with:",
+    opts: [
+      { id: "a", text: "A join of purchases to products plus SUM", correct: true },
+      { id: "b", text: "A single-table SELECT", correct: false },
+      { id: "c", text: "DROP TABLE", correct: false },
+      { id: "d", text: "A view with no query", correct: false },
+    ],
+  },
+  "NOT EXISTS anti join": {
+    q: "NOT EXISTS returns left rows that have:",
+    opts: [
+      { id: "a", text: "Zero matches on the right", correct: true },
+      { id: "b", text: "At least one match on the right", correct: false },
+      { id: "c", text: "Exactly one match", correct: false },
+      { id: "d", text: "NULL keys", correct: false },
+    ],
+  },
+  "LEFT JOIN with IS NULL": {
+    q: "LEFT JOIN ... WHERE right.key IS NULL keeps:",
+    opts: [
+      { id: "a", text: "Left rows with no right match", correct: true },
+      { id: "b", text: "Left rows with a match", correct: false },
+      { id: "c", text: "All right rows", correct: false },
+      { id: "d", text: "Nothing — it errors", correct: false },
+    ],
+  },
+  "NOT IN and NULL pitfalls": {
+    q: "A NULL inside a NOT IN list causes:",
+    opts: [
+      { id: "a", text: "No rows to match at all", correct: true },
+      { id: "b", text: "Faster results", correct: false },
+      { id: "c", text: "NULL rows to be skipped cleanly", correct: false },
+      { id: "d", text: "An error", correct: false },
+    ],
+  },
+  "Per-row inner queries": {
+    q: "A correlated subquery differs by:",
+    opts: [
+      { id: "a", text: "Referencing the outer query's current row", correct: true },
+      { id: "b", text: "Running before the outer query", correct: false },
+      { id: "c", text: "Never using aliases", correct: false },
+      { id: "d", text: "Returning whole tables", correct: false },
+    ],
+  },
+  "Above-average-per-group": {
+    q: "Employees above their own department average need:",
+    opts: [
+      { id: "a", text: "A correlated subquery averaging the matching dept", correct: true },
+      { id: "b", text: "A plain GROUP BY", correct: false },
+      { id: "c", text: "An index only", correct: false },
+      { id: "d", text: "Two databases", correct: false },
+    ],
+  },
+  "Correlated UPDATE patterns": {
+    q: "Before running a correlated UPDATE, you should:",
+    opts: [
+      { id: "a", text: "SELECT the affected rows first to preview", correct: true },
+      { id: "b", text: "DROP the indexes", correct: false },
+      { id: "c", text: "Disable the transaction", correct: false },
+      { id: "d", text: "Delete the table", correct: false },
+    ],
+  },
+  "Scalar values in SELECT": {
+    q: "A scalar subquery in the select list returns:",
+    opts: [
+      { id: "a", text: "One value per row", correct: true },
+      { id: "b", text: "One row per table", correct: false },
+      { id: "c", text: "A new table", correct: false },
+      { id: "d", text: "A boolean only", correct: false },
+    ],
+  },
+  "Derived tables in FROM": {
+    q: "A subquery in FROM is called:",
+    opts: [
+      { id: "a", text: "A derived table", correct: true },
+      { id: "b", text: "A view", correct: false },
+      { id: "c", text: "An index", correct: false },
+      { id: "d", text: "A trigger", correct: false },
+    ],
+  },
+  "Subqueries in ORDER BY": {
+    q: "ORDER BY with a subquery is best for:",
+    opts: [
+      { id: "a", text: "One-off sort keys kept out of the select list", correct: true },
+      { id: "b", text: "Sorting that must be reused often", correct: false },
+      { id: "c", text: "Filtering rows", correct: false },
+      { id: "d", text: "Creating tables", correct: false },
+    ],
+  },
+  "Chained CTEs": {
+    q: "In WITH evens AS (...), doubled AS (SELECT ... FROM evens):",
+    opts: [
+      { id: "a", text: "The second CTE builds on the first", correct: true },
+      { id: "b", text: "The CTEs are independent", correct: false },
+      { id: "c", text: "Evens runs after doubled", correct: false },
+      { id: "d", text: "Only one CTE may exist", correct: false },
+    ],
+  },
+  "Multiple CTEs": {
+    q: "Multiple CTEs are separated with:",
+    opts: [
+      { id: "a", text: "Commas after a single WITH", correct: true },
+      { id: "b", text: "Repeated WITH keywords", correct: false },
+      { id: "c", text: "Semicolons", correct: false },
+      { id: "d", text: "UNION", correct: false },
+    ],
+  },
+  "CTEs vs subqueries": {
+    q: "Prefer a CTE over a nested subquery when:",
+    opts: [
+      { id: "a", text: "A step is reused or nesting runs deep", correct: true },
+      { id: "b", text: "You need maximum speed always", correct: false },
+      { id: "c", text: "The query is a one-liner", correct: false },
+      { id: "d", text: "You want to create a table", correct: false },
+    ],
+  },
+  "Anchor and recursive members": {
+    q: "A recursive CTE consists of:",
+    opts: [
+      { id: "a", text: "An anchor SELECT plus a recursive SELECT", correct: true },
+      { id: "b", text: "Two unrelated SELECTs", correct: false },
+      { id: "c", text: "A PRIMARY KEY and a FOREIGN KEY", correct: false },
+      { id: "d", text: "A table and an index", correct: false },
+    ],
+  },
+  "UNION ALL recursion": {
+    q: "Recursive CTEs must use UNION ALL because:",
+    opts: [
+      { id: "a", text: "Duplicates are part of the iteration and dedup would break it", correct: true },
+      { id: "b", text: "UNION is forbidden in CTEs", correct: false },
+      { id: "c", text: "It sorts the output", correct: false },
+      { id: "d", text: "It limits recursion depth", correct: false },
+    ],
+  },
+  "Termination conditions": {
+    q: "Every recursive CTE needs:",
+    opts: [
+      { id: "a", text: "A WHERE that eventually yields zero new rows", correct: true },
+      { id: "b", text: "An ORDER BY", correct: false },
+      { id: "c", text: "A LIMIT 1", correct: false },
+      { id: "d", text: "A PRIMARY KEY", correct: false },
+    ],
+  },
+  "Walking org charts": {
+    q: "To return a whole subtree of unknown depth, use:",
+    opts: [
+      { id: "a", text: "A recursive CTE", correct: true },
+      { id: "b", text: "A fixed chain of self joins", correct: false },
+      { id: "c", text: "GROUP BY", correct: false },
+      { id: "d", text: "UNION ALL of tables", correct: false },
+    ],
+  },
+  "Depth tracking": {
+    q: "A depth counter in a recursive CTE starts at 0 in:",
+    opts: [
+      { id: "a", text: "The anchor member and increments per level", correct: true },
+      { id: "b", text: "The recursive member only", correct: false },
+      { id: "c", text: "The final SELECT", correct: false },
+      { id: "d", text: "The ORDER BY clause", correct: false },
+    ],
+  },
+  "Path building": {
+    q: "Breadcrumb paths like root/a/b are built by:",
+    opts: [
+      { id: "a", text: "Concatenating names level by level through the recursion", correct: true },
+      { id: "b", text: "GROUP_CONCAT over the whole table", correct: false },
+      { id: "c", text: "ORDER BY depth", correct: false },
+      { id: "d", text: "A separate table per level", correct: false },
+    ],
+  },
+  "ROW_NUMBER basics": {
+    q: "ROW_NUMBER() OVER (ORDER BY col):",
+    opts: [
+      { id: "a", text: "Numbers rows 1..N with no ties", correct: true },
+      { id: "b", text: "Gives ties the same number", correct: false },
+      { id: "c", text: "Sums the column", correct: false },
+      { id: "d", text: "Counts distinct values", correct: false },
+    ],
+  },
+  "RANK with gaps": {
+    q: "Two rows tied for rank 1 make the next RANK:",
+    opts: [
+      { id: "a", text: "3", correct: true },
+      { id: "b", text: "2", correct: false },
+      { id: "c", text: "1", correct: false },
+      { id: "d", text: "NULL", correct: false },
+    ],
+  },
+  "DENSE_RANK without gaps": {
+    q: "DENSE_RANK after a two-way tie for 1 gives:",
+    opts: [
+      { id: "a", text: "2", correct: true },
+      { id: "b", text: "3", correct: false },
+      { id: "c", text: "1 again", correct: false },
+      { id: "d", text: "NULL", correct: false },
+    ],
+  },
+  "LAG previous rows": {
+    q: "LAG(t) OVER (ORDER BY day) on the first row returns:",
+    opts: [
+      { id: "a", text: "NULL — there is no previous row", correct: true },
+      { id: "b", text: "The first row's own value", correct: false },
+      { id: "c", text: "0", correct: false },
+      { id: "d", text: "An error", correct: false },
+    ],
+  },
+  "LEAD next rows": {
+    q: "LEAD reads:",
+    opts: [
+      { id: "a", text: "The next row's value in the window order", correct: true },
+      { id: "b", text: "The previous row's value", correct: false },
+      { id: "c", text: "The maximum value", correct: false },
+      { id: "d", text: "The row count", correct: false },
+    ],
+  },
+  "NTILE buckets": {
+    q: "NTILE(4) splits rows into:",
+    opts: [
+      { id: "a", text: "Four near-equal buckets", correct: true },
+      { id: "b", text: "Four value ranges", correct: false },
+      { id: "c", text: "Four tables", correct: false },
+      { id: "d", text: "Four columns", correct: false },
+    ],
+  },
+  "ROWS BETWEEN frames": {
+    q: "ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW means:",
+    opts: [
+      { id: "a", text: "This row plus everything before it", correct: true },
+      { id: "b", text: "Only the current row", correct: false },
+      { id: "c", text: "The whole table unordered", correct: false },
+      { id: "d", text: "The rows after this one", correct: false },
+    ],
+  },
+  "Running totals": {
+    q: "A running total is SUM over:",
+    opts: [
+      { id: "a", text: "An expanding frame from the start to the current row", correct: true },
+      { id: "b", text: "The whole table with GROUP BY", correct: false },
+      { id: "c", text: "A single row", correct: false },
+      { id: "d", text: "The next three rows", correct: false },
+    ],
+  },
+  "Moving averages": {
+    q: "A 3-day moving average uses the frame:",
+    opts: [
+      { id: "a", text: "ROWS BETWEEN 2 PRECEDING AND CURRENT ROW", correct: true },
+      { id: "b", text: "ROWS BETWEEN 3 FOLLOWING AND CURRENT ROW", correct: false },
+      { id: "c", text: "The entire partition", correct: false },
+      { id: "d", text: "No frame at all", correct: false },
+    ],
+  },
+  "INTERSECT": {
+    q: "INTERSECT returns rows present in:",
+    opts: [
+      { id: "a", text: "Both SELECTs", correct: true },
+      { id: "b", text: "Either SELECT", correct: false },
+      { id: "c", text: "Only the first SELECT", correct: false },
+      { id: "d", text: "Neither SELECT", correct: false },
+    ],
+  },
+  "EXCEPT": {
+    q: "EXCEPT returns rows in the first SELECT that are:",
+    opts: [
+      { id: "a", text: "Absent from the second SELECT", correct: true },
+      { id: "b", text: "Present in the second SELECT", correct: false },
+      { id: "c", text: "Duplicated", correct: false },
+      { id: "d", text: "NULL", correct: false },
+    ],
+  },
+  "Set-operator precedence": {
+    q: "A UNION B INTERSECT C evaluates as:",
+    opts: [
+      { id: "a", text: "A UNION (B INTERSECT C)", correct: true },
+      { id: "b", text: "(A UNION B) INTERSECT C", correct: false },
+      { id: "c", text: "Left to right with no precedence", correct: false },
+      { id: "d", text: "An error", correct: false },
+    ],
+  },
+  "UNION dedup cost": {
+    q: "UNION is slower than UNION ALL because it:",
+    opts: [
+      { id: "a", text: "Sorts or hashes to remove duplicates", correct: true },
+      { id: "b", text: "Reads the tables twice", correct: false },
+      { id: "c", text: "Creates indexes", correct: false },
+      { id: "d", text: "Locks the tables", correct: false },
+    ],
+  },
+  "UNION ALL speed": {
+    q: "Default to UNION ALL when:",
+    opts: [
+      { id: "a", text: "Duplicates are impossible or acceptable", correct: true },
+      { id: "b", text: "You need deduplication", correct: false },
+      { id: "c", text: "Sorting is required", correct: false },
+      { id: "d", text: "Never", correct: false },
+    ],
+  },
+  "ORDER BY over unions": {
+    q: "In a compound SELECT, ORDER BY:",
+    opts: [
+      { id: "a", text: "Applies once to the whole result at the end", correct: true },
+      { id: "b", text: "Sorts each SELECT separately", correct: false },
+      { id: "c", text: "Is forbidden", correct: false },
+      { id: "d", text: "Uses the second SELECT's column names", correct: false },
+    ],
+  },
+  "CREATE VIEW with joins": {
+    q: "Putting a join inside a view gives consumers:",
+    opts: [
+      { id: "a", text: "One simple name hiding the pairing logic", correct: true },
+      { id: "b", text: "A copy of the data", correct: false },
+      { id: "c", text: "Faster writes", correct: false },
+      { id: "d", text: "Automatic indexes", correct: false },
+    ],
+  },
+  "DROP VIEW": {
+    q: "DROP VIEW removes:",
+    opts: [
+      { id: "a", text: "Only the saved query — base tables keep their data", correct: true },
+      { id: "b", text: "The base tables too", correct: false },
+      { id: "c", text: "All indexes", correct: false },
+      { id: "d", text: "The whole database", correct: false },
+    ],
+  },
+  "Views stay current": {
+    q: "A view always reflects current data because it:",
+    opts: [
+      { id: "a", text: "Reruns its query on every access", correct: true },
+      { id: "b", text: "Caches results forever", correct: false },
+      { id: "c", text: "Copies tables nightly", correct: false },
+      { id: "d", text: "Locks the base tables", correct: false },
+    ],
+  },
+  "Updatable view limits": {
+    q: "SQLite auto-routes writes through a view when it is:",
+    opts: [
+      { id: "a", text: "A simple single-table view", correct: true },
+      { id: "b", text: "A view with aggregates", correct: false },
+      { id: "c", text: "A view with DISTINCT", correct: false },
+      { id: "d", text: "Any view at all", correct: false },
+    ],
+  },
+  "INSTEAD OF triggers": {
+    q: "An INSTEAD OF INSERT trigger on a view:",
+    opts: [
+      { id: "a", text: "Replaces the insert with your own logic", correct: true },
+      { id: "b", text: "Runs after the insert completes", correct: false },
+      { id: "c", text: "Deletes the view", correct: false },
+      { id: "d", text: "Is forbidden in SQLite", correct: false },
+    ],
+  },
+  "Routing writes": {
+    q: "To make a joined view writable, the trigger must:",
+    opts: [
+      { id: "a", text: "Split NEW into inserts on each base table", correct: true },
+      { id: "b", text: "Insert into the view directly", correct: false },
+      { id: "c", text: "Drop the join", correct: false },
+      { id: "d", text: "Use GROUP BY", correct: false },
+    ],
+  },
+  "Composite indexes": {
+    q: "An index on (kind, ts) speeds filters on:",
+    opts: [
+      { id: "a", text: "kind, and kind-plus-ts together", correct: true },
+      { id: "b", text: "ts alone", correct: false },
+      { id: "c", text: "Any column of the table", correct: false },
+      { id: "d", text: "No realistic filter", correct: false },
+    ],
+  },
+  "Column order": {
+    q: "In a composite index, the most important position is:",
+    opts: [
+      { id: "a", text: "Leftmost — it decides what the index can answer", correct: true },
+      { id: "b", text: "Rightmost", correct: false },
+      { id: "c", text: "The middle", correct: false },
+      { id: "d", text: "Order does not matter", correct: false },
+    ],
+  },
+  "Covering indexes": {
+    q: "A covering index lets a query:",
+    opts: [
+      { id: "a", text: "Answer without touching the table", correct: true },
+      { id: "b", text: "Skip the WHERE clause", correct: false },
+      { id: "c", text: "Change its results", correct: false },
+      { id: "d", text: "Run without SELECT", correct: false },
+    ],
+  },
+  "EXPLAIN QUERY PLAN syntax": {
+    q: "EXPLAIN QUERY PLAN SELECT ...:",
+    opts: [
+      { id: "a", text: "Describes the plan without running the query", correct: true },
+      { id: "b", text: "Runs the query and shows results", correct: false },
+      { id: "c", text: "Creates an index", correct: false },
+      { id: "d", text: "Deletes the plan cache", correct: false },
+    ],
+  },
+  "SCAN vs SEARCH lines": {
+    q: "In a query plan, SEARCH means the engine:",
+    opts: [
+      { id: "a", text: "Seeks via an index to matching rows", correct: true },
+      { id: "b", text: "Reads the whole table", correct: false },
+      { id: "c", text: "Sorts the result", correct: false },
+      { id: "d", text: "Creates a temporary table", correct: false },
+    ],
+  },
+  "Version-dependent text": {
+    q: "EXPLAIN output node ids (2|0|56|...) are:",
+    opts: [
+      { id: "a", text: "Unstable across SQLite versions — read the shape, not the text", correct: true },
+      { id: "b", text: "Guaranteed identical everywhere", correct: false },
+      { id: "c", text: "The query's results", correct: false },
+      { id: "d", text: "Row counts", correct: false },
+    ],
+  },
+  "Forcing index use": {
+    q: "To prove an index matters, compare EXPLAIN output:",
+    opts: [
+      { id: "a", text: "Before and after creating the index", correct: true },
+      { id: "b", text: "On two different databases", correct: false },
+      { id: "c", text: "With different SELECT lists only", correct: false },
+      { id: "d", text: "Plans never change", correct: false },
+    ],
+  },
+  "Comparing plans": {
+    q: "When tuning, change:",
+    opts: [
+      { id: "a", text: "One thing at a time so the plan diff is honest", correct: true },
+      { id: "b", text: "Everything at once for speed", correct: false },
+      { id: "c", text: "Nothing — plans are final", correct: false },
+      { id: "d", text: "Only the SELECT list", correct: false },
+    ],
+  },
+  "When plans change": {
+    q: "Query plans can change with:",
+    opts: [
+      { id: "a", text: "Data size, indexes, and SQLite versions", correct: true },
+      { id: "b", text: "Nothing — plans are frozen", correct: false },
+      { id: "c", text: "Only the table name", correct: false },
+      { id: "d", text: "The day of the week", correct: false },
+    ],
+  },
+  "Multi-statement transfers": {
+    q: "A money transfer wraps debit plus credit in:",
+    opts: [
+      { id: "a", text: "One BEGIN...COMMIT transaction", correct: true },
+      { id: "b", text: "Two separate transactions", correct: false },
+      { id: "c", text: "No transaction", correct: false },
+      { id: "d", text: "A view", correct: false },
+    ],
+  },
+  "Balance invariants": {
+    q: "The transfer invariant is:",
+    opts: [
+      { id: "a", text: "Total balances never change in a transfer", correct: true },
+      { id: "b", text: "Balances always grow", correct: false },
+      { id: "c", text: "Each account holds the same amount", correct: false },
+      { id: "d", text: "Transfers need no invariant", correct: false },
+    ],
+  },
+  "COMMIT finality": {
+    q: "Until COMMIT, a transaction's statements are:",
+    opts: [
+      { id: "a", text: "Provisional — ROLLBACK can still erase them", correct: true },
+      { id: "b", text: "Permanent", correct: false },
+      { id: "c", text: "Visible to all connections", correct: false },
+      { id: "d", text: "Written to disk", correct: false },
+    ],
+  },
+  "Atomicity recap": {
+    q: "Atomicity guarantees:",
+    opts: [
+      { id: "a", text: "All-or-nothing application of the transaction", correct: true },
+      { id: "b", text: "Maximum speed", correct: false },
+      { id: "c", text: "Parallel execution", correct: false },
+      { id: "d", text: "No errors ever", correct: false },
+    ],
+  },
+  "Consistency guarantees": {
+    q: "Consistency means each transaction moves the database:",
+    opts: [
+      { id: "a", text: "From one valid state to another", correct: true },
+      { id: "b", text: "To a locked state", correct: false },
+      { id: "c", text: "To an empty state", correct: false },
+      { id: "d", text: "Without constraints", correct: false },
+    ],
+  },
+  "Isolation in SQLite": {
+    q: "SQLite isolates concurrent writers by:",
+    opts: [
+      { id: "a", text: "Serializing them — one writer at a time", correct: true },
+      { id: "b", text: "Letting all write at once", correct: false },
+      { id: "c", text: "Blocking all readers", correct: false },
+      { id: "d", text: "Merging conflicting writes", correct: false },
+    ],
+  },
+  "SAVEPOINT syntax": {
+    q: "SAVEPOINT sp1 marks:",
+    opts: [
+      { id: "a", text: "A point inside a transaction you can roll back to", correct: true },
+      { id: "b", text: "A backup of the database file", correct: false },
+      { id: "c", text: "A new transaction", correct: false },
+      { id: "d", text: "A permanent commit", correct: false },
+    ],
+  },
+  "ROLLBACK TO": {
+    q: "ROLLBACK TO sp1 differs from bare ROLLBACK by:",
+    opts: [
+      { id: "a", text: "Keeping the transaction alive after rewinding", correct: true },
+      { id: "b", text: "Committing the transaction", correct: false },
+      { id: "c", text: "Deleting the table", correct: false },
+      { id: "d", text: "Doing nothing", correct: false },
+    ],
+  },
+  "RELEASE": {
+    q: "RELEASE sp1:",
+    opts: [
+      { id: "a", text: "Clears the marker; the work still needs COMMIT", correct: true },
+      { id: "b", text: "Commits the transaction", correct: false },
+      { id: "c", text: "Undoes the transaction", correct: false },
+      { id: "d", text: "Deletes the savepoint's rows", correct: false },
+    ],
+  },
+  "Ledger schema": {
+    q: "A ledger separates:",
+    opts: [
+      { id: "a", text: "Balances (state) from audit rows (history)", correct: true },
+      { id: "b", text: "Users from passwords", correct: false },
+      { id: "c", text: "Tables from indexes", correct: false },
+      { id: "d", text: "Nothing — one table suffices", correct: false },
+    ],
+  },
+  "Audit trigger": {
+    q: "A trigger WHEN clause:",
+    opts: [
+      { id: "a", text: "Fires the trigger only when the condition holds", correct: true },
+      { id: "b", text: "Deletes the trigger", correct: false },
+      { id: "c", text: "Runs on every statement", correct: false },
+      { id: "d", text: "Sorts the audit table", correct: false },
+    ],
+  },
+  "Transfer procedure": {
+    q: "The transfer procedure plus trigger gives:",
+    opts: [
+      { id: "a", text: "Money movement and automatic evidence in one transaction", correct: true },
+      { id: "b", text: "Faster SELECTs", correct: false },
+      { id: "c", text: "Smaller tables", correct: false },
+      { id: "d", text: "No need for COMMIT", correct: false },
+    ],
+  },
+  "CHECK expressions": {
+    q: "CHECK (price >= 0) rejects:",
+    opts: [
+      { id: "a", text: "Negative prices at INSERT and UPDATE", correct: true },
+      { id: "b", text: "Zero prices", correct: false },
+      { id: "c", text: "All prices", correct: false },
+      { id: "d", text: "Nothing — CHECK is advisory", correct: false },
+    ],
+  },
+  "DEFAULT values": {
+    q: "With DEFAULT 'active', omitting status in INSERT stores:",
+    opts: [
+      { id: "a", text: "active", correct: true },
+      { id: "b", text: "NULL", correct: false },
+      { id: "c", text: "An error", correct: false },
+      { id: "d", text: "0", correct: false },
+    ],
+  },
+  "Constraint violations abort": {
+    q: "A CHECK violation:",
+    opts: [
+      { id: "a", text: "Aborts the statement — the row is not stored", correct: true },
+      { id: "b", text: "Stores the row anyway", correct: false },
+      { id: "c", text: "Deletes the table", correct: false },
+      { id: "d", text: "Is silently ignored", correct: false },
+    ],
+  },
+  "ON DELETE CASCADE": {
+    q: "ON DELETE CASCADE on players.team_id means deleting a team:",
+    opts: [
+      { id: "a", text: "Deletes its players too", correct: true },
+      { id: "b", text: "Keeps its players with NULL team_id", correct: false },
+      { id: "c", text: "Is forbidden", correct: false },
+      { id: "d", text: "Does nothing", correct: false },
+    ],
+  },
+  "ON DELETE SET NULL": {
+    q: "ON DELETE SET NULL keeps child rows and:",
+    opts: [
+      { id: "a", text: "Clears their foreign key", correct: true },
+      { id: "b", text: "Deletes them", correct: false },
+      { id: "c", text: "Copies the parent", correct: false },
+      { id: "d", text: "Assigns a new parent", correct: false },
+    ],
+  },
+  "PRAGMA foreign_keys": {
+    q: "SQLite enforces foreign keys only when:",
+    opts: [
+      { id: "a", text: "PRAGMA foreign_keys = ON is set per connection", correct: true },
+      { id: "b", text: "The tables are created", correct: false },
+      { id: "c", text: "Always — it is on by default", correct: false },
+      { id: "d", text: "An index exists", correct: false },
+    ],
+  },
+  "Spotting repeating groups": {
+    q: "The 1NF alarm in a workers table is:",
+    opts: [
+      { id: "a", text: "The department name repeated on every worker row", correct: true },
+      { id: "b", text: "A primary key", correct: false },
+      { id: "c", text: "An index", correct: false },
+      { id: "d", text: "A foreign key", correct: false },
+    ],
+  },
+  "Splitting tables": {
+    q: "Refactoring to 3NF moves each repeated fact to:",
+    opts: [
+      { id: "a", text: "Its own table with a key", correct: true },
+      { id: "b", text: "A view", correct: false },
+      { id: "c", text: "An index", correct: false },
+      { id: "d", text: "A trigger", correct: false },
+    ],
+  },
+  "Joining it back": {
+    q: "After normalization, the flat view is restored with:",
+    opts: [
+      { id: "a", text: "JOINs", correct: true },
+      { id: "b", text: "UNION", correct: false },
+      { id: "c", text: "GROUP BY", correct: false },
+      { id: "d", text: "It cannot be restored", correct: false },
+    ],
+  },
+  "Read vs write trade-offs": {
+    q: "Denormalization buys read speed with:",
+    opts: [
+      { id: "a", text: "Write complexity — every copy must update together", correct: true },
+      { id: "b", text: "More disk seeks on reads", correct: false },
+      { id: "c", text: "Smaller tables", correct: false },
+      { id: "d", text: "Nothing — it is free", correct: false },
+    ],
+  },
+  "Cached counters": {
+    q: "A likes counter on posts turns reads into:",
+    opts: [
+      { id: "a", text: "One column read instead of an aggregate", correct: true },
+      { id: "b", text: "A full table scan", correct: false },
+      { id: "c", text: "A join", correct: false },
+      { id: "d", text: "A trigger", correct: false },
+    ],
+  },
+  "Materialized summaries": {
+    q: "Materialized summaries trade freshness for:",
+    opts: [
+      { id: "a", text: "Instant report reads", correct: true },
+      { id: "b", text: "Smaller storage", correct: false },
+      { id: "c", text: "Stronger constraints", correct: false },
+      { id: "d", text: "Faster writes", correct: false },
+    ],
+  },
+  "AFTER INSERT triggers": {
+    q: "An AFTER INSERT trigger observes:",
+    opts: [
+      { id: "a", text: "The landed row with final values", correct: true },
+      { id: "b", text: "The row before it is stored", correct: false },
+      { id: "c", text: "The whole table", correct: false },
+      { id: "d", text: "Nothing — it runs before", correct: false },
+    ],
+  },
+  "NEW row values": {
+    q: "Inside an INSERT trigger, NEW.item is:",
+    opts: [
+      { id: "a", text: "The item value of the row being written", correct: true },
+      { id: "b", text: "The previous item value", correct: false },
+      { id: "c", text: "Always NULL", correct: false },
+      { id: "d", text: "The table name", correct: false },
+    ],
+  },
+  "Audit tables": {
+    q: "Audit tables are filled by:",
+    opts: [
+      { id: "a", text: "Triggers, so no writer can forget", correct: true },
+      { id: "b", text: "Manual inserts only", correct: false },
+      { id: "c", text: "SELECT queries", correct: false },
+      { id: "d", text: "Indexes", correct: false },
+    ],
+  },
+  "BEFORE INSERT guards": {
+    q: "A BEFORE INSERT guard with WHEN NEW.age < 0:",
+    opts: [
+      { id: "a", text: "Rejects negative ages before they land", correct: true },
+      { id: "b", text: "Logs negative ages after storing them", correct: false },
+      { id: "c", text: "Fixes negative ages automatically", correct: false },
+      { id: "d", text: "Deletes the table", correct: false },
+    ],
+  },
+  "RAISE(ABORT, ...)": {
+    q: "RAISE(ABORT, 'message') in a trigger:",
+    opts: [
+      { id: "a", text: "Aborts the statement with your message", correct: true },
+      { id: "b", text: "Commits the transaction", correct: false },
+      { id: "c", text: "Skips the trigger", correct: false },
+      { id: "d", text: "Creates an index", correct: false },
+    ],
+  },
+  "Enforcing rules": {
+    q: "Rules in the database (vs in app code) apply to:",
+    opts: [
+      { id: "a", text: "Every connection — no client can bypass them", correct: true },
+      { id: "b", text: "Only the first connection", correct: false },
+      { id: "c", text: "Reads but never writes", correct: false },
+      { id: "d", text: "Nothing — they are documentation", correct: false },
+    ],
+  },
+  "FOR EACH ROW only": {
+    q: "SQLite fires a trigger:",
+    opts: [
+      { id: "a", text: "Once per affected row", correct: true },
+      { id: "b", text: "Once per statement", correct: false },
+      { id: "c", text: "Once per database", correct: false },
+      { id: "d", text: "Only on SELECT", correct: false },
+    ],
+  },
+  "No FOR EACH STATEMENT": {
+    q: "SQLite statement-level triggers:",
+    opts: [
+      { id: "a", text: "Do not exist — there is no such syntax", correct: true },
+      { id: "b", text: "Are the default", correct: false },
+      { id: "c", text: "Fire on SELECT", correct: false },
+      { id: "d", text: "Replace row triggers", correct: false },
+    ],
+  },
+  "Workarounds with temp tables": {
+    q: "To emulate per-statement trigger work, use:",
+    opts: [
+      { id: "a", text: "A row trigger staging into a TEMP table, processed later", correct: true },
+      { id: "b", text: "FOR EACH STATEMENT", correct: false },
+      { id: "c", text: "DROP TRIGGER", correct: false },
+      { id: "d", text: "A view", correct: false },
+    ],
+  },
+  "JSON text columns": {
+    q: "SQLite stores JSON documents as:",
+    opts: [
+      { id: "a", text: "TEXT queried with JSON1 functions", correct: true },
+      { id: "b", text: "A special JSON column type", correct: false },
+      { id: "c", text: "BLOBs only", correct: false },
+      { id: "d", text: "Separate files", correct: false },
+    ],
+  },
+  "json_extract paths": {
+    q: "json_extract(data, '$.theme') reads:",
+    opts: [
+      { id: "a", text: "The theme field of the document", correct: true },
+      { id: "b", text: "The whole document", correct: false },
+      { id: "c", text: "The first array element", correct: false },
+      { id: "d", text: "The document's size", correct: false },
+    ],
+  },
+  "json_object building": {
+    q: "json_object('theme', 'dark') builds:",
+    opts: [
+      { id: "a", text: "A JSON document from SQL values", correct: true },
+      { id: "b", text: "A table", correct: false },
+      { id: "c", text: "An index", correct: false },
+      { id: "d", text: "A string without structure", correct: false },
+    ],
+  },
+  "json_each table function": {
+    q: "json_each over an array produces:",
+    opts: [
+      { id: "a", text: "One row per element", correct: true },
+      { id: "b", text: "One column per element", correct: false },
+      { id: "c", text: "A single JSON string", correct: false },
+      { id: "d", text: "An error", correct: false },
+    ],
+  },
+  "Unnesting arrays": {
+    q: "After unnesting with json_each, elements can be:",
+    opts: [
+      { id: "a", text: "Filtered, counted, and joined like ordinary rows", correct: true },
+      { id: "b", text: "Only printed", correct: false },
+      { id: "c", text: "Never filtered", correct: false },
+      { id: "d", text: "Stored but not read", correct: false },
+    ],
+  },
+  "Filtering extracted values": {
+    q: "WHERE value = 'pen' after json_each counts:",
+    opts: [
+      { id: "a", text: "Matching elements across all documents", correct: true },
+      { id: "b", text: "Whole documents only", correct: false },
+      { id: "c", text: "Nothing — filters cannot apply", correct: false },
+      { id: "d", text: "Tables", correct: false },
+    ],
+  },
+  "FTS5 virtual tables": {
+    q: "CREATE VIRTUAL TABLE docs USING fts5 builds:",
+    opts: [
+      { id: "a", text: "A full-text index over the text columns", correct: true },
+      { id: "b", text: "An ordinary table", correct: false },
+      { id: "c", text: "A view", correct: false },
+      { id: "d", text: "A backup", correct: false },
+    ],
+  },
+  "MATCH queries": {
+    q: "WHERE docs MATCH 'desert' finds documents:",
+    opts: [
+      { id: "a", text: "Containing the term, via the index", correct: true },
+      { id: "b", text: "By scanning every row's text", correct: false },
+      { id: "c", text: "With desert in any column type", correct: false },
+      { id: "d", text: "It always errors", correct: false },
+    ],
+  },
+  "Tokenization basics": {
+    q: "FTS5 searches match:",
+    opts: [
+      { id: "a", text: "Whole tokens, not substrings", correct: true },
+      { id: "b", text: "Arbitrary substrings", correct: false },
+      { id: "c", text: "Regular expressions", correct: false },
+      { id: "d", text: "Only exact phrases", correct: false },
+    ],
+  },
+  "bm25 ranking": {
+    q: "ORDER BY bm25(table) ranks matches by:",
+    opts: [
+      { id: "a", text: "Relevance — rare terms and short documents score higher", correct: true },
+      { id: "b", text: "Insertion order", correct: false },
+      { id: "c", text: "Random order", correct: false },
+      { id: "d", text: "Alphabetical title", correct: false },
+    ],
+  },
+  "snippet highlights": {
+    q: "snippet() is used to:",
+    opts: [
+      { id: "a", text: "Show the matching text with the term marked", correct: true },
+      { id: "b", text: "Rank the matches", correct: false },
+      { id: "c", text: "Delete matches", correct: false },
+      { id: "d", text: "Create the index", correct: false },
+    ],
+  },
+  "Column filters": {
+    q: "An FTS MATCH of {title} : sql searches:",
+    opts: [
+      { id: "a", text: "The title column only", correct: true },
+      { id: "b", text: "All columns", correct: false },
+      { id: "c", text: "The rowid only", correct: false },
+      { id: "d", text: "Nothing — the syntax is invalid", correct: false },
+    ],
+  },
+  "Daily deltas with LAG": {
+    q: "Period-over-period change is computed with:",
+    opts: [
+      { id: "a", text: "The value minus LAG's previous value", correct: true },
+      { id: "b", text: "GROUP BY", correct: false },
+      { id: "c", text: "COUNT(*)", correct: false },
+      { id: "d", text: "UNION", correct: false },
+    ],
+  },
+  "Running totals over time": {
+    q: "Revenue-so-far by day is a running total over:",
+    opts: [
+      { id: "a", text: "Ordered rows with an expanding frame", correct: true },
+      { id: "b", text: "Unordered rows", correct: false },
+      { id: "c", text: "A single row", correct: false },
+      { id: "d", text: "The schema", correct: false },
+    ],
+  },
+  "Week-over-week compare": {
+    q: "Week-over-week compares each day to:",
+    opts: [
+      { id: "a", text: "The same weekday last week via a self join offset by 7", correct: true },
+      { id: "b", text: "Yesterday", correct: false },
+      { id: "c", text: "The monthly average", correct: false },
+      { id: "d", text: "A random day", correct: false },
+    ],
+  },
+  "ROW_NUMBER per partition": {
+    q: "ROW_NUMBER() OVER (PARTITION BY region ...) numbers:",
+    opts: [
+      { id: "a", text: "Each region's rows independently from 1", correct: true },
+      { id: "b", text: "All rows globally", correct: false },
+      { id: "c", text: "Only the first region", correct: false },
+      { id: "d", text: "Regions instead of rows", correct: false },
+    ],
+  },
+  "Top-N filter": {
+    q: "Top-1 per group is a ranked subquery filtered with:",
+    opts: [
+      { id: "a", text: "WHERE rn = 1", correct: true },
+      { id: "b", text: "HAVING COUNT(*) = 1", correct: false },
+      { id: "c", text: "LIMIT 1 on the raw table", correct: false },
+      { id: "d", text: "DISTINCT", correct: false },
+    ],
+  },
+  "Ties handling": {
+    q: "ROW_NUMBER top-N with tied scores picks:",
+    opts: [
+      { id: "a", text: "An arbitrary tied row — add a unique tiebreaker for fairness", correct: true },
+      { id: "b", text: "All tied rows", correct: false },
+      { id: "c", text: "No rows", correct: false },
+      { id: "d", text: "The alphabetically first always", correct: false },
+    ],
+  },
+  "Cohort week grouping": {
+    q: "A user's cohort week is:",
+    opts: [
+      { id: "a", text: "MIN(week) grouped by user", correct: true },
+      { id: "b", text: "MAX(week) grouped by user", correct: false },
+      { id: "c", text: "COUNT(*) of logins", correct: false },
+      { id: "d", text: "The current week", correct: false },
+    ],
+  },
+  "Retention self join": {
+    q: "A retention self join pairs weeks with the condition:",
+    opts: [
+      { id: "a", text: "b.week = a.week + 1 on the same user", correct: true },
+      { id: "b", text: "b.week = a.week", correct: false },
+      { id: "c", text: "Different users", correct: false },
+      { id: "d", text: "No condition", correct: false },
+    ],
+  },
+  "Percent retained": {
+    q: "Retention rate is retained divided by cohort size, using 100.0 to:",
+    opts: [
+      { id: "a", text: "Keep the decimal part", correct: true },
+      { id: "b", text: "Round to an integer", correct: false },
+      { id: "c", text: "Count distinct users", correct: false },
+      { id: "d", text: "Filter NULLs", correct: false },
+    ],
+  },
+  "ON CONFLICT DO NOTHING": {
+    q: "INSERT ... ON CONFLICT(key) DO NOTHING on a duplicate key:",
+    opts: [
+      { id: "a", text: "Skips the row instead of erroring", correct: true },
+      { id: "b", text: "Deletes the existing row", correct: false },
+      { id: "c", text: "Updates the existing row", correct: false },
+      { id: "d", text: "Always errors", correct: false },
+    ],
+  },
+  "ON CONFLICT DO UPDATE": {
+    q: "An UPSERT counter uses DO UPDATE to:",
+    opts: [
+      { id: "a", text: "Increment the existing row on duplicate insert", correct: true },
+      { id: "b", text: "Insert a second row", correct: false },
+      { id: "c", text: "Delete the row", correct: false },
+      { id: "d", text: "Lock the table", correct: false },
+    ],
+  },
+  "excluded row values": {
+    q: "In DO UPDATE, excluded refers to:",
+    opts: [
+      { id: "a", text: "The row that failed to insert", correct: true },
+      { id: "b", text: "The existing stored row", correct: false },
+      { id: "c", text: "A deleted row", correct: false },
+      { id: "d", text: "Nothing — it is a keyword filler", correct: false },
+    ],
+  },
+  "Staged CTE pipelines": {
+    q: "A funnel query stages CTEs as:",
+    opts: [
+      { id: "a", text: "Raw events, then per-step counts, then ratios", correct: true },
+      { id: "b", text: "Ratios first, then raw events", correct: false },
+      { id: "c", text: "One CTE per user", correct: false },
+      { id: "d", text: "Tables instead of CTEs", correct: false },
+    ],
+  },
+  "Conversion ratios": {
+    q: "Step conversion divides each step's users by:",
+    opts: [
+      { id: "a", text: "The first step's users", correct: true },
+      { id: "b", text: "The total rows in the table", correct: false },
+      { id: "c", text: "The previous step plus one", correct: false },
+      { id: "d", text: "A fixed number", correct: false },
+    ],
+  },
+  "Funnel drop-off": {
+    q: "The funnel step needing product attention is the one with:",
+    opts: [
+      { id: "a", text: "The steepest fall between steps", correct: true },
+      { id: "b", text: "The most users", correct: false },
+      { id: "c", text: "The fewest users", correct: false },
+      { id: "d", text: "No users", correct: false },
+    ],
+  },
+  "Finding duplicates": {
+    q: "To list repeated name-email pairs, use:",
+    opts: [
+      { id: "a", text: "GROUP BY name, email HAVING COUNT(*) > 1", correct: true },
+      { id: "b", text: "SELECT DISTINCT", correct: false },
+      { id: "c", text: "ORDER BY", correct: false },
+      { id: "d", text: "LIMIT 1", correct: false },
+    ],
+  },
+  "DELETE with rowid": {
+    q: "Keeping the first copy of each duplicate deletes rows where:",
+    opts: [
+      { id: "a", text: "rowid is not the group's MIN(rowid)", correct: true },
+      { id: "b", text: "rowid is the MIN(rowid)", correct: false },
+      { id: "c", text: "rowid is NULL", correct: false },
+      { id: "d", text: "All rows unconditionally", correct: false },
+    ],
+  },
+  "Filling NULLs": {
+    q: "To repair NULL emails with a default, use:",
+    opts: [
+      { id: "a", text: "UPDATE ... SET email = 'unknown' WHERE email IS NULL", correct: true },
+      { id: "b", text: "DELETE WHERE email IS NULL always", correct: false },
+      { id: "c", text: "SELECT DISTINCT", correct: false },
+      { id: "d", text: "DROP COLUMN", correct: false },
+    ],
+  },
+  "ADD COLUMN with defaults": {
+    q: "ADD COLUMN status TEXT DEFAULT 'active' fills existing rows with:",
+    opts: [
+      { id: "a", text: "active", correct: true },
+      { id: "b", text: "NULL", correct: false },
+      { id: "c", text: "It leaves them empty with an error", correct: false },
+      { id: "d", text: "0", correct: false },
+    ],
+  },
+  "Backfilling data": {
+    q: "After adding a defaulted column, special rows are corrected with:",
+    opts: [
+      { id: "a", text: "A targeted UPDATE backfill", correct: true },
+      { id: "b", text: "DROP TABLE", correct: false },
+      { id: "c", text: "A second ADD COLUMN", correct: false },
+      { id: "d", text: "Nothing — defaults are always right", correct: false },
+    ],
+  },
+  "Renaming tables": {
+    q: "ALTER TABLE old RENAME TO new is:",
+    opts: [
+      { id: "a", text: "Instant metadata surgery that rewrites no data", correct: true },
+      { id: "b", text: "A full data copy", correct: false },
+      { id: "c", text: "Forbidden in SQLite", correct: false },
+      { id: "d", text: "A row delete", correct: false },
+    ],
+  },
+  "sqlite_master inventory": {
+    q: "sqlite_master lists:",
+    opts: [
+      { id: "a", text: "Every table, index, view, and trigger", correct: true },
+      { id: "b", text: "Table rows", correct: false },
+      { id: "c", text: "Query results", correct: false },
+      { id: "d", text: "User accounts", correct: false },
+    ],
+  },
+  "Missing-index smells": {
+    q: "The classic missing-index smell is:",
+    opts: [
+      { id: "a", text: "A selective WHERE with a SCAN plan and no matching index", correct: true },
+      { id: "b", text: "A SEARCH plan", correct: false },
+      { id: "c", text: "A small table", correct: false },
+      { id: "d", text: "An ORDER BY", correct: false },
+    ],
+  },
+  "Audit checklists": {
+    q: "A performance audit runs:",
+    opts: [
+      { id: "a", text: "Inventory indexes, EXPLAIN top queries, index the SCANs, re-check", correct: true },
+      { id: "b", text: "DROP all indexes first", correct: false },
+      { id: "c", text: "Guessing", correct: false },
+      { id: "d", text: "Only once ever", correct: false },
+    ],
+  },
+  "Capstone schema": {
+    q: "The market database links sellers, goods, and sales with:",
+    opts: [
+      { id: "a", text: "Foreign keys across two relationship depths", correct: true },
+      { id: "b", text: "No keys at all", correct: false },
+      { id: "c", text: "A single table", correct: false },
+      { id: "d", text: "Text files", correct: false },
+    ],
+  },
+  "Seed and constraints": {
+    q: "If capstone seed data violates a constraint:",
+    opts: [
+      { id: "a", text: "The rule or the seed is wrong — decide loudly", correct: true },
+      { id: "b", text: "Ignore it", correct: false },
+      { id: "c", text: "Delete the schema", correct: false },
+      { id: "d", text: "Disable all constraints", correct: false },
+    ],
+  },
+  "Executive dashboard query": {
+    q: "The capstone dashboard query is:",
+    opts: [
+      { id: "a", text: "One join-plus-aggregate statement over the whole business", correct: true },
+      { id: "b", text: "A stored procedure", correct: false },
+      { id: "c", text: "Manual arithmetic", correct: false },
+      { id: "d", text: "A backup command", correct: false },
+    ],
+  },
 };
 /* ─── Code-challenge verification ───
  * expectedOutput gates "Mark Complete" on the code exercise. SQL runs via the
@@ -1224,7 +3071,15 @@ const SQL_QUIZ_MAP: Record<string, { q: string; opts: { id: string; text: string
  * with |). Every gated value below is the EXACT FIRST data line produced by the
  * day's template, verified against a live SQLite engine. Day 38 executes
  * EXPLAIN QUERY PLAN, whose text varies by SQLite version, so it stays ungated.
- * Day 24 avoids clock-reading date functions by using fixed date strings. */
+ * Day 24 avoids clock-reading date functions by using fixed date strings.
+ * Days 41-100 follow the same contract: every deterministic template is gated
+ * on its verified first output line. Ungated by design: days 75-76 (EXPLAIN
+ * QUERY PLAN text varies by SQLite version — node ids and index names shift,
+ * so the output is a diagnostic, not a contract) and day 87 (SQLite supports
+ * only FOR EACH ROW triggers — there is no statement-level trigger syntax to
+ * run and verify; row-level trigger behavior is gated on days 73, 80, 85-86).
+ * All gated values for days 41-100 were verified against SQLite 3.50.4 via
+ * Python's sqlite3 module (no sqlite3 CLI on the verifier machine). */
 const SQL_EXPECTED_OUTPUT: Record<number, string> = {
   1: "Rex",
   2: "Ada",
@@ -1265,6 +3120,63 @@ const SQL_EXPECTED_OUTPUT: Record<number, string> = {
   37: "4",
   39: "relational data stays consistent",
   40: "1",
+  41: "15.0",
+  42: "Paris",
+  43: "Ada",
+  44: "Ada",
+  45: "book",
+  46: "Cy",
+  47: "click",
+  48: "report.txt",
+  49: "2",
+  50: "40",
+  51: "apple",
+  52: "Ada;Bob;Ada",
+  53: "2024|north",
+  54: "Ada",
+  55: "click",
+  56: "Bob",
+  57: "Frank|Dune",
+  58: "1|none",
+  59: "Ada",
+  60: "36.0",
+  61: "Ada",
+  62: "Ada",
+  63: "Alien",
+  64: "4",
+  65: "2",
+  66: "b",
+  67: "Ada|1",
+  68: "tue|4",
+  69: "1|10",
+  70: "q",
+  71: "4",
+  72: "2",
+  73: "2",
+  74: "2",
+  77: "80",
+  78: "10",
+  79: "1",
+  80: "1",
+  81: "0.0",
+  82: "0",
+  83: "Ada",
+  84: "2",
+  85: "added:pen",
+  86: "36",
+  88: "dark",
+  89: "2",
+  90: "Dune",
+  91: "sql guide",
+  92: "250",
+  93: "Ada",
+  94: "1",
+  95: "2",
+  96: "1",
+  97: "2",
+  98: "active",
+  99: "idx_fast_email",
+  100: "40.0",
 };
 
 /* ─── Content generators ─── */

@@ -78,7 +78,7 @@ export const CONCEPT_GRAPH: Record<TrackKey, ConceptNode[]> = {
     { id: "python:inheritance", label: "Inheritance & magic methods", track: "python", day: 33, prereqs: ["python:classes"], related: ["python:decorators"] },
     { id: "python:generators", label: "Generators & iterators", track: "python", day: 36, prereqs: ["python:classes", "python:loops"], related: ["python:decorators"] },
     { id: "python:decorators", label: "Decorators & closures", track: "python", day: 37, prereqs: ["python:functions", "python:scope"], related: ["python:capstone"] },
-    { id: "python:capstone", label: "Capstone CLI tool", track: "python", day: 40, prereqs: ["python:classes", "python:files", "python:modules"], related: [] },
+    { id: "python:capstone", label: "Capstone job service", track: "python", day: 100, prereqs: ["python:classes", "python:files", "python:modules"], related: [] },
   ],
   cpp: [
     { id: "cpp:hello", label: "Hello, C++ & iostream", track: "cpp", day: 1, prereqs: [], related: ["cpp:types"] },
@@ -100,7 +100,7 @@ export const CONCEPT_GRAPH: Record<TrackKey, ConceptNode[]> = {
     { id: "cpp:stl-algorithms", label: "STL algorithms & lambdas", track: "cpp", day: 28, prereqs: ["cpp:stl-containers", "cpp:templates"], related: ["cpp:move-semantics"] },
     { id: "cpp:move-semantics", label: "Move semantics", track: "cpp", day: 32, prereqs: ["cpp:smart-pointers", "cpp:constructors"], related: ["cpp:threads"] },
     { id: "cpp:threads", label: "Threads & mutexes", track: "cpp", day: 36, prereqs: ["cpp:move-semantics"], related: ["cpp:capstone"] },
-    { id: "cpp:capstone", label: "Capstone project", track: "cpp", day: 40, prereqs: ["cpp:stl-algorithms", "cpp:threads"], related: [] },
+    { id: "cpp:capstone", label: "Capstone library manager", track: "cpp", day: 100, prereqs: ["cpp:stl-algorithms", "cpp:threads"], related: [] },
   ],
   js: [
     { id: "js:hello", label: "Hello, JavaScript", track: "js", day: 1, prereqs: [], related: ["js:variables"] },
@@ -117,7 +117,7 @@ export const CONCEPT_GRAPH: Record<TrackKey, ConceptNode[]> = {
     { id: "js:promises", label: "Promises & async/await", track: "js", day: 28, prereqs: ["js:errors", "js:functions"], related: ["js:fetch"] },
     { id: "js:fetch", label: "fetch & modules", track: "js", day: 30, prereqs: ["js:promises"], related: ["js:typescript"] },
     { id: "js:typescript", label: "TypeScript — types & generics", track: "js", day: 34, prereqs: ["js:classes", "js:fetch"], related: ["js:capstone"] },
-    { id: "js:capstone", label: "Capstone CLI tool", track: "js", day: 40, prereqs: ["js:promises", "js:typescript"], related: [] },
+    { id: "js:capstone", label: "Capstone mini service", track: "js", day: 100, prereqs: ["js:promises", "js:typescript"], related: [] },
   ],
   sql: [
     { id: "sql:select", label: "SELECT basics", track: "sql", day: 2, prereqs: [], related: ["sql:filtering"] },
@@ -133,7 +133,7 @@ export const CONCEPT_GRAPH: Record<TrackKey, ConceptNode[]> = {
     { id: "sql:ctes", label: "CTEs", track: "sql", day: 37, prereqs: ["sql:window-functions"], related: ["sql:tuning"] },
     { id: "sql:tuning", label: "Indexes & query tuning", track: "sql", day: 28, prereqs: ["sql:joins"], related: ["sql:normalization"] },
     { id: "sql:normalization", label: "Normalization", track: "sql", day: 30, prereqs: ["sql:schema", "sql:keys"], related: ["sql:capstone"] },
-    { id: "sql:capstone", label: "Capstone library database", track: "sql", day: 40, prereqs: ["sql:window-functions", "sql:normalization"], related: [] },
+    { id: "sql:capstone", label: "Capstone market database", track: "sql", day: 100, prereqs: ["sql:window-functions", "sql:normalization"], related: [] },
   ],
   bash: [
     { id: "bash:shell", label: "The shell & echo", track: "bash", day: 1, prereqs: [], related: ["bash:variables"] },
@@ -149,7 +149,7 @@ export const CONCEPT_GRAPH: Record<TrackKey, ConceptNode[]> = {
     { id: "bash:git-remote", label: "Git remotes & history", track: "bash", day: 25, prereqs: ["bash:git"], related: ["bash:pipelines"] },
     { id: "bash:pipelines", label: "Text pipelines", track: "bash", day: 29, prereqs: ["bash:text-tools"], related: ["bash:scripting"] },
     { id: "bash:scripting", label: "Scripting best practices", track: "bash", day: 34, prereqs: ["bash:loops", "bash:functions"], related: ["bash:capstone"] },
-    { id: "bash:capstone", label: "Capstone deploy script", track: "bash", day: 40, prereqs: ["bash:git-remote", "bash:scripting"], related: [] },
+    { id: "bash:capstone", label: "Capstone ship-it script", track: "bash", day: 100, prereqs: ["bash:git-remote", "bash:scripting"], related: [] },
   ],
 };
 

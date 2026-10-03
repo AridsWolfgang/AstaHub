@@ -53,7 +53,7 @@ export const TRACK_GROUPS: TrackGroup[] = [
         description:
           "The first language for automation, data, and AI — live on the same engine. Forty days from your first print to classes, decorators, and generators.",
         href: "/lesson/python/1",
-        days: 40,
+        days: 100,
       },
       {
         slug: "cpp",
@@ -63,7 +63,7 @@ export const TRACK_GROUPS: TrackGroup[] = [
         description:
           "C with ergonomics and a standard library that scales from systems to games. Forty days from your first std::cout to classes, smart pointers, and the STL.",
         href: "/lesson/cpp/1",
-        days: 40,
+        days: 100,
       },
       {
         slug: "javascript",
@@ -73,7 +73,7 @@ export const TRACK_GROUPS: TrackGroup[] = [
         description:
           "The language of the web, from a first console.log to async, the DOM, and TypeScript. Forty days from your first script to shipping full-stack.",
         href: "/lesson/js/1",
-        days: 40,
+        days: 100,
       },
       {
         slug: "sql",
@@ -83,7 +83,7 @@ export const TRACK_GROUPS: TrackGroup[] = [
         description:
           "From your first SELECT to schema design, joins, and query tuning. Forty days from a single table to a well-normalized database you actually built.",
         href: "/lesson/sql/1",
-        days: 40,
+        days: 100,
       },
       {
         slug: "toolkit",
@@ -93,7 +93,7 @@ export const TRACK_GROUPS: TrackGroup[] = [
         description:
           "The shell, the OS, and version control — the cross-cutting toolkit woven through every track. Forty days from your first echo to a deploy script and a real git workflow.",
         href: "/lesson/bash/1",
-        days: 40,
+        days: 100,
       },
     ],
   },

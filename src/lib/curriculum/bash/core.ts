@@ -53,6 +53,66 @@ const BASH_CURRICULUM: BashBlueprint[] = [
   { title: "Package Management", subtitle: "apt, yum, and dnf", language: "bash", tags: ["system"], theoryTopics: ["apt concepts", "yum and dnf", "Why packages"], codeTemplate: `#!/bin/bash\n# apt and yum are distro-specific and need root + network.\n# apt-get update\n# yum install -y curl\necho "package managers install software"` },
   { title: "Shell Portability", subtitle: "sh vs bash, and POSIX features", language: "bash", tags: ["scripting"], theoryTopics: ["sh vs bash", "POSIX features", "Portable scripts"], codeTemplate: `#!/bin/bash\necho "works in sh and bash"\nif [ "\$(printf x | tr a-z A-Z)" = "X" ]; then\n  echo "portable test passed"\nfi` },
   { title: "Capstone: A Deploy Script", subtitle: "Plan, build, verify, ship", language: "bash", tags: ["capstone"], theoryTopics: ["Planning a script", "Steps and checks", "Making it robust"], codeTemplate: `#!/bin/bash\n# A deploy script builds, tests, and ships — needing fs and network.\necho "Building the project"\nmkdir -p /tmp/deploy-out\necho "#!/bin/bash" > /tmp/deploy-out/main.sh\necho "echo hello" >> /tmp/deploy-out/main.sh\necho "Deploy complete"` },
+  { title: "Strict Mode Foundations", subtitle: "set -euo pipefail in every script", language: "bash", tags: ["scripting"], theoryTopics: ["set -euo pipefail", "Fail-fast scripts", "Unset variable guards"], codeTemplate: `#!/bin/bash\nset -euo pipefail\nname="Ada"\necho "Hello, \$name"\necho "strict mode on"` },
+  { title: "Shebangs & Executable Scripts", subtitle: "Interpreter lines and the +x bit", language: "bash", tags: ["scripting"], theoryTopics: ["Shebang lines", "Executable bits", "env shebangs"], codeTemplate: `#!/bin/bash\necho "interpreter: bash"\necho "shebang works"` },
+  { title: "Parameter Expansion I: Defaults", subtitle: "Safe defaults without branching", language: "bash", tags: ["variables"], theoryTopics: ["Default values \${var:-}", "Assignment defaults \${var:=}", "Error on unset \${var:?}"], codeTemplate: `#!/bin/bash\nunset asta_nick asta_level\necho "Hello, \${asta_nick:-World}"\nasta_level="\${asta_level:-5}"\necho "level \$asta_level"` },
+  { title: "Parameter Expansion II: Patterns", subtitle: "Trim and rewrite with #, %, //", language: "bash", tags: ["variables"], theoryTopics: ["Prefix removal \${var#}", "Suffix removal \${var%}", "Pattern replacement \${var//}"], codeTemplate: `#!/bin/bash\npath="/home/ada/report.txt"\necho "\${path##*/}"\necho "\${path%.txt}"\necho "\${path//ada/ADA}"` },
+  { title: "Arrays Deep", subtitle: "Slices and associative maps", language: "bash", tags: ["data"], theoryTopics: ["Array slicing", "Associative arrays", "Array iteration guards"], codeTemplate: `#!/bin/bash\nnums=(10 20 30 40 50)\necho "\${nums[@]:1:3}"\necho "\${#nums[@]}"\ndeclare -A cap=([fr]=Paris [jp]=Tokyo)\necho "\${cap[fr]}"` },
+  { title: "String Ops Deep", subtitle: "Offsets, case maps, lengths", language: "bash", tags: ["strings"], theoryTopics: ["Substring extraction offsets", "Case mapping patterns", "Length checks"], codeTemplate: `#!/bin/bash\ns="hello-world"\necho "\${s:6}"\necho "\${s^^}"\necho "\${#s}"` },
+  { title: "Arithmetic Deep", subtitle: "(( )), bases, and ternary", language: "bash", tags: ["operators"], theoryTopics: ["(( )) conditionals", "Bases and precedence", "Ternary in arithmetic"], codeTemplate: `#!/bin/bash\necho "\$((2 + 3 * 4))"\necho "\$((16 / 4))"\nif (( 5 > 3 )); then\n  echo "five wins"\nfi\necho "\$(( 1 > 2 ? 10 : 20 ))"` },
+  { title: "[[ ]] Tests Deep", subtitle: "Globs, regex, and safety", language: "bash", tags: ["control-flow"], theoryTopics: ["[[ ]] vs [ ]", "Regex match =~", "Glob match =="], codeTemplate: `#!/bin/bash\nname="ada-42"\nif [[ "\$name" == ada-* ]]; then\n  echo "glob match"\nfi\nif [[ "\$name" =~ ^[a-z]+-[0-9]+\$ ]]; then\n  echo "regex match"\nfi\n[[ -n "\$name" ]] && echo "nonempty"` },
+  { title: "Conditionals Deep", subtitle: "Guard chains with && and ||", language: "bash", tags: ["control-flow"], theoryTopics: ["&& and || guards", "Short-circuit chains", "Nested conditionals"], codeTemplate: `#!/bin/bash\nx=10\n[ "\$x" -gt 5 ] && echo "big"\n[ "\$x" -lt 5 ] || echo "not small"\ntrue && echo "chain ok"` },
+  { title: "Loops Deep I", subtitle: "C-style loops and brace ranges", language: "bash", tags: ["loops"], theoryTopics: ["C-style for loops", "Brace ranges {1..n}", "Loop counters"], codeTemplate: `#!/bin/bash\nfor ((i=1; i<=3; i++)); do\n  echo "c-loop \$i"\ndone\nfor n in {1..3}; do\n  echo "range \$n"\ndone` },
+  { title: "Loops Deep II", subtitle: "read loops and flow control", language: "bash", tags: ["loops"], theoryTopics: ["while read loops", "break with levels", "continue guards"], codeTemplate: `#!/bin/bash\ncount=0\nwhile read -r line; do\n  echo "got: \$line"\n  count=\$((count + 1))\ndone <<< "\$(printf 'a\\nb\\nc')"\necho "lines \$count"\nfor i in 1 2 3 4; do\n  if [ "\$i" -eq 3 ]; then\n    continue\n  fi\n  echo "kept \$i"\ndone` },
+  { title: "Functions Deep", subtitle: "Arguments, locals, captured output", language: "bash", tags: ["functions"], theoryTopics: ["Function arguments $1", "local variables", "Echo-based returns"], codeTemplate: `#!/bin/bash\nadd() {\n  local a=\$1\n  local b=\$2\n  echo \$((a + b))\n}\nresult=\$(add 20 22)\necho "sum \$result"\ngreet() {\n  echo "hi \$1"\n}\ngreet Ada` },
+  { title: "Scope Rules", subtitle: "local, global, and subshells", language: "bash", tags: ["functions"], theoryTopics: ["local vs global", "Exported functions", "Subshell scope"], codeTemplate: `#!/bin/bash\ng="global"\nf() {\n  local g="shadowed"\n  echo "\$g"\n}\nf\necho "\$g"\n( inner="sub"; echo "\$inner" )` },
+  { title: "Traps I: EXIT", subtitle: "Cleanup that always runs", language: "bash", tags: ["process"], theoryTopics: ["trap on EXIT", "Cleanup functions", "Trap listing"], codeTemplate: `#!/bin/bash\ncleanup() {\n  echo "cleanup ran"\n}\ntrap cleanup EXIT\necho "work done"` },
+  { title: "Traps II: Signals", subtitle: "INT, TERM, and resetting", language: "bash", tags: ["process"], theoryTopics: ["SIGINT handling", "SIGTERM handling", "Resetting traps"], codeTemplate: `#!/bin/bash\non_int() {\n  echo "caught INT"\n}\ntrap on_int INT\ntrap -p INT\ntrap - INT\necho "trap installed and reset"` },
+  { title: "Redirection Deep", subtitle: "Merge, group, and quote heredocs", language: "bash", tags: ["io"], theoryTopics: ["Merging streams 2>&1", "stderr to stdout patterns", "Heredoc quoting"], codeTemplate: `#!/bin/bash\n{ echo "out-line"; echo "err-line" >&2; } 2>&1 | sort\ncat <<'EOF'\nliteral \$HOME kept\nEOF` },
+  { title: "Pipes Deep", subtitle: "pipefail and process substitution", language: "bash", tags: ["io"], theoryTopics: ["pipefail semantics", "Process substitution <()", "Grouping with { }"], codeTemplate: `#!/bin/bash\nset -o pipefail\nprintf "b\\na\\nc\\n" | sort | head -n 1\ndiff <(printf "same\\n") <(printf "same\\n") && echo "streams equal"` },
+  { title: "grep Deep I", subtitle: "Classes, anchors, extended regex", language: "bash", tags: ["text"], theoryTopics: ["Character classes", "Anchors ^$", "Extended regex -E"], codeTemplate: `#!/bin/bash\nprintf "ada-42\\nbob\\nada-7\\nzoe-100\\n" | grep -E "^ada-[0-9]+\$"` },
+  { title: "grep Deep II", subtitle: "Context, invert, count", language: "bash", tags: ["text"], theoryTopics: ["Context flags -A/-B/-C", "Invert and count -v/-c", "Recursive grep -r"], codeTemplate: `#!/bin/bash\nprintf "one\\ntwo\\nthree\\nfour\\n" | grep -C1 "three"\nprintf "a\\nb\\na\\n" | grep -c "a"` },
+  { title: "Milestone Project I: Log Analyzer", subtitle: "A grep-sort-awk report", language: "bash", tags: ["capstone"], theoryTopics: ["Log report design", "Pipeline composition", "Summary formatting"], codeTemplate: `#!/bin/bash\nprintf 'INFO start\\nERROR disk full\\nINFO retry\\nERROR timeout\\nINFO ok\\n' | grep ERROR | sort | uniq -c | awk '{ print \$3, \$4 }'\necho "report complete"` },
+  { title: "sed I: Addresses", subtitle: "Ranges, delete, print", language: "bash", tags: ["text"], theoryTopics: ["Address ranges", "Delete command d", "Print command p"], codeTemplate: `#!/bin/bash\nprintf "one\\ntwo\\nthree\\nfour\\n" | sed -n '2,3p'\nprintf "a\\nb\\nc\\n" | sed '2d'` },
+  { title: "sed II: Substitution Power", subtitle: "Global, multi-expr, backrefs", language: "bash", tags: ["text"], theoryTopics: ["Global flag g", "Multiple expressions -e", "Capture groups and backrefs"], codeTemplate: `#!/bin/bash\nprintf "foo foo\\nbar foo\\n" | sed -e 's/foo/FOO/g' -e 's/bar/BAR/'` },
+  { title: "awk I: Aggregation", subtitle: "BEGIN/END and column sums", language: "bash", tags: ["text"], theoryTopics: ["BEGIN and END blocks", "Column sums", "Field separator -F"], codeTemplate: `#!/bin/bash\nprintf "10\\n20\\n30\\n" | awk '{ s += \$1 } END { print s }'\nprintf "a:b:c\\n" | awk -F: '{ print \$2 }'` },
+  { title: "awk II: Filtering", subtitle: "Conditions and formatted output", language: "bash", tags: ["text"], theoryTopics: ["Pattern conditions", "String functions", "Formatted output printf"], codeTemplate: `#!/bin/bash\nprintf "ada 90\\nbob 40\\nzoe 75\\n" | awk '\$2 >= 70 { print \$1 }'\necho "filter done"` },
+  { title: "find I: Search", subtitle: "Name, type, and time filters", language: "bash", tags: ["tools"], theoryTopics: ["Name patterns -name", "Type filters -type", "Time filters -mtime"], codeTemplate: `#!/bin/bash\n# find walks a real directory tree, which sandboxes cannot guarantee.\nmkdir -p demo/src\ntouch demo/src/a.txt demo/src/b.log\nfind demo -name "*.txt"\necho "find demo complete"` },
+  { title: "find + xargs", subtitle: "Safe batch execution", language: "bash", tags: ["tools"], theoryTopics: ["-print0 with xargs -0", "xargs -I replacement", "Safe filenames"], codeTemplate: `#!/bin/bash\n# Filenames with spaces break naive parsing; -print0 + -0 stay safe.\nmkdir -p xdemo\nprintf "x\\n" > "xdemo/sp ace.txt"\nfind xdemo -name "*.txt" -print0 | xargs -0 -I{} echo "found {}"` },
+  { title: "tar Deep", subtitle: "Create, verify, exclude", language: "bash", tags: ["tools"], theoryTopics: ["Create and verify -czvf/-tzvf", "Exclude patterns", "Incremental notes"], codeTemplate: `#!/bin/bash\n# Archives bundle real files, so this demo needs a writable filesystem.\nmkdir -p tardemo\necho data > tardemo/f.txt\ntar -czf tardemo/b.tar.gz -C tardemo f.txt\ntar -tzf tardemo/b.tar.gz` },
+  { title: "Compression Compared", subtitle: "gzip, bzip2, xz trade-offs", language: "bash", tags: ["tools"], theoryTopics: ["gzip vs bzip2 vs xz", "Compression levels", "tar + compression pairs"], codeTemplate: `#!/bin/bash\n# Compression rewrites real files; ratios depend on the data.\nmkdir -p zipdemo\necho "compress me please compress me please" > zipdemo/note.txt\ngzip -k zipdemo/note.txt\nls zipdemo` },
+  { title: "Permissions Deep", subtitle: "Octal, umask, special bits", language: "bash", tags: ["system"], theoryTopics: ["Octal modes", "umask", "Special bits setuid/setgid/sticky"], codeTemplate: `#!/bin/bash\n# Permission bits only mean something on a real multi-user filesystem.\ntouch permdemo.txt\nchmod 640 permdemo.txt\nls -l permdemo.txt` },
+  { title: "Users & Groups", subtitle: "Identity checks inside scripts", language: "bash", tags: ["system"], theoryTopics: ["id and groups", "sudoers concepts", "User checks in scripts"], codeTemplate: `#!/bin/bash\n# Identity output depends on the runtime user, so it cannot be gated.\nid -un\ngroups\necho "identity checked"` },
+  { title: "Processes I", subtitle: "Snapshots and signals", language: "bash", tags: ["process"], theoryTopics: ["ps snapshots", "pgrep patterns", "kill signals"], codeTemplate: `#!/bin/bash\n# Process tables are host-specific, and kill needs a PID you own.\nps -o pid,comm | head -n 5\necho "process snapshot taken"` },
+  { title: "Jobs Deep", subtitle: "PIDs, wait, and job ids", language: "bash", tags: ["process"], theoryTopics: ["Background PIDs $!", "wait semantics", "kill %job"], codeTemplate: `#!/bin/bash\n# Job timing is scheduler-dependent, so completion order cannot be gated.\nsleep 0.2 &\necho "started \$!"\nwait\necho "all jobs reaped"` },
+  { title: "cron Deep", subtitle: "The five time fields", language: "bash", tags: ["process"], theoryTopics: ["Five time fields", "Crontab editing", "Cron logging"], codeTemplate: `#!/bin/bash\n# cron needs a running daemon, which sandboxes rarely provide.\necho "0 2 * * * /home/ada/backup.sh"\necho "cron fields: minute hour dom month dow"` },
+  { title: "curl I: Downloads", subtitle: "Flags, files, retries", language: "bash", tags: ["tools"], theoryTopics: ["curl flags -fsSL", "Saving with -o", "Retries and timeouts"], codeTemplate: `#!/bin/bash\n# curl needs network access and a reachable URL.\ncurl -fsSL https://example.com -o page.html\necho "download attempted"` },
+  { title: "curl II: APIs", subtitle: "JSON over HTTP", language: "bash", tags: ["tools"], theoryTopics: ["JSON endpoints", "Parsing with grep/awk", "API error handling"], codeTemplate: `#!/bin/bash\n# API calls need network; parse JSON with grep/awk when jq is absent.\ncurl -fsSL https://api.example.com/status | grep -o '"ok"'\necho "api check attempted"` },
+  { title: "git Deep I: Branches", subtitle: "switch, track, merge", language: "bash", tags: ["git"], theoryTopics: ["Branch workflows", "git switch", "Merge strategies"], codeTemplate: `#!/bin/bash\n# Branching needs a repository on a real filesystem.\ngit init -b main demo-repo\ngit -C demo-repo status\necho "branch demo ready"` },
+  { title: "git Deep II: Stash", subtitle: "Stack discipline", language: "bash", tags: ["git"], theoryTopics: ["Stash stack", "stash pop vs apply", "Stash messages"], codeTemplate: `#!/bin/bash\n# Stash operates on a working tree, so it needs a real repository.\ngit init -b main stash-demo\necho work > stash-demo/note.txt\ngit -C stash-demo status\necho "stash demo ready"` },
+  { title: "git Deep III: Rebase", subtitle: "Rebase versus merge", language: "bash", tags: ["git"], theoryTopics: ["rebase vs merge", "Interactive rebase notes", "Conflict flow"], codeTemplate: `#!/bin/bash\n# Rebase rewrites history and can stop for conflicts or an editor.\ngit init -b main rebase-demo\ngit -C rebase-demo status\necho "rebase demo ready"` },
+  { title: "git Deep IV: Hooks", subtitle: "Automate with hooks", language: "bash", tags: ["git"], theoryTopics: ["pre-commit hooks", "Hook executables", "Sample hooks"], codeTemplate: `#!/bin/bash\n# Hooks are executable files inside a repository's .git directory.\ngit init -b main hooks-demo\nls hooks-demo/.git/hooks | head -n 3\necho "hooks demo ready"` },
+  { title: "Milestone Project II: Backup Script", subtitle: "Stamp, archive, verify", language: "bash", tags: ["capstone"], theoryTopics: ["Backup design", "Timestamped archives", "Restore checks"], codeTemplate: `#!/bin/bash\n# Milestone: timestamped tar backup with a verify step.\nstamp=\$(date +%F)\nmkdir -p mysite\necho hello > mysite/index.html\ntar -czf "backup-\$stamp.tar.gz" mysite\ntar -tzf "backup-\$stamp.tar.gz"\necho "backup \$stamp complete"` },
+  { title: "git Deep V: Remotes", subtitle: "fetch, pull, tracking", language: "bash", tags: ["git"], theoryTopics: ["fetch vs pull", "Upstream tracking -u", "Remote URLs"], codeTemplate: `#!/bin/bash\n# Remotes need a reachable server and credentials for push/pull.\ngit init -b main remote-demo\ngit -C remote-demo remote add origin https://example.com/repo.git\ngit -C remote-demo remote -v\necho "remote demo ready"` },
+  { title: "git Deep VI: Workflows", subtitle: "GitHub flow and releases", language: "bash", tags: ["git"], theoryTopics: ["GitHub flow", "Feature branches", "Release branches"], codeTemplate: `#!/bin/bash\n# Workflows assume a shared remote, reviews, and CI.\ngit init -b main flow-demo\ngit -C flow-demo checkout -b feature/login\ngit -C flow-demo status\necho "workflow demo ready"` },
+  { title: "Dotfiles I", subtitle: "Organize your shell config", language: "bash", tags: ["environment"], theoryTopics: ["Organizing dotfiles", "Symlink farms", "Bare-repo method notes"], codeTemplate: `#!/bin/bash\n# Dotfiles live in \$HOME, which sandboxes do not provide.\n# ln -s ~/dotfiles/.bashrc ~/.bashrc\necho "dotfiles live in the home directory"` },
+  { title: "Environment II", subtitle: "PATH and per-project env", language: "bash", tags: ["environment"], theoryTopics: ["PATH management", "Per-project env files", "direnv notes"], codeTemplate: `#!/bin/bash\n# PATH and project env files depend on the user's machine.\n# export PATH="\$HOME/bin:\$PATH"\n# [ -f .env ] && set -a && . ./.env && set +a\necho "environment is per-machine"` },
+  { title: "Debugging Scripts", subtitle: "Trace with set -x and PS4", language: "bash", tags: ["scripting"], theoryTopics: ["set -x tracing", "PS4 customization", "shellcheck notes"], codeTemplate: `#!/bin/bash\nexport PS4='+ debug: '\nset -x\nx=41\ny=\$((x + 1))\nset +x\necho "answer \$y"` },
+  { title: "Logging Patterns", subtitle: "Levels, tee, and logger", language: "bash", tags: ["scripting"], theoryTopics: ["Log levels", "Tee patterns", "logger command notes"], codeTemplate: `#!/bin/bash\nlog() {\n  echo "[INFO] \$1"\n}\nlog "service started"\nlog "service stopped"\necho "logs shipped"` },
+  { title: "CLI Parsing with getopts", subtitle: "Flags and usage text", language: "bash", tags: ["scripting"], theoryTopics: ["getopts loop", "OPTARG handling", "Usage functions"], codeTemplate: `#!/bin/bash\nusage() {\n  echo "usage: prog [-n name]"\n}\nname="World"\nwhile getopts "n:" opt; do\n  case "\$opt" in\n    n) name="\$OPTARG" ;;\n    *) usage ;;\n  esac\ndone\nshift \$((OPTIND - 1))\necho "Hello, \$name"` },
+  { title: "Config Files", subtitle: "Source, parse, override", language: "bash", tags: ["scripting"], theoryTopics: ["Sourcing configs", "INI parsing with awk", "Defaults + overrides"], codeTemplate: `#!/bin/bash\nconfig="port=8080\nhost=example"\nport=\$(printf '%s\\n' "\$config" | awk -F= '\$1=="port" { print \$2 }')\nhost=\$(printf '%s\\n' "\$config" | awk -F= '\$1=="host" { print \$2 }')\necho "\$host:\$port"` },
+  { title: "Parallelism", subtitle: "Fan out with xargs -P", language: "bash", tags: ["process"], theoryTopics: ["xargs -P", "wait fan-out", "Job slots"], codeTemplate: `#!/bin/bash\n# Parallel jobs race, so output order is timing-dependent.\nprintf "a\\nb\\nc\\n" | xargs -P3 -I{} echo "job {}"\necho "fan-out complete"` },
+  { title: "Testing Bash", subtitle: "Assert functions and runners", language: "bash", tags: ["scripting"], theoryTopics: ["Assert functions", "Test runners (bats) notes", "Exit-code checks"], codeTemplate: `#!/bin/bash\nassert_eq() {\n  if [ "\$1" = "\$2" ]; then\n    echo "pass: \$3"\n  else\n    echo "FAIL: \$3"\n  fi\n}\nassert_eq "4" "\$((2 + 2))" "math works"\nassert_eq "hi" "\$(echo hi)" "echo works"` },
+  { title: "Script Security", subtitle: "Quote input, never eval", language: "bash", tags: ["scripting"], theoryTopics: ["Quoting untrusted input", "eval dangers", "Injection demo (safe)"], codeTemplate: `#!/bin/bash\nuser='ada; echo PWNED'\necho "\$user"\necho "quoted safe"` },
+  { title: "Bash Regex", subtitle: "=~ and BASH_REMATCH", language: "bash", tags: ["control-flow"], theoryTopics: ["=~ operator", "BASH_REMATCH", "Validation patterns"], codeTemplate: `#!/bin/bash\nemail="ada@example.com"\nif [[ "\$email" =~ ^[^@]+@[^@]+\\.[^@]+\$ ]]; then\n  echo "valid email"\nfi\nif [[ "v1.2.3" =~ v([0-9]+) ]]; then\n  echo "major \${BASH_REMATCH[1]}"\nfi` },
+  { title: "Dates & Times", subtitle: "Formatting and epoch math", language: "bash", tags: ["tools"], theoryTopics: ["date formatting", "Epoch math", "date -d portability notes"], codeTemplate: `#!/bin/bash\ndate -u -d "@0" +%F\necho "epoch demo done"` },
+  { title: "Sort, Join & Cut", subtitle: "Ordering and field extraction", language: "bash", tags: ["text"], theoryTopics: ["sort -n/-r/-u", "join two files", "cut ranges"], codeTemplate: `#!/bin/bash\nprintf "pear\\napple\\nfig\\n" | sort -u\nprintf "a:b:c\\n" | cut -d: -f2\necho "sorted and cut"` },
+  { title: "System Diagnostics", subtitle: "Disk, memory, load", language: "bash", tags: ["system"], theoryTopics: ["df/du reading", "Load averages", "Log triage notes"], codeTemplate: `#!/bin/bash\n# Sizes and load are host-specific snapshots.\ndf -h . | head -n 3\ndu -sh . 2>/dev/null | head -n 1\necho "capacity snapshot taken"` },
+  { title: "Scripted Setup", subtitle: "Idempotent installs", language: "bash", tags: ["system"], theoryTopics: ["apt/dnf script guards", "Idempotent installs", "Checksums notes"], codeTemplate: `#!/bin/bash\n# Installs need root, a package manager, and network.\n# command -v curl || sudo apt-get install -y curl\necho "setup needs root and network"` },
+  { title: "SSH Deep", subtitle: "Keys, config, copies", language: "bash", tags: ["tools"], theoryTopics: ["Key pairs", "ssh config", "scp/rsync notes"], codeTemplate: `#!/bin/bash\n# SSH needs servers, keys, and credentials.\n# ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""\n# scp report.txt user@host:/srv/\necho "ssh needs keys and a server"` },
+  { title: "Services & systemd", subtitle: "Units and journals", language: "bash", tags: ["system"], theoryTopics: ["systemctl units", "Service files", "Logs with journalctl"], codeTemplate: `#!/bin/bash\n# Services need systemd, root, and a real host.\n# systemctl status cron\n# journalctl -u cron --no-pager | head\necho "services need systemd and root"` },
+  { title: "Milestone Project III: Project Planner", subtitle: "Checklists that run", language: "bash", tags: ["capstone"], theoryTopics: ["Project scaffolding", "Checklist scripts", "Idempotency"], codeTemplate: `#!/bin/bash\nsteps=("gather" "transform" "verify" "ship")\nfor s in "\${steps[@]}"; do\n  echo "step: \$s"\ndone\necho "plan ready"` },
+  { title: "Capstone: Ship It", subtitle: "A full deploy pipeline", language: "bash", tags: ["capstone"], theoryTopics: ["Deploy pipeline", "Health checks", "Rollback plan"], codeTemplate: `#!/bin/bash\n# Capstone: a real deploy needs artifacts, servers, and secrets.\nset -euo pipefail\necho "1. build"\necho "2. test"\necho "3. package"\necho "4. ship"\necho "deploy plan complete"` },
 ];
 
 /* ─── Hand-written topic content ─── */
@@ -178,6 +238,186 @@ const BASH_TOPIC_CONTENT: Record<string, string> = {
   "Planning a script": "A real script starts with a plan: what input it takes, what steps run in what order, and what failure looks like. Sketch the pipeline on paper — gather, transform, act, verify — before typing. The plan becomes the script's function boundaries and its `set -e` guardrails.",
   "Steps and checks": "Deploy-style scripts sequence discrete steps — build, test, package, publish — each with a success check before the next. Guard each stage: fail fast with a clear message and nonzero exit. Log what happened (`echo \"[ok] tests passed\"`) so the run is auditable.",
   "Making it robust": "Robustness is defense in depth: `set -euo pipefail`, defaults for missing arguments, checks for prerequisites, idempotent actions, and explicit exit codes. A robust script still works when run twice, from another directory, or by another user. It fails loudly and tells you exactly where.",
+  "set -euo pipefail": "`set -euo pipefail` is the strict-mode trio: `-e` exits on the first failing command, `-u` errors on unset variables, and `pipefail` makes a pipeline fail when any stage fails. Together they turn silent corruption into a loud, early failure. Put the line near the top of every non-trivial script.",
+  "Fail-fast scripts": "A fail-fast script stops at the first error instead of rolling forward on broken state. Each stage checks the previous one — explicitly with `|| exit 1` or implicitly with `set -e`. Failing fast keeps a half-deployed system from getting worse.",
+  "Unset variable guards": "`set -u` turns a typo like `$nmae` into an immediate error instead of an empty string. Combined with `${var:?message}` for required inputs, it catches missing configuration at startup. Guard inputs once at the top rather than debugging empty values later.",
+  "Shebang lines": "The first line `#!/bin/bash` tells the kernel which interpreter runs the file when executed as `./script.sh`. Without it the kernel falls back to the invoking shell, which may lack bash features. Always declare the interpreter you actually wrote for.",
+  "Executable bits": "`chmod +x script.sh` sets the execute bit that lets the kernel run a file directly. The bit is a filesystem permission, not file content — copying without preserving it silently un-runs the script. `ls -l` shows it as the `x` in `rwxr-xr-x`.",
+  "env shebangs": "`#!/usr/bin/env bash` finds bash through PATH instead of a hardcoded path, so the script works wherever bash is installed. It is the portable choice across Linux, macOS, and version managers. Prefer `env` unless you must pin an exact interpreter.",
+  "Default values \${var:-}": "`${var:-fallback}` expands to `fallback` when `var` is unset or empty, without changing `var`. It makes optional inputs safe in one expression: `name=${1:-World}`. Use it wherever a missing argument should mean a sensible default.",
+  "Assignment defaults \${var:=}": "`${var:=fallback}` works like `:-` but also assigns the fallback to `var`, so later uses see it. It initializes configuration once at the top: `: ${port:=8080}`. Reach for `:=` when the default must stick.",
+  "Error on unset \${var:?}": "`${var:?message}` aborts with `message` when `var` is unset or empty — a one-line guard for required inputs. A script run without its environment fails immediately, naming the missing variable. Required values deserve `?`, optional ones deserve `-`.",
+  "Prefix removal \${var#}": "`${var#prefix}` strips the shortest matching prefix while `##` strips the longest: `${path##*/}` is the basename. It replaces external `basename` calls for simple trims. One `#` is shortest, two is longest.",
+  "Suffix removal \${var%}": "`${var%suffix}` strips the shortest matching suffix while `%%` strips the longest: `${file%%.*}` drops every extension at once. It replaces string juggling for extensions and directories. One `%` is shortest, two is longest.",
+  "Pattern replacement \${var//}": "`${var/old/new}` replaces the first match and `${var//old/new}` replaces every match — pure in-shell search and replace. No external process spawns, so it stays fast inside loops. For regex power across lines, graduate to `sed`.",
+  "Array slicing": "`${arr[@]:offset:length}` takes a slice of an array without copying by hand: `${nums[@]:1:3}` is elements 1 through 3. Omitting `:length` takes everything from the offset on. Slices keep list processing inside the shell.",
+  "Associative arrays": "`declare -A map` creates a string-keyed map: `cap[fr]=Paris` stores and `${cap[fr]}` reads. Keys are arbitrary strings rather than indices, so maps model configs and lookups. Iterate keys with `${!map[@]}`.",
+  "Array iteration guards": "Iterate arrays as `for x in \"${arr[@]}\"` — quoted `[@]` keeps elements with spaces intact. Unquoted expansion re-splits on spaces and breaks filenames. The quotes are the guard; never drop them.",
+  "Substring extraction offsets": "`${s:offset:length}` slices a string by position: `${s:6}` drops the first six characters. Offsets are 0-based, and negative offsets count from the end in newer bash. Position slicing complements pattern removal.",
+  "Case mapping patterns": "`${s^^}` uppercases, `${s,,}` lowercases, and `${s^^[aeiou]}` converts only matching characters. The mapping is pure expansion with no `tr` subprocess. Use it for normalizing user input before comparison.",
+  "Length checks": "`${#s}` is the character length of a string and the standard input validator: `[ \"${#name}\" -gt 0 ]`. Check lengths before slicing or comparing. Empty input handled early never becomes a weird bug later.",
+  "(( )) conditionals": "`(( expr ))` evaluates arithmetic as a condition: true when the result is nonzero. `if (( x > 5 )); then` reads like math rather than test syntax. Inside, variables need no `$` and comparisons are C-style.",
+  "Bases and precedence": "Arithmetic honors bases — `16#ff` is 255, `8#17` is 15 — and standard precedence with `*` before `+` and parentheses first. `2 + 3 * 4` is 14, not 20. Explicit parentheses beat memorized precedence.",
+  "Ternary in arithmetic": "`$(( cond ? a : b ))` picks a value inline: `$(( x > 0 ? x : 0 ))` clamps negatives. It replaces a four-line if/else when only a value differs. Keep the branches simple or readability collapses.",
+  "[[ ]] vs [ ]": "`[[ ]]` is bash's safer test: no word splitting, no pathname expansion, `&&` and `||` inside, plus pattern operators. `[ ]` is the portable POSIX command with quoting pitfalls. In bash scripts prefer `[[ ]]`; in `sh` scripts you must use `[ ]`.",
+  "Regex match =~": "`[[ $s =~ regex ]]` tests against an extended regex with the pattern left unquoted: `[[ $v =~ ^v[0-9]+ ]]`. Captures land in `BASH_REMATCH`. Quoting the pattern turns it into a literal string — the classic gotcha.",
+  "Glob match ==": "`[[ $f == *.log ]]` matches globs rather than regex: `*` means any string, `?` one character, `[abc]` one of a set. It is filename-style matching for dispatch and filtering. For full regex power, switch to `=~`.",
+  "&& and || guards": "`cmd && next` runs `next` only on success while `cmd || fallback` runs only on failure — one-line branching. `[ -f file ] && echo exists` is an if without the ceremony. Guards suit single commands, not whole blocks.",
+  "Short-circuit chains": "`a && b || c` runs `c` when `a` fails OR when `b` fails — it is not if/else. Chains evaluate left to right and stop at the first decisive result. For real else-branches write the `if`; reserve chains for guards.",
+  "Nested conditionals": "Nesting `if` inside `if` handles multi-factor decisions, but depth beyond two gets unreadable. Flatten with `&&` in the condition or with early `exit` and `return`. Each nesting level should earn its place.",
+  "C-style for loops": "`for ((i=0; i<n; i++))` loops with init, condition, and step — the precise counter loop. It shines for indices, retries with backoff, and numeric ranges. The condition is arithmetic, so `$` is optional inside.",
+  "Brace ranges {1..n}": "`{1..10}` expands to ten words before the loop runs — compact for small fixed ranges. `{a..z}` and zero-padded `{01..10}` work too. For large or dynamic ranges prefer `seq` or C-style loops, since brace expansion builds the whole list upfront.",
+  "Loop counters": "A counter plus a limit is the manual loop contract: initialize before, test at top, increment at bottom. Forgetting the increment is the classic infinite loop. C-style loops bundle all three so none goes missing.",
+  "while read loops": "`while read -r line; do ...; done < file` processes input line by line, with `-r` protecting backslashes. It streams, so gigabyte files need no extra memory. Feed it with redirection, pipes, or herestrings.",
+  "break with levels": "`break` exits one loop while `break 2` exits two nested levels at once. Numbered breaks escape nested searches without flag variables. Use sparingly — a function with `return` is usually clearer.",
+  "continue guards": "`continue` skips to the next iteration, making it the guard-clause of loops: check the skip condition first and the real work stays unindented. `continue` flattens while deep nesting confuses.",
+  "Function arguments $1": "Function parameters arrive as `$1`, `$2`, and `$@` — like script arguments but scoped to the call. Assign them to named locals immediately for readability. Quoted `$@` preserves multi-word arguments.",
+  "local variables": "`local x=$1` confines a variable to its function; without it every variable is global. Globals leak between functions and cause action-at-a-distance bugs. Default to `local` for everything except deliberate outputs.",
+  "Echo-based returns": "Functions return data by printing it for callers to capture with `$(...)`: `result=$(add 2 3)`. `return` only sets a 0–255 status for success or failure. Status is for decisions, stdout is for data.",
+  "local vs global": "Undeclared variables are global in bash — visible and mutable everywhere. `local` creates function-scoped copies that vanish on return. Treat globals as shared state: minimize them and name them loudly.",
+  "Exported functions": "`export -f myfunc` puts a function into the environment so subshells and `bash -c` children can call it. It is how parallel `xargs -P` workers share helpers. Export deliberately — the environment is a public channel.",
+  "Subshell scope": "Parentheses `( ... )` run in a subshell whose assignments never reach the parent: `( x=1 )` leaves `$x` unchanged. Pipes also run stages in subshells, which is why `cmd | read x` loses `$x`. Use subshells for isolation, never for outputs.",
+  "trap on EXIT": "`trap cleanup EXIT` runs `cleanup` whenever the shell exits — on success, on error, or on signal. It is the shell's `finally`: temp files get removed even on failure. One EXIT trap per script, set early, keeps every path clean.",
+  "Cleanup functions": "A cleanup function removes temp files, kills background jobs, and restores state: `rm -f \"$tmp\"`. Keep it idempotent since it may run when little was created. Register it before creating anything it must clean.",
+  "Trap listing": "`trap -p` lists installed traps and `trap -p EXIT` shows one signal's handler. Listing verifies the safety net is actually installed. Inspect traps when debugging scripts that misbehave on exit.",
+  "SIGINT handling": "Ctrl+C sends SIGINT, and `trap handler INT` intercepts it for graceful shutdown instead of instant death. Handlers should clean up and usually re-exit nonzero. Never swallow SIGINT silently — users expect Ctrl+C to work.",
+  "SIGTERM handling": "SIGTERM is the polite kill request from `kill` and orchestrators; `trap handler TERM` lets the script flush and exit cleanly. TERM means wrap up now, unlike KILL which cannot be caught. Handle TERM in anything long-running.",
+  "Resetting traps": "`trap - SIGNAL` removes a handler and restores the default, while `trap '' SIGNAL` ignores the signal entirely. Reset temporary handlers once their protected section ends. Narrow trap windows beat script-wide interceptions.",
+  "Merging streams 2>&1": "`2>&1` points stderr at wherever stdout currently goes — order matters, so `>file 2>&1` captures both in the file. It unites the streams for pipes and logs. Remember that redirections apply left to right.",
+  "stderr to stdout patterns": "`cmd 2>&1 | filter` pipes errors through the filter too — the standard way to search full output. `{ cmd1; cmd2; } 2>&1` merges a whole block. Merging is for inspection; keep streams split when errors need separate handling.",
+  "Heredoc quoting": "Quoting the heredoc delimiter (`<<'EOF'`) disables expansion inside, so `$HOME` stays literal. Unquoted delimiters expand variables and `$(...)`. Quote when writing code or templates; leave unquoted for configured output.",
+  "pipefail semantics": "`set -o pipefail` makes a pipeline return the last nonzero status instead of only the last command's. Without it `false | true` reports success and errors hide. Enable pipefail wherever a middle stage can fail.",
+  "Process substitution <()": "`<(cmd)` exposes a command's output as a readable filename: `diff <(sort a) <(sort b)`. It feeds stream output to tools that demand file arguments. `<()` reads and `>()` writes — both avoid temp files.",
+  "Grouping with { }": "`{ cmd1; cmd2; } | filter` pipes a whole block's combined output through one filter. Braces group without a subshell (unlike parentheses), so variables survive. The spaces and trailing semicolon are mandatory syntax.",
+  "Character classes": "`[0-9]`, `[a-z]`, and `[A-Za-z]` each match one character from a set, while `[^0-9]` negates. Classes constrain matches to exactly the alphabet you mean. POSIX classes like `[[:digit:]]` stay correct across locales.",
+  "Anchors ^$": "`^` pins to line start and `$` to line end: `^error` finds lines beginning with error, `done$` lines ending with done. Anchors turn substring search into exact-position matching. Both together (`^x$`) match whole lines only.",
+  "Extended regex -E": "`grep -E` enables `+`, `?`, `|`, `{n}`, and `()` grouping without backslash soup: `^(ada|bob)-[0-9]+$`. Basic regex needs escaped forms for the same. Prefer `-E` for anything beyond literals and `.*`.",
+  "Context flags -A/-B/-C": "`-A3` shows 3 lines after each match, `-B3` before, and `-C3` both — the incident-response flags. Context reveals what surrounded the error without reopening the file. Start with small contexts and widen only if needed.",
+  "Invert and count -v/-c": "`-v` prints non-matching lines and `-c` prints only the match count. `grep -vc ok` counts failures by exclusion. Invert-then-count answers `how many do not` in one pass.",
+  "Recursive grep -r": "`grep -r pattern dir/` searches whole trees, with `--include='*.sh'` narrowing by file type. It finds every call site without a code index. Exclude noise with `--exclude-dir=node_modules`.",
+  "Log report design": "A log report answers one question: counts by error, top offenders, or a timeline. Decide the output shape first — columns, ordering, and thresholds. Design the report before composing the pipeline that fills it.",
+  "Pipeline composition": "Compose reports stage by stage — select (`grep`), order (`sort`), deduplicate (`uniq -c`), extract (`awk`) — verifying each stage's output before adding the next. Pipelines built incrementally stay debuggable. Each stage does exactly one job.",
+  "Summary formatting": "The last stage formats for humans: `awk` picks columns, `sort -rn` ranks, and `head` trims to the top N. Raw counts become a ranked summary. Format last so upstream stages keep full fidelity.",
+  "Address ranges": "sed addresses select lines: `5p` prints line 5, `1,10p` lines 1–10, and `/error/,/fixed/p` everything between two patterns. Ranges focus every command on exactly the lines it should touch. Unaddressed commands hit every line.",
+  "Delete command d": "`2d` drops line 2 and `/debug/d` drops matching lines — sed's line filter. Deletion happens before printing, so dropped lines never reach output. It carves unwanted lines out of streams.",
+  "Print command p": "With `-n` suppressing default output, `sed -n '5p'` prints only line 5. `p` selects while `-n` silences everything else. The pair turns sed into a precise line extractor.",
+  "Global flag g": "Without `g`, `s/a/b/` replaces only the first match per line; with `g` it replaces every match. Most real substitutions want `g` — first-only is the common surprise. Read `s/x/y/` as `first x` unless `g` says otherwise.",
+  "Multiple expressions -e": "`sed -e 's/a/A/g' -e 's/b/B/g'` chains edits in order, with each seeing the previous one's output. `-e` sequences transformations readably instead of semicolon soup. Order matters: later expressions match earlier replacements.",
+  "Capture groups and backrefs": "Parenthesized groups capture and `\\1` replays the first capture: `s/([0-9]+)/[\\1]/` brackets numbers. Backrefs rearrange text — swapping fields, wrapping matches, normalizing formats. They turn substitution into restructuring.",
+  "BEGIN and END blocks": "`BEGIN { }` runs before any input for headers and initialization, while `END { }` runs after all input for totals and summaries. The per-line block accumulates between them. Three blocks make one complete report.",
+  "Column sums": "`{ s += $1 } END { print s }` sums a column across all lines — the flagship awk one-liner. Initialize in BEGIN for clarity with multiple accumulators. awk arithmetic is floating-point, unlike the shell's integers.",
+  "Field separator -F": "`-F:` splits on colons, `-F,` on commas, and `-F'[ \\t]+'` on whitespace runs. The separator defines what a field is for that invocation. Match `-F` to the data format or every column index is wrong.",
+  "Pattern conditions": "`$2 >= 70 { print $1 }` acts only on lines passing the test — awk's filter-then-act core. Patterns can be regexes (`/error/`), comparisons, or ranges. Conditions keep the action block small and total.",
+  "String functions": "awk ships `length()`, `substr()`, `index()`, `toupper()`, and `split()` — string surgery without spawning processes. `substr($2, 1, 3)` trims fields inline. Prefer built-ins over piping fields through sed.",
+  "Formatted output printf": "awk's `printf \"%-10s %5d\\n\", $1, $2` aligns columns like C — widths, padding, and decimals. Formatted output turns data dumps into readable tables. Format in awk rather than post-processing spaces.",
+  "Name patterns -name": "`find dir -name '*.log'` matches basenames with globs — quote the pattern or the shell expands it first. `-iname` ignores case. Name search is the fastest way to locate files by convention.",
+  "Type filters -type": "`-type f` means files only, `-type d` directories, and `-type l` symlinks — type filters remove the wrong-kind results. Combine with `-name` to say which kind of which name. Types keep destructive follow-ups aimed correctly.",
+  "Time filters -mtime": "`-mtime -7` means modified within 7 days and `+30` older than 30 — find's cleanup vocabulary. Time filters drive retention scripts: find old, archive, delete. Test with `-ls` before adding `-delete`.",
+  "-print0 with xargs -0": "`-print0` separates results with NUL bytes and `xargs -0` reads them — the only filename-safe channel. Newlines and spaces in names survive intact. Any `find | xargs` without `-0` is a latent bug.",
+  "xargs -I replacement": "`-I{}` runs the command once per input with `{}` marking the spot: `-I{} mv {} backup/{}`. It handles commands that take exactly one filename. Default batching is faster; `-I` is more flexible.",
+  "Safe filenames": "Filenames can contain spaces, newlines, quotes, and dashes — scripts must assume hostility. NUL-delimited streams plus quoted expansions survive all of them. Test filename handling with a deliberately evil name.",
+  "Create and verify -czvf/-tzvf": "`tar -czvf b.tar.gz dir/` creates verbosely while `tar -tzvf b.tar.gz` lists contents before you trust the file. Create, then list, then extract — the verify step catches missing files early. The `v` makes both directions auditable.",
+  "Exclude patterns": "`--exclude='*.log' --exclude=.git` keeps junk out of archives. Exclusions shrink backups and keep secrets out of shared tarballs. Exclude caches, outputs, and credentials by default.",
+  "Incremental notes": "Incremental backups (`--listed-incremental=snap`) store only what changed since the last snapshot. Full plus incrementals trade restore complexity for space. Timestamp the snapshot file with the backup set.",
+  "gzip vs bzip2 vs xz": "gzip is fast and universal, bzip2 compresses smaller but slower, and xz squeezes hardest at the highest CPU cost. Text compresses dramatically while already-compressed media barely shrinks. Match the tool to the bottleneck: time or space.",
+  "Compression levels": "`-1` means fastest through `-9` smallest, letting you tune the trade: `-1` for hot paths, `-9` for cold archives. Defaults sit in the middle for a reason. Benchmark on your data before standardizing.",
+  "tar + compression pairs": "tar bundles while compressors shrink single streams — paired as `-czf` (gzip), `-cjf` (bzip2), and `-cJf` (xz). Modern tar auto-detects on extract (`-xf`). One archive command does both jobs.",
+  "Octal modes": "Permissions are three octal digits — owner, group, others — each summing r(4) w(2) x(1): `755` is `rwxr-xr-x`. Octal sets the full mode absolutely, unlike symbolic `+x` tweaks. Memorize 644 for files, 755 for dirs and scripts, 600 for secrets.",
+  "umask": "`umask 022` strips write for group and others from new files, yielding 644 and 755 by default. It is a creation mask rather than retroactive — existing files keep their modes. Set umask in profiles for consistently safe defaults.",
+  "Special bits setuid/setgid/sticky": "setuid (4) runs as the file owner, setgid (2) as the group, and sticky (1) on directories restricts deletion to owners (`/tmp` uses `1777`). They are powerful and dangerous — audit with `find / -perm -4000`. Prefer sudo rules over new setuid binaries.",
+  "id and groups": "`id` prints uid, gid, and every group while `groups` lists group names. Scripts read them to check capability before acting. Identity explains permission denials — `groups` shows why a file is readable or not.",
+  "sudoers concepts": "`/etc/sudoers` (edited via `visudo`) grants named users scoped root commands. Least privilege means `user ALL=(ALL) /usr/bin/systemctl restart app` rather than `ALL`. Scripts needing root should document and check it upfront.",
+  "User checks in scripts": "Gate privileged scripts early: `[ \"$(id -u)\" -eq 0 ] || { echo need root; exit 1; }`. Failing fast beats failing halfway through system changes. Check identity before touching anything privileged.",
+  "ps snapshots": "`ps -eo pid,comm` snapshots the process table — a point-in-time list rather than live state. Snapshots suit scripts while interactive `top` suits humans. PIDs recycle, so snapshot-then-signal can hit the wrong process.",
+  "pgrep patterns": "`pgrep -f pattern` returns matching PIDs for scripting — cleaner than `ps | grep` pipelines that match themselves. `-x` anchors exact names. Verify matches with `pgrep -a` (showing full commands) before signaling.",
+  "kill signals": "`kill PID` sends TERM (polite) while `kill -9` sends KILL (uncatchable, last resort). Always try TERM first and give the process a moment. KILL skips cleanup — corrupted state is the price of force.",
+  "Background PIDs $!": "`$!` holds the last backgrounded job's PID — capture it immediately before another `&` overwrites it. The PID lets `wait` and `kill` target that exact job. Untracked background jobs become orphans.",
+  "wait semantics": "`wait` reaps all background jobs while `wait $pid` reaps one and returns its status. Waiting prevents the script from exiting while work is unfinished. Check `$?` after `wait $pid` for that job's result.",
+  "kill %job": "`kill %1` signals job 1 by shell job-id — an interactive convenience, since job-ids exist only in that shell. Scripts should use PIDs (`$!`) instead. Job-ids shine at the prompt; PIDs travel.",
+  "Five time fields": "Crontab entries are `minute hour day-of-month month day-of-week command`: `0 2 * * *` means 2 AM daily. The two day fields OR together — the classic scheduling surprise. Comment every entry with its plain-English meaning.",
+  "Crontab editing": "`crontab -e` edits your schedule, `-l` lists, and `-r` removes (dangerously, without backup). Always list before editing and keep the file in version control elsewhere. A deleted crontab has no undo.",
+  "Cron logging": "cron mails output or drops it — redirect explicitly: `>> /var/log/job.log 2>&1`. Silent cron jobs fail invisibly for months. Log every run with timestamps and alert on nonzero exits.",
+  "curl flags -fsSL": "`-f` fails on HTTP errors, `-sS` silences progress but shows errors, and `-L` follows redirects — `-fsSL` is the script-safe bundle. Bare `curl` reports success on 404 pages. Memorize `-fsSL` as the default for automation.",
+  "Saving with -o": "`-o file` saves to a named file while `-O` uses the remote name. `-o` pairs with explicit paths in scripts for predictable locations. Check the exit status — a saved error page is still a failure.",
+  "Retries and timeouts": "`--retry 3 --max-time 30 --connect-timeout 10` bounds every network call: retries for flakiness, timeouts against hangs. Unbounded network calls wedge scripts and pipelines. Every curl in automation needs a timeout.",
+  "JSON endpoints": "REST endpoints return JSON over HTTP verbs: GET reads, POST creates, PUT replaces. `curl -H 'Accept: application/json'` asks explicitly. Know the verb, the path, and the expected status before scripting the call.",
+  "Parsing with grep/awk": "Without `jq`, `grep -o '\"key\": *\"[^\"]*\"'` extracts simple string values. It is brittle on nested JSON but dependency-free. Prefer `jq` where installable; grep-parse only flat, predictable payloads.",
+  "API error handling": "Check the HTTP status (`-w '%{http_code}'`) before parsing bodies — a 500 page is not JSON. Retry 5xx and 429 while failing fast on 4xx. Parse only after confirming 2xx.",
+  "Branch workflows": "Branches isolate work: create per task, merge when done, delete after. Short-lived branches keep merges trivial while long-lived ones breed conflicts. The workflow is branch, commit, merge, delete — on repeat.",
+  "git switch": "`git switch name` changes branches and `-c new` creates and switches — the modern, safe split of overloaded `checkout`. `switch` refuses when uncommitted changes would be overwritten. Prefer `switch` and `restore` over `checkout` in new muscle memory.",
+  "Merge strategies": "Fast-forward replays commits linearly when possible while `--no-ff` forces a merge commit preserving the branch shape. Choose linear history or explicit merges per team convention. The strategy shapes how history reads later.",
+  "Stash stack": "Stash is a stack: `stash` pushes, `list` shows, `pop` and `apply` restore, `drop` discards. Multiple stashes accumulate with `stash@{n}` addresses. Name entries (`stash push -m msg`) or the stack becomes mystery meat.",
+  "stash pop vs apply": "`pop` restores and drops the entry while `apply` restores and keeps it. `pop` is the normal retrieve; `apply` is the cautious one that keeps a backup until you verify. Conflicts on restore keep the entry either way.",
+  "Stash messages": "`git stash push -m 'wip: login form'` labels the entry for later identification. Messages turn `stash@{2}` from a puzzle into a plan. Unlabeled stashes rot while labeled ones get restored.",
+  "rebase vs merge": "Rebase replays your commits onto the tip — linear history with rewritten hashes; merge preserves both lines with a merge commit. Rebase private branches and merge shared ones. Never rebase commits others have pulled.",
+  "Interactive rebase notes": "`rebase -i` opens an editor to pick, squash, reword, and drop — history surgery for clean pull requests. Squash fixups before review, never after merge. Interactive rewrite demands a terminal and care.",
+  "Conflict flow": "Conflicts pause the operation with markers in files: edit, `git add` the resolutions, then `rebase --continue` (or commit for merges). `--abort` restores the pre-operation state safely. Resolve calmly and abort freely.",
+  "pre-commit hooks": "`.git/hooks/pre-commit` runs on every commit — lint, format-check, or secret-scan before history records anything. A failing hook blocks the commit with your message. Automate standards where they cannot be skipped.",
+  "Hook executables": "Hooks must be executable files with no extension, named exactly (`pre-commit`, `pre-push`). Non-executable hooks are silently ignored — the classic reason a hook never ran. `chmod +x` is part of installing a hook.",
+  "Sample hooks": "Git ships `.sample` templates in `.git/hooks/` — rename to activate. Samples document the arguments and exit conventions. Start from samples rather than blank files.",
+  "Backup design": "A backup answers what, where, and how often: which directories, which destination, which schedule. Design retention too — how many copies, how far back. Undesigned backups are either incomplete or infinite.",
+  "Timestamped archives": "Stamp filenames with dates (`backup-$(date +%F).tar.gz`) so generations never collide. Timestamps make pruning (`find -mtime +30 -delete`) and restores (`which day?`) trivial. Never overwrite yesterday's backup with today's.",
+  "Restore checks": "A backup is only as good as its last tested restore — list (`-tzf`) every archive after creation and periodically extract to scratch. Unverified backups fail exactly when needed. Verify automatically, not hopefully.",
+  "fetch vs pull": "`fetch` downloads remote state without touching your work while `pull` is fetch plus merge. Fetch to inspect (`log origin/main`); pull to integrate. Fetching is always safe while pulling can conflict.",
+  "Upstream tracking -u": "`push -u origin main` links the local branch to its remote counterpart, so later `push` and `pull` need no arguments. Tracking is per-branch configuration, set once. Check links with `git branch -vv`.",
+  "Remote URLs": "Remotes are URLs — HTTPS (token prompts) or SSH (`git@host:path`, key auth). `remote -v` shows fetch and push URLs while `remote set-url` changes them. Know which protocol your credentials match.",
+  "GitHub flow": "GitHub flow runs branch off main, push, open a pull request, review, merge, delete the branch. Main stays deployable and every change is reviewed. It suits continuous delivery better than heavy release trains.",
+  "Feature branches": "One branch per change, named for the work (`feature/login`, `fix/timeout`), merged via review. Small branches review fast and revert cleanly. Branch from current main to minimize conflicts.",
+  "Release branches": "Release branches (`release/2.4`) freeze a version for stabilization while main moves on. Hotfixes land on the release, then merge back. They trade branch overhead for controlled rollouts.",
+  "Organizing dotfiles": "Keep shell config in a version-controlled dotfiles repo rather than scattered edits. One repo, one README, install via documented steps. Organized dotfiles make every new machine feel like home in minutes.",
+  "Symlink farms": "Symlink `~/.bashrc` to the repo file so edits land under version control immediately. A tiny install script creates all links idempotently. Links keep the live config and the repo the same file.",
+  "Bare-repo method notes": "A bare repo with `--git-dir=$HOME/.cfg` versions home files without symlinks: `config checkout` materializes them. It scales to dozens of files with no link farm. Exotic but elegant for full-home tracking.",
+  "PATH management": "PATH order decides which binary wins — prepend personal dirs and never append untrusted ones. `export PATH=\"$HOME/bin:$PATH\"` in the profile, guarded against duplication. A polluted PATH runs the wrong programs.",
+  "Per-project env files": "`.env` files hold per-project secrets and settings, loaded with `set -a; . ./.env; set +a`. Never commit `.env` — commit `.env.example` instead. Project env keeps machine config out of code.",
+  "direnv notes": "`direnv` auto-loads `.envrc` on entering a directory and unloads on exit — project env without manual sourcing. `.envrc` must be explicitly allowed (`direnv allow`) for safety. Automation for what sourcing does by hand.",
+  "set -x tracing": "`set -x` prints each command after expansion, prefixed by PS4 — the execution X-ray. `set +x` stops it, so wrap just the suspicious section. Trace output goes to stderr, leaving stdout clean for assertions.",
+  "PS4 customization": "`PS4` prefixes every trace line — `export PS4='+ ${BASH_SOURCE}:${LINENO}: '` adds file and line. Custom PS4 turns traces into located evidence. Set it once in debug helpers.",
+  "shellcheck notes": "ShellCheck statically flags quoting, portability, and logic bugs without running anything. Treat its warnings as errors in CI. It catches the bugs that tracing only finds after damage.",
+  "Log levels": "Levels (DEBUG, INFO, WARN, ERROR) let runners filter noise: quiet by default, verbose on demand. Prefix every line (`[INFO] message`) so `grep` filters work. Consistent levels make logs queryable.",
+  "Tee patterns": "`cmd 2>&1 | tee run.log` shows output live AND saves it — the interactive-run pattern. `tee -a` appends across runs. Tee when humans watch and history matters.",
+  "logger command notes": "`logger` sends lines to syslog for centralized collection — the server-side step beyond files. Tag with `-t myapp` for grep-able identity. Files for scripts, syslog for services.",
+  "getopts loop": "`while getopts 'n:v' opt` parses short flags into `$opt`, with unknown flags landing in `?`. The loop is the standard flag parser — no manual `shift` chains. Declare the option string once; it documents the interface.",
+  "OPTARG handling": "Options with `:` take arguments delivered in `$OPTARG`: `n) name=\"$OPTARG\"`. Missing arguments yield `?` with a diagnostic. Always quote `$OPTARG` — values contain spaces.",
+  "Usage functions": "A `usage()` function prints the synopsis and exits nonzero on bad input. Every CLI needs one — it is the built-in manual. Call it for `-h`, unknown flags, and missing required args.",
+  "Sourcing configs": "`. ./config.sh` (or `source`) loads `key=value` files into the current shell — the simplest config format. Sourced files run as code, so only source trusted ones. Defaults first, sourced overrides second.",
+  "INI parsing with awk": "`awk -F= '$1==\"key\" {print $2}'` reads INI-style values without dependencies. It handles flat `key=value` files robustly. For sections and nesting, upgrade to a real parser.",
+  "Defaults + overrides": "Layer configuration: hardcoded defaults, then config file, then environment, then flags — each overriding the last. Document the precedence so behavior is predictable. Explicit layering beats scattered conditionals.",
+  "xargs -P": "`xargs -P4 -n1` runs four workers in parallel — the one-flag speedup for batch jobs. Output interleaves, so parallelize only order-independent work. Size `-P` to CPUs rather than wishful thinking.",
+  "wait fan-out": "Background N jobs with `&`, then one `wait` fans out and rejoins — the built-in parallel pattern. Capture PIDs (`$!`) to report per-job status after. Fan-out for speed, `wait` for correctness.",
+  "Job slots": "Unbounded `&` spawns swamp machines — cap concurrent jobs with a slot counter or `xargs -P`. Slots bound memory and file descriptors. Parallelism needs a throttle.",
+  "Assert functions": "An `assert_eq expected actual name` helper turns checks into one-liners printing pass or FAIL. Tests are just scripts that exit nonzero on failure. Grow helpers (`assert_contains`, `assert_rc`) as suites grow.",
+  "Test runners (bats) notes": "bats runs `@test` blocks with setup, teardown, and TAP output — real test structure for shell. `run cmd` captures status and output for assertions. Adopt bats when assert-scripts outgrow single files.",
+  "Exit-code checks": "Every test ends in an exit code: 0 for all-green, nonzero with the failure printed. CI reads only the code. Print diagnostics AND exit correctly — one for humans, one for machines.",
+  "Quoting untrusted input": "Quote every expansion of untrusted data — `echo \"$user\"` prints literally instead of executing. Unquoted variables split, glob, and reinterpret metacharacters. Quoting is the primary injection defense.",
+  "eval dangers": "`eval` re-parses its arguments as code — `eval \"echo $user\"` executes embedded commands. There is almost always a safer construct (arrays, indirect expansion `${!var}`). Treat `eval` on external input as a vulnerability.",
+  "Injection demo (safe)": "A value like `ada; echo PWNED` is harmless text when quoted and a command when evaled. Demonstrate injection with echo-only payloads, never destructive ones. Show the danger without the damage.",
+  "=~ operator": "`[[ $s =~ regex ]]` matches extended regex inside `[[ ]]` with an unquoted pattern. It brings full pattern power to conditionals. Remember: a quoted pattern means a literal string.",
+  "BASH_REMATCH": "After `=~` matches, `${BASH_REMATCH[0]}` is the whole match and `[1..n]` are the capture groups. Rematch data turns validation into extraction. Read captures immediately — the next `=~` overwrites them.",
+  "Validation patterns": "Email, semver, and date formats each reduce to one anchored regex: `^...$` with no partial-match escape. Validate input at entry with named patterns. Reject early with a message naming the expected format.",
+  "date formatting": "`date +%F_%T` stamps `2026-10-02_12:00:00` — `+` plus format codes compose any layout. `%F` gives date, `%T` time, `%s` epoch. Format explicitly since default layouts vary by locale.",
+  "Epoch math": "Seconds since epoch (`date +%s`) make time arithmetic trivial subtraction: durations, ages, timeouts. Compare integers and format only for display. Epochs are the machine language of time.",
+  "date -d portability notes": "GNU `date -d` parses arbitrary dates (`-d '@0'`, `-d 'last friday'`) while BSD and macOS use `-v` and `-j` instead. Date arithmetic is the least portable shell feature. Isolate date logic and test on every target OS.",
+  "sort -n/-r/-u": "`-n` means numeric order (10 after 9, not after 1), `-r` reverse, `-u` unique — sort's essential flags. Combine freely: `sort -nur`. Pick flags deliberately since default sort is lexicographic bytes.",
+  "join two files": "`join` merges two sorted files on a common field — the relational join for text. Both inputs must be sorted on the key first. Sorted keys in, matched rows out.",
+  "cut ranges": "`cut -d: -f1,3` picks fields 1 and 3 while `-f2-` means from field 2 on. `cut` extracts when awk is overkill. Delimiter plus field list is the whole interface.",
+  "df/du reading": "`df -h` shows filesystem free space while `du -sh dir` sizes a tree — capacity's two questions. `df` answers which disk is full; `du` answers which directory did it. Check `df` first, then drill with `du`.",
+  "Load averages": "Load averages (1, 5, and 15 minute) measure runnable processes — compare against CPU count rather than zero. Sustained load above core count means queuing. Averages trend while per-core breakdowns (`top`) locate.",
+  "Log triage notes": "Triage in order: load, disk, memory, then app logs — system before application. Each check is one command with a threshold. Document thresholds so on-call decisions stay mechanical rather than inspired.",
+  "apt/dnf script guards": "Guard installs with `command -v` checks and OS detection — install only what is missing, with the right manager. `command -v curl || sudo apt-get install -y curl` is the pattern. Guards make setup rerunnable.",
+  "Idempotent installs": "Rerunning setup must converge rather than duplicate: check-before-install, `--exists` flags, pinned versions. Idempotency turns setup into a safe retry. Test by running twice and diffing the result.",
+  "Checksums notes": "Verify downloads with published checksums (`sha256sum -c`) before executing anything. A mismatched hash means stop rather than proceed. Checksums close the supply-chain loop for scripted installs.",
+  "Key pairs": "`ssh-keygen -t ed25519` creates a key pair; the private key never leaves your machine while the public one goes to servers. Passphrases protect the private key at rest. Use one key per device, named for it.",
+  "ssh config": "`~/.ssh/config` names hosts with users, keys, and ports — `ssh deploy` instead of flags. Config turns connection trivia into short names scripts can use. Keep the file `600` since it maps your access.",
+  "scp/rsync notes": "`scp` copies over SSH simply while `rsync -avz` resumes, compresses, and syncs incrementally. `scp` suits one-offs; `rsync` suits trees and repeats. Both ride SSH keys, so no new credentials are needed.",
+  "systemctl units": "`systemctl status`, `start`, `stop`, and `enable app` manage the `app.service` unit — the lifecycle verbs. `enable` persists across reboots while `start` is one-shot. Units are how Linux runs things while nobody watches.",
+  "Service files": "Unit files declare what runs, as whom, and on what dependencies (`After=network.target`). Ship them with the app rather than as tribal knowledge. Declarative services restart predictably.",
+  "Logs with journalctl": "`journalctl -u app --since '1 hour ago'` reads a service's collected output — stdout becomes queryable history. `-f` follows live like `tail`. Services log to the journal while humans read with journalctl.",
+  "Project scaffolding": "Scaffolding scripts generate the standard layout — directories, configs, READMEs — so projects start consistent. Generate rather than document-and-hope. One command should yield a runnable skeleton.",
+  "Checklist scripts": "Executable checklists print each step, run it, and verify — progress plus proof. Steps as array elements keep the list data-driven. A checklist script never skips step three.",
+  "Idempotency": "Rerunning a planner must be safe: check state before acting, skip completed steps, and report what changed. Idempotent scripts are resumable scripts. Design every step as safe-to-repeat.",
+  "Deploy pipeline": "A deploy pipeline sequences build, test, package, publish, and activate — each gated on the previous. Stages map to script functions with checks between. The pipeline is the product's front door, so guard it.",
+  "Health checks": "After activating, verify: process alive, port listening, endpoint returning 200. Health checks turn `it deployed` into `it works`. Fail the deploy — and roll back — on any check.",
+  "Rollback plan": "Every deploy needs a reverse: previous artifact retained, switch-back tested, database migrations reversible. Plan rollback before shipping forward. The best deploys are the boring, reversible ones.",
 };
 
 /* ─── Quiz map ─── */
@@ -903,6 +1143,1626 @@ const BASH_QUIZ_MAP: Record<string, { q: string; opts: { id: string; text: strin
       { id: "d", text: "To print more logs", correct: false },
     ],
   },
+  "set -euo pipefail": {
+    q: "What does set -euo pipefail do?",
+    opts: [
+      { id: "a", text: "Exits on errors, errors on unset vars, fails pipelines on any stage failure", correct: true },
+      { id: "b", text: "Disables all error checking", correct: false },
+      { id: "c", text: "Enables verbose tracing", correct: false },
+      { id: "d", text: "Installs packages", correct: false },
+    ],
+  },
+  "Fail-fast scripts": {
+    q: "Why should scripts fail fast?",
+    opts: [
+      { id: "a", text: "To stop at the first error before damage spreads", correct: true },
+      { id: "b", text: "To run faster", correct: false },
+      { id: "c", text: "To skip tests", correct: false },
+      { id: "d", text: "To hide errors", correct: false },
+    ],
+  },
+  "Unset variable guards": {
+    q: "What does set -u do?",
+    opts: [
+      { id: "a", text: "Errors when expanding an unset variable", correct: true },
+      { id: "b", text: "Unsets all variables", correct: false },
+      { id: "c", text: "Exports variables", correct: false },
+      { id: "d", text: "Clears the screen", correct: false },
+    ],
+  },
+  "Shebang lines": {
+    q: "Where must the shebang line appear?",
+    opts: [
+      { id: "a", text: "As the very first line of the file", correct: true },
+      { id: "b", text: "At the end of the file", correct: false },
+      { id: "c", text: "Anywhere in the file", correct: false },
+      { id: "d", text: "Inside a comment block", correct: false },
+    ],
+  },
+  "Executable bits": {
+    q: "How do you make script.sh directly runnable?",
+    opts: [
+      { id: "a", text: "chmod +x script.sh", correct: true },
+      { id: "b", text: "chmod -x script.sh", correct: false },
+      { id: "c", text: "run script.sh", correct: false },
+      { id: "d", text: "compile script.sh", correct: false },
+    ],
+  },
+  "env shebangs": {
+    q: "Why use #!/usr/bin/env bash?",
+    opts: [
+      { id: "a", text: "It finds bash through PATH for portability", correct: true },
+      { id: "b", text: "It runs faster", correct: false },
+      { id: "c", text: "It enables networking", correct: false },
+      { id: "d", text: "It skips permissions", correct: false },
+    ],
+  },
+  "Default values \${var:-}": {
+    q: "What does ${nick:-World} expand to when nick is unset?",
+    opts: [
+      { id: "a", text: "World", correct: true },
+      { id: "b", text: "Empty string", correct: false },
+      { id: "c", text: "An error", correct: false },
+      { id: "d", text: "The word nick", correct: false },
+    ],
+  },
+  "Assignment defaults \${var:=}": {
+    q: "How does ${var:=x} differ from ${var:-x}?",
+    opts: [
+      { id: "a", text: "It also assigns x to var", correct: true },
+      { id: "b", text: "It deletes var", correct: false },
+      { id: "c", text: "It prints x twice", correct: false },
+      { id: "d", text: "There is no difference", correct: false },
+    ],
+  },
+  "Error on unset \${var:?}": {
+    q: "What does ${token:?missing} do when token is unset?",
+    opts: [
+      { id: "a", text: "Aborts with the message missing", correct: true },
+      { id: "b", text: "Sets token to missing", correct: false },
+      { id: "c", text: "Ignores it", correct: false },
+      { id: "d", text: "Prints missing and continues", correct: false },
+    ],
+  },
+  "Prefix removal \${var#}": {
+    q: "What does ${path##*/} yield for /a/b/c.txt?",
+    opts: [
+      { id: "a", text: "c.txt", correct: true },
+      { id: "b", text: "/a/b/c.txt", correct: false },
+      { id: "c", text: "c", correct: false },
+      { id: "d", text: "/a/b/", correct: false },
+    ],
+  },
+  "Suffix removal \${var%}": {
+    q: "What does ${f%.txt} yield for report.txt?",
+    opts: [
+      { id: "a", text: "report", correct: true },
+      { id: "b", text: ".txt", correct: false },
+      { id: "c", text: "report.txt", correct: false },
+      { id: "d", text: "Empty string", correct: false },
+    ],
+  },
+  "Pattern replacement \${var//}": {
+    q: "What does ${s//a/A} do?",
+    opts: [
+      { id: "a", text: "Replaces every a with A", correct: true },
+      { id: "b", text: "Replaces only the first a", correct: false },
+      { id: "c", text: "Deletes all a characters", correct: false },
+      { id: "d", text: "Uppercases the whole string", correct: false },
+    ],
+  },
+  "Array slicing": {
+    q: "What does ${arr[@]:1:2} give?",
+    opts: [
+      { id: "a", text: "Two elements starting at index 1", correct: true },
+      { id: "b", text: "The first two elements", correct: false },
+      { id: "c", text: "Elements joined into one string", correct: false },
+      { id: "d", text: "An error", correct: false },
+    ],
+  },
+  "Associative arrays": {
+    q: "How do you declare an associative array?",
+    opts: [
+      { id: "a", text: "declare -A map", correct: true },
+      { id: "b", text: "map = {}", correct: false },
+      { id: "c", text: "array -A map", correct: false },
+      { id: "d", text: "assoc map", correct: false },
+    ],
+  },
+  "Array iteration guards": {
+    q: "What is the safe way to iterate an array?",
+    opts: [
+      { id: "a", text: "for x in \"${arr[@]}\"", correct: true },
+      { id: "b", text: "for x in $arr", correct: false },
+      { id: "c", text: "foreach x arr", correct: false },
+      { id: "d", text: "loop arr", correct: false },
+    ],
+  },
+  "Substring extraction offsets": {
+    q: "What does ${s:6} give for s=hello-world?",
+    opts: [
+      { id: "a", text: "world", correct: true },
+      { id: "b", text: "hello", correct: false },
+      { id: "c", text: "-world", correct: false },
+      { id: "d", text: "Empty string", correct: false },
+    ],
+  },
+  "Case mapping patterns": {
+    q: "What does ${s^^} do?",
+    opts: [
+      { id: "a", text: "Uppercases the value", correct: true },
+      { id: "b", text: "Lowercases the value", correct: false },
+      { id: "c", text: "Reverses the string", correct: false },
+      { id: "d", text: "Trims spaces", correct: false },
+    ],
+  },
+  "Length checks": {
+    q: "How do you test a string is longer than 5 characters?",
+    opts: [
+      { id: "a", text: "[ \"${#s}\" -gt 5 ]", correct: true },
+      { id: "b", text: "[ s > 5 ]", correct: false },
+      { id: "c", text: "[ len(s) > 5 ]", correct: false },
+      { id: "d", text: "[ s -gt 5 ]", correct: false },
+    ],
+  },
+  "(( )) conditionals": {
+    q: "When is (( expr )) true?",
+    opts: [
+      { id: "a", text: "When the result is nonzero", correct: true },
+      { id: "b", text: "When the result is zero", correct: false },
+      { id: "c", text: "Always", correct: false },
+      { id: "d", text: "When it prints output", correct: false },
+    ],
+  },
+  "Bases and precedence": {
+    q: "What is $((2 + 3 * 4))?",
+    opts: [
+      { id: "a", text: "14", correct: true },
+      { id: "b", text: "20", correct: false },
+      { id: "c", text: "24", correct: false },
+      { id: "d", text: "9", correct: false },
+    ],
+  },
+  "Ternary in arithmetic": {
+    q: "What does $((1 > 2 ? 10 : 20)) print?",
+    opts: [
+      { id: "a", text: "20", correct: true },
+      { id: "b", text: "10", correct: false },
+      { id: "c", text: "1", correct: false },
+      { id: "d", text: "0", correct: false },
+    ],
+  },
+  "[[ ]] vs [ ]": {
+    q: "Which is true about [[ ]]?",
+    opts: [
+      { id: "a", text: "It avoids word splitting and allows pattern matching", correct: true },
+      { id: "b", text: "It is POSIX sh compatible", correct: false },
+      { id: "c", text: "It requires double quoting everything twice", correct: false },
+      { id: "d", text: "It runs external commands", correct: false },
+    ],
+  },
+  "Regex match =~": {
+    q: "What does [[ $v =~ ^v[0-9]+ ]] test?",
+    opts: [
+      { id: "a", text: "Whether the value starts with v followed by digits", correct: true },
+      { id: "b", text: "Exact string equality", correct: false },
+      { id: "c", text: "Glob filename matching", correct: false },
+      { id: "d", text: "String length", correct: false },
+    ],
+  },
+  "Glob match ==": {
+    q: "What does [[ $f == *.log ]] test?",
+    opts: [
+      { id: "a", text: "Whether f ends in .log via glob matching", correct: true },
+      { id: "b", text: "Regex match", correct: false },
+      { id: "c", text: "File existence", correct: false },
+      { id: "d", text: "Exact equality only", correct: false },
+    ],
+  },
+  "&& and || guards": {
+    q: "What does [ -f x ] && echo hi do?",
+    opts: [
+      { id: "a", text: "Prints hi only if file x exists", correct: true },
+      { id: "b", text: "Always prints hi", correct: false },
+      { id: "c", text: "Creates file x", correct: false },
+      { id: "d", text: "Deletes file x", correct: false },
+    ],
+  },
+  "Short-circuit chains": {
+    q: "What is the risk of a && b || c?",
+    opts: [
+      { id: "a", text: "c runs when b fails too, not just when a fails", correct: true },
+      { id: "b", text: "It never runs c", correct: false },
+      { id: "c", text: "It runs all three always", correct: false },
+      { id: "d", text: "It is a syntax error", correct: false },
+    ],
+  },
+  "Nested conditionals": {
+    q: "How should deep if nesting be handled?",
+    opts: [
+      { id: "a", text: "Flatten with combined conditions or early exits", correct: true },
+      { id: "b", text: "Nest deeper for clarity", correct: false },
+      { id: "c", text: "Avoid conditions entirely", correct: false },
+      { id: "d", text: "Duplicate the branches", correct: false },
+    ],
+  },
+  "C-style for loops": {
+    q: "Which loops i from 1 to 3?",
+    opts: [
+      { id: "a", text: "for ((i=1; i<=3; i++))", correct: true },
+      { id: "b", text: "for i in 1..3", correct: false },
+      { id: "c", text: "loop 1 to 3", correct: false },
+      { id: "d", text: "repeat 3", correct: false },
+    ],
+  },
+  "Brace ranges {1..n}": {
+    q: "What does {1..3} expand to?",
+    opts: [
+      { id: "a", text: "1 2 3", correct: true },
+      { id: "b", text: "1..3", correct: false },
+      { id: "c", text: "123", correct: false },
+      { id: "d", text: "A file list", correct: false },
+    ],
+  },
+  "Loop counters": {
+    q: "What must a manual counter loop never forget?",
+    opts: [
+      { id: "a", text: "Incrementing the counter", correct: true },
+      { id: "b", text: "Printing the counter", correct: false },
+      { id: "c", text: "Exporting the counter", correct: false },
+      { id: "d", text: "Zeroing it afterwards", correct: false },
+    ],
+  },
+  "while read loops": {
+    q: "What does -r do in read -r line?",
+    opts: [
+      { id: "a", text: "Prevents backslash interpretation", correct: true },
+      { id: "b", text: "Reads in reverse", correct: false },
+      { id: "c", text: "Retries on failure", correct: false },
+      { id: "d", text: "Reads raw disk blocks", correct: false },
+    ],
+  },
+  "break with levels": {
+    q: "What does break 2 do?",
+    opts: [
+      { id: "a", text: "Exits two enclosing loop levels", correct: true },
+      { id: "b", text: "Breaks with a two-second pause", correct: false },
+      { id: "c", text: "Skips two iterations", correct: false },
+      { id: "d", text: "Exits the script with code 2", correct: false },
+    ],
+  },
+  "continue guards": {
+    q: "What does continue do?",
+    opts: [
+      { id: "a", text: "Skips to the next loop iteration", correct: true },
+      { id: "b", text: "Exits the loop", correct: false },
+      { id: "c", text: "Restarts the script", correct: false },
+      { id: "d", text: "Pauses one second", correct: false },
+    ],
+  },
+  "Function arguments $1": {
+    q: "What is $1 inside a function?",
+    opts: [
+      { id: "a", text: "The function's first argument", correct: true },
+      { id: "b", text: "The script's first argument", correct: false },
+      { id: "c", text: "The function name", correct: false },
+      { id: "d", text: "Always empty", correct: false },
+    ],
+  },
+  "local variables": {
+    q: "What does local do?",
+    opts: [
+      { id: "a", text: "Confines the variable to the current function", correct: true },
+      { id: "b", text: "Exports it globally", correct: false },
+      { id: "c", text: "Makes it readonly", correct: false },
+      { id: "d", text: "Deletes it on exit", correct: false },
+    ],
+  },
+  "Echo-based returns": {
+    q: "How does a function return data (not status)?",
+    opts: [
+      { id: "a", text: "By printing it for command substitution", correct: true },
+      { id: "b", text: "With return value", correct: false },
+      { id: "c", text: "With exit data", correct: false },
+      { id: "d", text: "Via a global echo flag", correct: false },
+    ],
+  },
+  "local vs global": {
+    q: "What happens to undeclared bash variables in functions?",
+    opts: [
+      { id: "a", text: "They are global and visible everywhere", correct: true },
+      { id: "b", text: "They are function-local", correct: false },
+      { id: "c", text: "They are deleted on return", correct: false },
+      { id: "d", text: "They cause errors", correct: false },
+    ],
+  },
+  "Exported functions": {
+    q: "What does export -f myfunc do?",
+    opts: [
+      { id: "a", text: "Makes myfunc available to child bash processes", correct: true },
+      { id: "b", text: "Saves myfunc to a file", correct: false },
+      { id: "c", text: "Publishes myfunc online", correct: false },
+      { id: "d", text: "Deletes myfunc", correct: false },
+    ],
+  },
+  "Subshell scope": {
+    q: "What happens to assignments inside ( ... )?",
+    opts: [
+      { id: "a", text: "They vanish when the subshell ends", correct: true },
+      { id: "b", text: "They persist in the parent", correct: false },
+      { id: "c", text: "They are written to disk", correct: false },
+      { id: "d", text: "They become exported", correct: false },
+    ],
+  },
+  "trap on EXIT": {
+    q: "What does trap cleanup EXIT do?",
+    opts: [
+      { id: "a", text: "Runs cleanup whenever the shell exits", correct: true },
+      { id: "b", text: "Runs cleanup once right now", correct: false },
+      { id: "c", text: "Disables exiting", correct: false },
+      { id: "d", text: "Cleans on startup", correct: false },
+    ],
+  },
+  "Cleanup functions": {
+    q: "What should a cleanup function remove?",
+    opts: [
+      { id: "a", text: "Temp files and background jobs it created", correct: true },
+      { id: "b", text: "System binaries", correct: false },
+      { id: "c", text: "The script itself", correct: false },
+      { id: "d", text: "All environment variables", correct: false },
+    ],
+  },
+  "Trap listing": {
+    q: "How do you list installed traps?",
+    opts: [
+      { id: "a", text: "trap -p", correct: true },
+      { id: "b", text: "trap --list-all", correct: false },
+      { id: "c", text: "list traps", correct: false },
+      { id: "d", text: "echo $TRAPS", correct: false },
+    ],
+  },
+  "SIGINT handling": {
+    q: "What sends SIGINT?",
+    opts: [
+      { id: "a", text: "Ctrl+C from the terminal", correct: true },
+      { id: "b", text: "The kill -9 command", correct: false },
+      { id: "c", text: "System shutdown only", correct: false },
+      { id: "d", text: "A cron schedule", correct: false },
+    ],
+  },
+  "SIGTERM handling": {
+    q: "What does SIGTERM mean?",
+    opts: [
+      { id: "a", text: "A polite request to terminate and clean up", correct: true },
+      { id: "b", text: "Instant uncatchable kill", correct: false },
+      { id: "c", text: "A terminal resize", correct: false },
+      { id: "d", text: "A debug breakpoint", correct: false },
+    ],
+  },
+  "Resetting traps": {
+    q: "How do you remove a trap handler?",
+    opts: [
+      { id: "a", text: "trap - SIGNAL", correct: true },
+      { id: "b", text: "untrap SIGNAL", correct: false },
+      { id: "c", text: "trap delete SIGNAL", correct: false },
+      { id: "d", text: "kill the trap", correct: false },
+    ],
+  },
+  "Merging streams 2>&1": {
+    q: "What does >file 2>&1 do?",
+    opts: [
+      { id: "a", text: "Sends both stdout and stderr to file", correct: true },
+      { id: "b", text: "Sends only stdout", correct: false },
+      { id: "c", text: "Appends stderr to the screen", correct: false },
+      { id: "d", text: "Deletes stderr", correct: false },
+    ],
+  },
+  "stderr to stdout patterns": {
+    q: "How do you pipe both streams through grep?",
+    opts: [
+      { id: "a", text: "cmd 2>&1 | grep pattern", correct: true },
+      { id: "b", text: "cmd | grep pattern 2>&1", correct: false },
+      { id: "c", text: "cmd >& grep pattern", correct: false },
+      { id: "d", text: "grep pattern < cmd", correct: false },
+    ],
+  },
+  "Heredoc quoting": {
+    q: "What does <<'EOF' (quoted delimiter) do?",
+    opts: [
+      { id: "a", text: "Disables expansion inside the heredoc", correct: true },
+      { id: "b", text: "Enables extra expansion", correct: false },
+      { id: "c", text: "Reads from a file named EOF", correct: false },
+      { id: "d", text: "Speeds up input", correct: false },
+    ],
+  },
+  "pipefail semantics": {
+    q: "What does set -o pipefail change?",
+    opts: [
+      { id: "a", text: "A pipeline fails if any stage fails", correct: true },
+      { id: "b", text: "Pipelines run faster", correct: false },
+      { id: "c", text: "Pipes become bidirectional", correct: false },
+      { id: "d", text: "Nothing observable", correct: false },
+    ],
+  },
+  "Process substitution <()": {
+    q: "What does <(cmd) provide?",
+    opts: [
+      { id: "a", text: "The command's output as a readable filename", correct: true },
+      { id: "b", text: "A new background job", correct: false },
+      { id: "c", text: "A temp variable", correct: false },
+      { id: "d", text: "A network socket", correct: false },
+    ],
+  },
+  "Grouping with { }": {
+    q: "What does { a; b; } | sort do?",
+    opts: [
+      { id: "a", text: "Pipes the combined output of a and b into sort", correct: true },
+      { id: "b", text: "Sorts the command names", correct: false },
+      { id: "c", text: "Runs a and b in parallel", correct: false },
+      { id: "d", text: "Creates a file named { }", correct: false },
+    ],
+  },
+  "Character classes": {
+    q: "What does [0-9] match?",
+    opts: [
+      { id: "a", text: "One digit", correct: true },
+      { id: "b", text: "The literal text 0-9", correct: false },
+      { id: "c", text: "Any number of digits", correct: false },
+      { id: "d", text: "Zero or nine", correct: false },
+    ],
+  },
+  "Anchors ^$": {
+    q: "What does ^error match?",
+    opts: [
+      { id: "a", text: "Lines starting with error", correct: true },
+      { id: "b", text: "Lines containing error anywhere", correct: false },
+      { id: "c", text: "Lines ending with error", correct: false },
+      { id: "d", text: "Only the exact line error", correct: false },
+    ],
+  },
+  "Extended regex -E": {
+    q: "Which needs grep -E?",
+    opts: [
+      { id: "a", text: "Patterns using + | ? ( ) without backslashes", correct: true },
+      { id: "b", text: "Plain literal search", correct: false },
+      { id: "c", text: "Case-insensitive search", correct: false },
+      { id: "d", text: "Recursive search", correct: false },
+    ],
+  },
+  "Context flags -A/-B/-C": {
+    q: "What does grep -C2 hit show?",
+    opts: [
+      { id: "a", text: "Two lines before and after each match", correct: true },
+      { id: "b", text: "Only the matching lines", correct: false },
+      { id: "c", text: "Two matches total", correct: false },
+      { id: "d", text: "Column 2 of matches", correct: false },
+    ],
+  },
+  "Invert and count -v/-c": {
+    q: "What does grep -c ok log print?",
+    opts: [
+      { id: "a", text: "The number of lines containing ok", correct: true },
+      { id: "b", text: "The matching lines", correct: false },
+      { id: "c", text: "The file names", correct: false },
+      { id: "d", text: "Nothing", correct: false },
+    ],
+  },
+  "Recursive grep -r": {
+    q: "What does grep -r TODO src/ do?",
+    opts: [
+      { id: "a", text: "Searches all files under src/ for TODO", correct: true },
+      { id: "b", text: "Replaces TODO in src/", correct: false },
+      { id: "c", text: "Searches one file named src/", correct: false },
+      { id: "d", text: "Lists files named TODO", correct: false },
+    ],
+  },
+  "Log report design": {
+    q: "What should you decide first for a log report?",
+    opts: [
+      { id: "a", text: "The output shape: columns, order, thresholds", correct: true },
+      { id: "b", text: "The font", correct: false },
+      { id: "c", text: "The log file owner", correct: false },
+      { id: "d", text: "The editor", correct: false },
+    ],
+  },
+  "Pipeline composition": {
+    q: "How should report pipelines be built?",
+    opts: [
+      { id: "a", text: "Stage by stage, verifying each stage's output", correct: true },
+      { id: "b", text: "All at once from memory", correct: false },
+      { id: "c", text: "Longest command first", correct: false },
+      { id: "d", text: "Without running until done", correct: false },
+    ],
+  },
+  "Summary formatting": {
+    q: "What does the last pipeline stage do?",
+    opts: [
+      { id: "a", text: "Formats ranked output for humans", correct: true },
+      { id: "b", text: "Deletes the input", correct: false },
+      { id: "c", text: "Fetches more logs", correct: false },
+      { id: "d", text: "Restarts the service", correct: false },
+    ],
+  },
+  "Address ranges": {
+    q: "What does sed -n '2,3p' print?",
+    opts: [
+      { id: "a", text: "Lines 2 through 3", correct: true },
+      { id: "b", text: "Line 23", correct: false },
+      { id: "c", text: "Every 2nd and 3rd line", correct: false },
+      { id: "d", text: "Nothing", correct: false },
+    ],
+  },
+  "Delete command d": {
+    q: "What does /debug/d do?",
+    opts: [
+      { id: "a", text: "Deletes lines containing debug", correct: true },
+      { id: "b", text: "Deletes the file", correct: false },
+      { id: "c", text: "Prints debug lines", correct: false },
+      { id: "d", text: "Stops sed", correct: false },
+    ],
+  },
+  "Print command p": {
+    q: "Why pair -n with p?",
+    opts: [
+      { id: "a", text: "-n silences default output so only p prints", correct: true },
+      { id: "b", text: "It speeds up printing", correct: false },
+      { id: "c", text: "It is required syntax", correct: false },
+      { id: "d", text: "It numbers lines", correct: false },
+    ],
+  },
+  "Global flag g": {
+    q: "How does s/a/b/g differ from s/a/b/?",
+    opts: [
+      { id: "a", text: "It replaces every match per line, not just the first", correct: true },
+      { id: "b", text: "It replaces across files", correct: false },
+      { id: "c", text: "It ignores case", correct: false },
+      { id: "d", text: "There is no difference", correct: false },
+    ],
+  },
+  "Multiple expressions -e": {
+    q: "What does sed -e A -e B do?",
+    opts: [
+      { id: "a", text: "Applies edit A then edit B in order", correct: true },
+      { id: "b", text: "Applies only B", correct: false },
+      { id: "c", text: "Runs A and B in parallel", correct: false },
+      { id: "d", text: "Edits two files", correct: false },
+    ],
+  },
+  "Capture groups and backrefs": {
+    q: "What does \\1 refer to in a replacement?",
+    opts: [
+      { id: "a", text: "The text captured by the first group", correct: true },
+      { id: "b", text: "The first line", correct: false },
+      { id: "c", text: "The first file", correct: false },
+      { id: "d", text: "A literal 1", correct: false },
+    ],
+  },
+  "BEGIN and END blocks": {
+    q: "When does an awk END block run?",
+    opts: [
+      { id: "a", text: "After all input lines are processed", correct: true },
+      { id: "b", text: "Before input", correct: false },
+      { id: "c", text: "Once per line", correct: false },
+      { id: "d", text: "Never automatically", correct: false },
+    ],
+  },
+  "Column sums": {
+    q: "What does { s += $1 } END { print s } compute?",
+    opts: [
+      { id: "a", text: "The sum of column one", correct: true },
+      { id: "b", text: "The line count", correct: false },
+      { id: "c", text: "The average", correct: false },
+      { id: "d", text: "The maximum", correct: false },
+    ],
+  },
+  "Field separator -F": {
+    q: "What does awk -F: do?",
+    opts: [
+      { id: "a", text: "Splits fields on colons", correct: true },
+      { id: "b", text: "Prints field F", correct: false },
+      { id: "c", text: "Reads a file named F", correct: false },
+      { id: "d", text: "Filters lines containing F", correct: false },
+    ],
+  },
+  "Pattern conditions": {
+    q: "What does awk '$2 > 70 { print $1 }' do?",
+    opts: [
+      { id: "a", text: "Prints field 1 of lines where field 2 exceeds 70", correct: true },
+      { id: "b", text: "Prints all lines", correct: false },
+      { id: "c", text: "Sorts by field 2", correct: false },
+      { id: "d", text: "Counts lines", correct: false },
+    ],
+  },
+  "String functions": {
+    q: "Which is an awk string builtin?",
+    opts: [
+      { id: "a", text: "substr()", correct: true },
+      { id: "b", text: "slice()", correct: false },
+      { id: "c", text: "replaceAll()", correct: false },
+      { id: "d", text: "charAt()", correct: false },
+    ],
+  },
+  "Formatted output printf": {
+    q: "What does awk printf with %5d do?",
+    opts: [
+      { id: "a", text: "Prints an integer right-aligned in width 5", correct: true },
+      { id: "b", text: "Prints 5 decimals", correct: false },
+      { id: "c", text: "Repeats output 5 times", correct: false },
+      { id: "d", text: "Exits with code 5", correct: false },
+    ],
+  },
+  "Name patterns -name": {
+    q: "Why quote '*.log' in find . -name '*.log'?",
+    opts: [
+      { id: "a", text: "So the shell passes the glob to find unexpanded", correct: true },
+      { id: "b", text: "It is optional decoration", correct: false },
+      { id: "c", text: "To enable regex mode", correct: false },
+      { id: "d", text: "To search faster", correct: false },
+    ],
+  },
+  "Type filters -type": {
+    q: "What does find . -type d locate?",
+    opts: [
+      { id: "a", text: "Directories", correct: true },
+      { id: "b", text: "Deleted files", correct: false },
+      { id: "c", text: "Text files", correct: false },
+      { id: "d", text: "Device nodes", correct: false },
+    ],
+  },
+  "Time filters -mtime": {
+    q: "What does -mtime -7 mean?",
+    opts: [
+      { id: "a", text: "Modified within the last 7 days", correct: true },
+      { id: "b", text: "Modified exactly 7 days ago", correct: false },
+      { id: "c", text: "Older than 7 days", correct: false },
+      { id: "d", text: "Modified in July", correct: false },
+    ],
+  },
+  "-print0 with xargs -0": {
+    q: "Why use find -print0 | xargs -0?",
+    opts: [
+      { id: "a", text: "NUL separation survives spaces and newlines in names", correct: true },
+      { id: "b", text: "It always runs faster", correct: false },
+      { id: "c", text: "It compresses output", correct: false },
+      { id: "d", text: "It sorts results", correct: false },
+    ],
+  },
+  "xargs -I replacement": {
+    q: "What does xargs -I{} ... {} do?",
+    opts: [
+      { id: "a", text: "Runs the command once per input with {} replaced", correct: true },
+      { id: "b", text: "Deletes files named {}", correct: false },
+      { id: "c", text: "Ignores input", correct: false },
+      { id: "d", text: "Counts inputs", correct: false },
+    ],
+  },
+  "Safe filenames": {
+    q: "Which filename breaks naive `for f in $(ls)`?",
+    opts: [
+      { id: "a", text: "A name containing spaces", correct: true },
+      { id: "b", text: "a.txt", correct: false },
+      { id: "c", text: "file1", correct: false },
+      { id: "d", text: "Names never break it", correct: false },
+    ],
+  },
+  "Create and verify -czvf/-tzvf": {
+    q: "After tar -czf b.tar.gz dir/, what verifies it?",
+    opts: [
+      { id: "a", text: "tar -tzf b.tar.gz lists the contents", correct: true },
+      { id: "b", text: "Deleting dir/", correct: false },
+      { id: "c", text: "Nothing is needed", correct: false },
+      { id: "d", text: "Rebooting", correct: false },
+    ],
+  },
+  "Exclude patterns": {
+    q: "How do you keep *.log out of a tarball?",
+    opts: [
+      { id: "a", text: "tar --exclude='*.log' -czf ...", correct: true },
+      { id: "b", text: "Delete logs first, always", correct: false },
+      { id: "c", text: "tar cannot exclude", correct: false },
+      { id: "d", text: "Rename the logs", correct: false },
+    ],
+  },
+  "Incremental notes": {
+    q: "What do incremental backups store?",
+    opts: [
+      { id: "a", text: "Only changes since the last snapshot", correct: true },
+      { id: "b", text: "Everything every time", correct: false },
+      { id: "c", text: "Only filenames", correct: false },
+      { id: "d", text: "Nothing new", correct: false },
+    ],
+  },
+  "gzip vs bzip2 vs xz": {
+    q: "Which compresses fastest for hot paths?",
+    opts: [
+      { id: "a", text: "gzip", correct: true },
+      { id: "b", text: "xz", correct: false },
+      { id: "c", text: "bzip2", correct: false },
+      { id: "d", text: "tar alone", correct: false },
+    ],
+  },
+  "Compression levels": {
+    q: "What does gzip -9 select?",
+    opts: [
+      { id: "a", text: "Best compression, slowest speed", correct: true },
+      { id: "b", text: "Fastest, largest output", correct: false },
+      { id: "c", text: "No compression", correct: false },
+      { id: "d", text: "Nine threads", correct: false },
+    ],
+  },
+  "tar + compression pairs": {
+    q: "Which flag pairs tar with gzip?",
+    opts: [
+      { id: "a", text: "-z", correct: true },
+      { id: "b", text: "-j", correct: false },
+      { id: "c", text: "-J", correct: false },
+      { id: "d", text: "-x", correct: false },
+    ],
+  },
+  "Octal modes": {
+    q: "What does chmod 755 set?",
+    opts: [
+      { id: "a", text: "rwxr-xr-x", correct: true },
+      { id: "b", text: "rw-rw-rw-", correct: false },
+      { id: "c", text: "rwx------", correct: false },
+      { id: "d", text: "Nothing", correct: false },
+    ],
+  },
+  "umask": {
+    q: "With umask 022, what mode does a new file get?",
+    opts: [
+      { id: "a", text: "644", correct: true },
+      { id: "b", text: "777", correct: false },
+      { id: "c", text: "600", correct: false },
+      { id: "d", text: "000", correct: false },
+    ],
+  },
+  "Special bits setuid/setgid/sticky": {
+    q: "What does the sticky bit do on a directory?",
+    opts: [
+      { id: "a", text: "Restricts deletion to each file's owner", correct: true },
+      { id: "b", text: "Makes files executable", correct: false },
+      { id: "c", text: "Hides the directory", correct: false },
+      { id: "d", text: "Speeds up listing", correct: false },
+    ],
+  },
+  "id and groups": {
+    q: "What does id show?",
+    opts: [
+      { id: "a", text: "uid, gid, and group memberships", correct: true },
+      { id: "b", text: "Only the username", correct: false },
+      { id: "c", text: "Running processes", correct: false },
+      { id: "d", text: "Disk quotas", correct: false },
+    ],
+  },
+  "sudoers concepts": {
+    q: "How should /etc/sudoers be edited?",
+    opts: [
+      { id: "a", text: "With visudo, which validates syntax", correct: true },
+      { id: "b", text: "With any plain append", correct: false },
+      { id: "c", text: "It never needs editing", correct: false },
+      { id: "d", text: "By deleting it first", correct: false },
+    ],
+  },
+  "User checks in scripts": {
+    q: "How should a script requiring root start?",
+    opts: [
+      { id: "a", text: "Check id -u equals 0 and exit otherwise", correct: true },
+      { id: "b", text: "Assume root always", correct: false },
+      { id: "c", text: "Ask for root mid-run", correct: false },
+      { id: "d", text: "Skip the check", correct: false },
+    ],
+  },
+  "ps snapshots": {
+    q: "What does ps show?",
+    opts: [
+      { id: "a", text: "A point-in-time snapshot of processes", correct: true },
+      { id: "b", text: "Live updating stats", correct: false },
+      { id: "c", text: "Only your shell", correct: false },
+      { id: "d", text: "Future processes", correct: false },
+    ],
+  },
+  "pgrep patterns": {
+    q: "Why prefer pgrep -f over ps | grep?",
+    opts: [
+      { id: "a", text: "It avoids matching the grep process itself", correct: true },
+      { id: "b", text: "It is older", correct: false },
+      { id: "c", text: "It only uses less typing", correct: false },
+      { id: "d", text: "There is no reason", correct: false },
+    ],
+  },
+  "kill signals": {
+    q: "What should you try before kill -9?",
+    opts: [
+      { id: "a", text: "Plain kill (SIGTERM) and a short wait", correct: true },
+      { id: "b", text: "Reboot immediately", correct: false },
+      { id: "c", text: "kill -9 twice", correct: false },
+      { id: "d", text: "Delete the binary", correct: false },
+    ],
+  },
+  "Background PIDs $!": {
+    q: "What does $! hold after cmd &?",
+    opts: [
+      { id: "a", text: "The background job's PID", correct: true },
+      { id: "b", text: "The exit status", correct: false },
+      { id: "c", text: "The job's output", correct: false },
+      { id: "d", text: "Nothing", correct: false },
+    ],
+  },
+  "wait semantics": {
+    q: "What does wait $pid do?",
+    opts: [
+      { id: "a", text: "Pauses until that job finishes, giving its status", correct: true },
+      { id: "b", text: "Starts the job", correct: false },
+      { id: "c", text: "Kills the job", correct: false },
+      { id: "d", text: "Lists jobs", correct: false },
+    ],
+  },
+  "kill %job": {
+    q: "What does kill %1 target?",
+    opts: [
+      { id: "a", text: "Job number 1 in the current shell", correct: true },
+      { id: "b", text: "PID 1", correct: false },
+      { id: "c", text: "1% of processes", correct: false },
+      { id: "d", text: "The first user", correct: false },
+    ],
+  },
+  "Five time fields": {
+    q: "In 0 2 * * *, what is the 2?",
+    opts: [
+      { id: "a", text: "The hour (2 AM)", correct: true },
+      { id: "b", text: "The day of the month", correct: false },
+      { id: "c", text: "February", correct: false },
+      { id: "d", text: "Two minutes", correct: false },
+    ],
+  },
+  "Crontab editing": {
+    q: "How do you safely edit your crontab?",
+    opts: [
+      { id: "a", text: "crontab -e, after crontab -l to review", correct: true },
+      { id: "b", text: "Edit /etc/passwd", correct: false },
+      { id: "c", text: "Run crontab -r first", correct: false },
+      { id: "d", text: "Kill the cron daemon", correct: false },
+    ],
+  },
+  "Cron logging": {
+    q: "Why redirect cron output to a log file?",
+    opts: [
+      { id: "a", text: "Otherwise failures vanish silently", correct: true },
+      { id: "b", text: "It speeds up cron", correct: false },
+      { id: "c", text: "Logs are mandatory syntax", correct: false },
+      { id: "d", text: "To hide output", correct: false },
+    ],
+  },
+  "curl flags -fsSL": {
+    q: "What does curl -fsSL add over bare curl?",
+    opts: [
+      { id: "a", text: "Fail on HTTP errors, silence progress, follow redirects", correct: true },
+      { id: "b", text: "Faster downloads only", correct: false },
+      { id: "c", text: "FTP support", correct: false },
+      { id: "d", text: "Nothing", correct: false },
+    ],
+  },
+  "Saving with -o": {
+    q: "What does curl -o out.html URL do?",
+    opts: [
+      { id: "a", text: "Saves the response body to out.html", correct: true },
+      { id: "b", text: "Prints headers only", correct: false },
+      { id: "c", text: "Uploads out.html", correct: false },
+      { id: "d", text: "Deletes the URL", correct: false },
+    ],
+  },
+  "Retries and timeouts": {
+    q: "Why set --max-time on scripted curl?",
+    opts: [
+      { id: "a", text: "To bound hangs so automation never wedges", correct: true },
+      { id: "b", text: "To speed up servers", correct: false },
+      { id: "c", text: "It is decorative", correct: false },
+      { id: "d", text: "To retry forever", correct: false },
+    ],
+  },
+  "JSON endpoints": {
+    q: "What does POST to an API typically do?",
+    opts: [
+      { id: "a", text: "Creates a resource from the sent body", correct: true },
+      { id: "b", text: "Deletes the server", correct: false },
+      { id: "c", text: "Returns the API docs", correct: false },
+      { id: "d", text: "Closes the connection only", correct: false },
+    ],
+  },
+  "Parsing with grep/awk": {
+    q: "When is grep-parsing JSON acceptable?",
+    opts: [
+      { id: "a", text: "Flat predictable payloads without jq available", correct: true },
+      { id: "b", text: "Always, even for nested JSON", correct: false },
+      { id: "c", text: "Never parse responses", correct: false },
+      { id: "d", text: "Only for XML", correct: false },
+    ],
+  },
+  "API error handling": {
+    q: "What should you check before parsing an API body?",
+    opts: [
+      { id: "a", text: "The HTTP status is 2xx", correct: true },
+      { id: "b", text: "The body length is odd", correct: false },
+      { id: "c", text: "The time of day", correct: false },
+      { id: "d", text: "Nothing", correct: false },
+    ],
+  },
+  "Branch workflows": {
+    q: "What is the branch lifecycle?",
+    opts: [
+      { id: "a", text: "Create per task, merge when done, delete after", correct: true },
+      { id: "b", text: "One branch forever", correct: false },
+      { id: "c", text: "Branch per keystroke", correct: false },
+      { id: "d", text: "Never merge", correct: false },
+    ],
+  },
+  "git switch": {
+    q: "What does git switch -c feat do?",
+    opts: [
+      { id: "a", text: "Creates branch feat and switches to it", correct: true },
+      { id: "b", text: "Deletes feat", correct: false },
+      { id: "c", text: "Merges feat", correct: false },
+      { id: "d", text: "Renames main", correct: false },
+    ],
+  },
+  "Merge strategies": {
+    q: "What does --no-ff do?",
+    opts: [
+      { id: "a", text: "Forces a merge commit preserving branch shape", correct: true },
+      { id: "b", text: "Deletes history", correct: false },
+      { id: "c", text: "Always fast-forwards", correct: false },
+      { id: "d", text: "Aborts merges", correct: false },
+    ],
+  },
+  "Stash stack": {
+    q: "How do you list stashes?",
+    opts: [
+      { id: "a", text: "git stash list", correct: true },
+      { id: "b", text: "git stash show-all --print", correct: false },
+      { id: "c", text: "git list", correct: false },
+      { id: "d", text: "ls .stash", correct: false },
+    ],
+  },
+  "stash pop vs apply": {
+    q: "How does pop differ from apply?",
+    opts: [
+      { id: "a", text: "pop drops the entry after restoring; apply keeps it", correct: true },
+      { id: "b", text: "There is no difference", correct: false },
+      { id: "c", text: "pop deletes the repo", correct: false },
+      { id: "d", text: "apply commits", correct: false },
+    ],
+  },
+  "Stash messages": {
+    q: "Why use git stash push -m msg?",
+    opts: [
+      { id: "a", text: "Labels the entry so it can be identified later", correct: true },
+      { id: "b", text: "It commits the stash", correct: false },
+      { id: "c", text: "It pushes to origin", correct: false },
+      { id: "d", text: "It is always required", correct: false },
+    ],
+  },
+  "rebase vs merge": {
+    q: "When should you rebase instead of merge?",
+    opts: [
+      { id: "a", text: "For private branches not yet shared", correct: true },
+      { id: "b", text: "For branches others already pulled", correct: false },
+      { id: "c", text: "Always rewrite public history", correct: false },
+      { id: "d", text: "When you want a merge commit", correct: false },
+    ],
+  },
+  "Interactive rebase notes": {
+    q: "What is rebase -i for?",
+    opts: [
+      { id: "a", text: "Reordering, squashing, and rewording commits via an editor", correct: true },
+      { id: "b", text: "Merging remotes", correct: false },
+      { id: "c", text: "Deleting the repo", correct: false },
+      { id: "d", text: "Viewing logs", correct: false },
+    ],
+  },
+  "Conflict flow": {
+    q: "After resolving conflict markers, what continues a rebase?",
+    opts: [
+      { id: "a", text: "git add the files, then git rebase --continue", correct: true },
+      { id: "b", text: "git push --force immediately", correct: false },
+      { id: "c", text: "Restart the machine", correct: false },
+      { id: "d", text: "git stash", correct: false },
+    ],
+  },
+  "pre-commit hooks": {
+    q: "When does pre-commit run?",
+    opts: [
+      { id: "a", text: "On every commit attempt, before history records it", correct: true },
+      { id: "b", text: "After push", correct: false },
+      { id: "c", text: "At clone time", correct: false },
+      { id: "d", text: "Weekly", correct: false },
+    ],
+  },
+  "Hook executables": {
+    q: "Why must hooks be executable with exact names?",
+    opts: [
+      { id: "a", text: "Git runs the exact filename; non-executable hooks are silently skipped", correct: true },
+      { id: "b", text: "For decoration", correct: false },
+      { id: "c", text: "Names do not matter", correct: false },
+      { id: "d", text: "Extensions are required", correct: false },
+    ],
+  },
+  "Sample hooks": {
+    q: "What are the .sample files in .git/hooks/?",
+    opts: [
+      { id: "a", text: "Documented templates to rename and activate", correct: true },
+      { id: "b", text: "Backups of your code", correct: false },
+      { id: "c", text: "Commit history", correct: false },
+      { id: "d", text: "Remote refs", correct: false },
+    ],
+  },
+  "Backup design": {
+    q: "What questions does backup design answer?",
+    opts: [
+      { id: "a", text: "What, where, and how often (plus retention)", correct: true },
+      { id: "b", text: "Color, font, logo", correct: false },
+      { id: "c", text: "Who, why, whatever", correct: false },
+      { id: "d", text: "None of them", correct: false },
+    ],
+  },
+  "Timestamped archives": {
+    q: "Why stamp backup filenames with dates?",
+    opts: [
+      { id: "a", text: "So generations never collide and pruning is trivial", correct: true },
+      { id: "b", text: "For decoration", correct: false },
+      { id: "c", text: "To slow restores", correct: false },
+      { id: "d", text: "Timestamps break tar", correct: false },
+    ],
+  },
+  "Restore checks": {
+    q: "When is a backup trustworthy?",
+    opts: [
+      { id: "a", text: "After its restore has been tested", correct: true },
+      { id: "b", text: "Immediately after creation", correct: false },
+      { id: "c", text: "When it is large", correct: false },
+      { id: "d", text: "Never", correct: false },
+    ],
+  },
+  "fetch vs pull": {
+    q: "How does fetch differ from pull?",
+    opts: [
+      { id: "a", text: "fetch downloads without touching your work; pull also merges", correct: true },
+      { id: "b", text: "There is no difference", correct: false },
+      { id: "c", text: "fetch uploads", correct: false },
+      { id: "d", text: "pull only lists", correct: false },
+    ],
+  },
+  "Upstream tracking -u": {
+    q: "What does git push -u origin main do once?",
+    opts: [
+      { id: "a", text: "Links the branch so future push/pull need no args", correct: true },
+      { id: "b", text: "Deletes the remote", correct: false },
+      { id: "c", text: "Uploads once and unlinks", correct: false },
+      { id: "d", text: "Creates a fork", correct: false },
+    ],
+  },
+  "Remote URLs": {
+    q: "Which remote URL form uses key auth?",
+    opts: [
+      { id: "a", text: "SSH form git@host:path", correct: true },
+      { id: "b", text: "https:// with a token in history", correct: false },
+      { id: "c", text: "file:///tmp", correct: false },
+      { id: "d", text: "ftp://anonymous", correct: false },
+    ],
+  },
+  "GitHub flow": {
+    q: "What is the GitHub flow sequence?",
+    opts: [
+      { id: "a", text: "Branch, push, pull request, review, merge, delete branch", correct: true },
+      { id: "b", text: "Push straight to main always", correct: false },
+      { id: "c", text: "Email patches only", correct: false },
+      { id: "d", text: "Fork once a year", correct: false },
+    ],
+  },
+  "Feature branches": {
+    q: "How should feature branches be sized?",
+    opts: [
+      { id: "a", text: "Small, one change, merged via review", correct: true },
+      { id: "b", text: "Huge, months of work", correct: false },
+      { id: "c", text: "One per developer forever", correct: false },
+      { id: "d", text: "Never delete them", correct: false },
+    ],
+  },
+  "Release branches": {
+    q: "What are release branches for?",
+    opts: [
+      { id: "a", text: "Freezing a version for stabilization while main moves on", correct: true },
+      { id: "b", text: "Storing release binaries in git", correct: false },
+      { id: "c", text: "Deleting old code", correct: false },
+      { id: "d", text: "Hiding features", correct: false },
+    ],
+  },
+  "Organizing dotfiles": {
+    q: "Where should shell config live?",
+    opts: [
+      { id: "a", text: "A version-controlled dotfiles repo with documented install", correct: true },
+      { id: "b", text: "Only in memory", correct: false },
+      { id: "c", text: "Scattered edits everywhere", correct: false },
+      { id: "d", text: "In /tmp", correct: false },
+    ],
+  },
+  "Symlink farms": {
+    q: "What does symlinking ~/.bashrc into a repo achieve?",
+    opts: [
+      { id: "a", text: "Live config and repo stay the same versioned file", correct: true },
+      { id: "b", text: "Faster shells", correct: false },
+      { id: "c", text: "Encrypted config", correct: false },
+      { id: "d", text: "Nothing", correct: false },
+    ],
+  },
+  "Bare-repo method notes": {
+    q: "What is the bare-repo dotfiles method?",
+    opts: [
+      { id: "a", text: "A bare repo with --git-dir in $HOME, no symlinks needed", correct: true },
+      { id: "b", text: "Deleting .git", correct: false },
+      { id: "c", text: "A second home directory", correct: false },
+      { id: "d", text: "Zipping dotfiles", correct: false },
+    ],
+  },
+  "PATH management": {
+    q: "Where should personal bin dirs go in PATH?",
+    opts: [
+      { id: "a", text: "Prepended, so your tools win predictably", correct: true },
+      { id: "b", text: "Appended after /tmp", correct: false },
+      { id: "c", text: "PATH order is irrelevant", correct: false },
+      { id: "d", text: "Replace PATH entirely", correct: false },
+    ],
+  },
+  "Per-project env files": {
+    q: "What belongs in .env.example?",
+    opts: [
+      { id: "a", text: "Placeholder keys without real secrets", correct: true },
+      { id: "b", text: "Production secrets", correct: false },
+      { id: "c", text: "Binary data", correct: false },
+      { id: "d", text: "Nothing at all", correct: false },
+    ],
+  },
+  "direnv notes": {
+    q: "What does direnv require before an .envrc loads?",
+    opts: [
+      { id: "a", text: "Explicit direnv allow", correct: true },
+      { id: "b", text: "Root access", correct: false },
+      { id: "c", text: "A reboot", correct: false },
+      { id: "d", text: "Network access", correct: false },
+    ],
+  },
+  "set -x tracing": {
+    q: "Where does set -x output go?",
+    opts: [
+      { id: "a", text: "stderr, leaving stdout clean", correct: true },
+      { id: "b", text: "Mixed into stdout", correct: false },
+      { id: "c", text: "syslog", correct: false },
+      { id: "d", text: "Nowhere", correct: false },
+    ],
+  },
+  "PS4 customization": {
+    q: "What does PS4 control?",
+    opts: [
+      { id: "a", text: "The prefix of every trace line", correct: true },
+      { id: "b", text: "The shell prompt only", correct: false },
+      { id: "c", text: "Script arguments", correct: false },
+      { id: "d", text: "Exit codes", correct: false },
+    ],
+  },
+  "shellcheck notes": {
+    q: "What is ShellCheck?",
+    opts: [
+      { id: "a", text: "A static analyzer for shell scripts", correct: true },
+      { id: "b", text: "A runtime debugger", correct: false },
+      { id: "c", text: "A package manager", correct: false },
+      { id: "d", text: "A shell replacement", correct: false },
+    ],
+  },
+  "Log levels": {
+    q: "Why prefix logs with [INFO]?",
+    opts: [
+      { id: "a", text: "So grep can filter by level", correct: true },
+      { id: "b", text: "For decoration", correct: false },
+      { id: "c", text: "It is required syntax", correct: false },
+      { id: "d", text: "To slow logging", correct: false },
+    ],
+  },
+  "Tee patterns": {
+    q: "What does cmd | tee run.log do?",
+    opts: [
+      { id: "a", text: "Shows output live and saves it to run.log", correct: true },
+      { id: "b", text: "Deletes run.log", correct: false },
+      { id: "c", text: "Runs cmd twice", correct: false },
+      { id: "d", text: "Hides output", correct: false },
+    ],
+  },
+  "logger command notes": {
+    q: "What is logger for?",
+    opts: [
+      { id: "a", text: "Sending lines to syslog with a tag", correct: true },
+      { id: "b", text: "Creating log files", correct: false },
+      { id: "c", text: "Deleting logs", correct: false },
+      { id: "d", text: "Printing man pages", correct: false },
+    ],
+  },
+  "getopts loop": {
+    q: "What does while getopts 'n:' opt parse?",
+    opts: [
+      { id: "a", text: "Short flags, with -n taking an argument", correct: true },
+      { id: "b", text: "Long flags only", correct: false },
+      { id: "c", text: "Filenames", correct: false },
+      { id: "d", text: "Environment variables", correct: false },
+    ],
+  },
+  "OPTARG handling": {
+    q: "Where does -n's value arrive?",
+    opts: [
+      { id: "a", text: "In $OPTARG during that iteration", correct: true },
+      { id: "b", text: "In $OPTIND", correct: false },
+      { id: "c", text: "In $0", correct: false },
+      { id: "d", text: "Nowhere", correct: false },
+    ],
+  },
+  "Usage functions": {
+    q: "When should usage() be called?",
+    opts: [
+      { id: "a", text: "For -h, unknown flags, or missing required args", correct: true },
+      { id: "b", text: "After every success", correct: false },
+      { id: "c", text: "Never in scripts", correct: false },
+      { id: "d", text: "Only on Fridays", correct: false },
+    ],
+  },
+  "Sourcing configs": {
+    q: "What does . ./config.sh do?",
+    opts: [
+      { id: "a", text: "Runs key=value assignments in the current shell", correct: true },
+      { id: "b", text: "Prints the file", correct: false },
+      { id: "c", text: "Starts a subshell", correct: false },
+      { id: "d", text: "Deletes the file", correct: false },
+    ],
+  },
+  "INI parsing with awk": {
+    q: "What does awk -F= '$1==\"k\" {print $2}' do?",
+    opts: [
+      { id: "a", text: "Prints the value of key k from key=value lines", correct: true },
+      { id: "b", text: "Prints all keys", correct: false },
+      { id: "c", text: "Sorts the file", correct: false },
+      { id: "d", text: "Counts equals signs", correct: false },
+    ],
+  },
+  "Defaults + overrides": {
+    q: "What is the standard config precedence?",
+    opts: [
+      { id: "a", text: "Defaults, then file, then env, then flags", correct: true },
+      { id: "b", text: "Flags are weakest", correct: false },
+      { id: "c", text: "Random order", correct: false },
+      { id: "d", text: "File always beats flags", correct: false },
+    ],
+  },
+  "xargs -P": {
+    q: "What does xargs -P4 do?",
+    opts: [
+      { id: "a", text: "Runs up to four workers in parallel", correct: true },
+      { id: "b", text: "Prints output four times", correct: false },
+      { id: "c", text: "Uses port 4", correct: false },
+      { id: "d", text: "Pauses 4 seconds", correct: false },
+    ],
+  },
+  "wait fan-out": {
+    q: "What does launching N jobs with & then wait achieve?",
+    opts: [
+      { id: "a", text: "Parallel fan-out with a single rejoin point", correct: true },
+      { id: "b", text: "Sequential execution", correct: false },
+      { id: "c", text: "Job deletion", correct: false },
+      { id: "d", text: "Nothing", correct: false },
+    ],
+  },
+  "Job slots": {
+    q: "Why cap parallel jobs?",
+    opts: [
+      { id: "a", text: "Unbounded jobs swamp memory and file descriptors", correct: true },
+      { id: "b", text: "Slots speed up CPUs", correct: false },
+      { id: "c", text: "Required by syntax", correct: false },
+      { id: "d", text: "There is no reason", correct: false },
+    ],
+  },
+  "Assert functions": {
+    q: "What does assert_eq print on mismatch?",
+    opts: [
+      { id: "a", text: "A FAIL line naming the check", correct: true },
+      { id: "b", text: "Nothing", correct: false },
+      { id: "c", text: "A stack trace", correct: false },
+      { id: "d", text: "The whole file", correct: false },
+    ],
+  },
+  "Test runners (bats) notes": {
+    q: "What is bats?",
+    opts: [
+      { id: "a", text: "A test runner with @test blocks and setup/teardown", correct: true },
+      { id: "b", text: "A linter", correct: false },
+      { id: "c", text: "A shell fork", correct: false },
+      { id: "d", text: "A CI server", correct: false },
+    ],
+  },
+  "Exit-code checks": {
+    q: "How does CI read test results?",
+    opts: [
+      { id: "a", text: "Only the exit code: 0 green, nonzero red", correct: true },
+      { id: "b", text: "Screenshots", correct: false },
+      { id: "c", text: "Log colors", correct: false },
+      { id: "d", text: "Email", correct: false },
+    ],
+  },
+  "Quoting untrusted input": {
+    q: "Why quote \"$user\"?",
+    opts: [
+      { id: "a", text: "So metacharacters print literally instead of executing", correct: true },
+      { id: "b", text: "For speed", correct: false },
+      { id: "c", text: "It encrypts the value", correct: false },
+      { id: "d", text: "Quotes do nothing", correct: false },
+    ],
+  },
+  "eval dangers": {
+    q: "What is the risk of eval \"echo $user\"?",
+    opts: [
+      { id: "a", text: "Embedded commands in $user execute", correct: true },
+      { id: "b", text: "It prints slowly", correct: false },
+      { id: "c", text: "It lowercases output", correct: false },
+      { id: "d", text: "There is no risk", correct: false },
+    ],
+  },
+  "Injection demo (safe)": {
+    q: "How should injection be demonstrated?",
+    opts: [
+      { id: "a", text: "With echo-only payloads, never destructive ones", correct: true },
+      { id: "b", text: "With rm -rf payloads", correct: false },
+      { id: "c", text: "On production", correct: false },
+      { id: "d", text: "Without explanation", correct: false },
+    ],
+  },
+  "=~ operator": {
+    q: "What must be true of the pattern in [[ $s =~ pat ]]?",
+    opts: [
+      { id: "a", text: "Unquoted for regex; quoted means literal", correct: true },
+      { id: "b", text: "Always quoted", correct: false },
+      { id: "c", text: "Always in single quotes", correct: false },
+      { id: "d", text: "Stored on disk", correct: false },
+    ],
+  },
+  "BASH_REMATCH": {
+    q: "After [[ v1.2.3 =~ v([0-9]+) ]], what is BASH_REMATCH[1]?",
+    opts: [
+      { id: "a", text: "1", correct: true },
+      { id: "b", text: "v1", correct: false },
+      { id: "c", text: "v1.2.3", correct: false },
+      { id: "d", text: "Empty", correct: false },
+    ],
+  },
+  "Validation patterns": {
+    q: "What anchors a full-string validation regex?",
+    opts: [
+      { id: "a", text: "^ at the start and $ at the end", correct: true },
+      { id: "b", text: "Quotes around it", correct: false },
+      { id: "c", text: "Parentheses", correct: false },
+      { id: "d", text: "Nothing is needed", correct: false },
+    ],
+  },
+  "date formatting": {
+    q: "What does date +%F print?",
+    opts: [
+      { id: "a", text: "The date as YYYY-MM-DD", correct: true },
+      { id: "b", text: "The filename", correct: false },
+      { id: "c", text: "The epoch", correct: false },
+      { id: "d", text: "The timezone name", correct: false },
+    ],
+  },
+  "Epoch math": {
+    q: "Why compute with date +%s values?",
+    opts: [
+      { id: "a", text: "Durations become trivial integer subtraction", correct: true },
+      { id: "b", text: "Epochs print prettier", correct: false },
+      { id: "c", text: "It is required by law", correct: false },
+      { id: "d", text: "They never change", correct: false },
+    ],
+  },
+  "date -d portability notes": {
+    q: "What is the portability issue with date -d?",
+    opts: [
+      { id: "a", text: "BSD/macOS date uses -v/-j instead of GNU -d", correct: true },
+      { id: "b", text: "GNU date lacks -d", correct: false },
+      { id: "c", text: "Epochs differ per OS", correct: false },
+      { id: "d", text: "No issue exists", correct: false },
+    ],
+  },
+  "sort -n/-r/-u": {
+    q: "What does sort -n fix versus default sort?",
+    opts: [
+      { id: "a", text: "Orders 10 after 9 instead of after 1", correct: true },
+      { id: "b", text: "Sorts faster", correct: false },
+      { id: "c", text: "Ignores case", correct: false },
+      { id: "d", text: "Sorts randomly", correct: false },
+    ],
+  },
+  "join two files": {
+    q: "What must be true before join runs?",
+    opts: [
+      { id: "a", text: "Both files sorted on the key field", correct: true },
+      { id: "b", text: "Files must be empty", correct: false },
+      { id: "c", text: "Keys must be secret", correct: false },
+      { id: "d", text: "Nothing", correct: false },
+    ],
+  },
+  "cut ranges": {
+    q: "What does cut -d: -f2- print?",
+    opts: [
+      { id: "a", text: "Field 2 through the end of each line", correct: true },
+      { id: "b", text: "Only field 2", correct: false },
+      { id: "c", text: "Only the delimiter", correct: false },
+      { id: "d", text: "Line numbers", correct: false },
+    ],
+  },
+  "df/du reading": {
+    q: "Which answers 'which directory filled the disk'?",
+    opts: [
+      { id: "a", text: "du -sh drilling into candidate trees", correct: true },
+      { id: "b", text: "df alone", correct: false },
+      { id: "c", text: "free", correct: false },
+      { id: "d", text: "uname", correct: false },
+    ],
+  },
+  "Load averages": {
+    q: "How should load 8.0 on 4 CPUs be read?",
+    opts: [
+      { id: "a", text: "Overloaded: twice the runnable capacity", correct: true },
+      { id: "b", text: "Idle", correct: false },
+      { id: "c", text: "Normal, always", correct: false },
+      { id: "d", text: "Crashed", correct: false },
+    ],
+  },
+  "Log triage notes": {
+    q: "What is the triage order?",
+    opts: [
+      { id: "a", text: "System load, disk, memory, then app logs", correct: true },
+      { id: "b", text: "App logs first, always", correct: false },
+      { id: "c", text: "Reboot first", correct: false },
+      { id: "d", text: "Random order", correct: false },
+    ],
+  },
+  "apt/dnf script guards": {
+    q: "What does command -v curl || sudo apt-get install -y curl do?",
+    opts: [
+      { id: "a", text: "Installs curl only when missing", correct: true },
+      { id: "b", text: "Always reinstalls", correct: false },
+      { id: "c", text: "Removes curl", correct: false },
+      { id: "d", text: "Updates everything", correct: false },
+    ],
+  },
+  "Idempotent installs": {
+    q: "What makes setup idempotent?",
+    opts: [
+      { id: "a", text: "Check-before-install so reruns converge", correct: true },
+      { id: "b", text: "Running once only", correct: false },
+      { id: "c", text: "Skipping checks", correct: false },
+      { id: "d", text: "Rebooting after", correct: false },
+    ],
+  },
+  "Checksums notes": {
+    q: "What does a mismatched sha256 mean?",
+    opts: [
+      { id: "a", text: "Stop: the download is corrupt or tampered", correct: true },
+      { id: "b", text: "Proceed anyway", correct: false },
+      { id: "c", text: "Retry over plain http", correct: false },
+      { id: "d", text: "Ignore hashes", correct: false },
+    ],
+  },
+  "Key pairs": {
+    q: "Where does the SSH private key live?",
+    opts: [
+      { id: "a", text: "Only on your machine, never shared", correct: true },
+      { id: "b", text: "On every server", correct: false },
+      { id: "c", text: "In the repo", correct: false },
+      { id: "d", text: "In email", correct: false },
+    ],
+  },
+  "ssh config": {
+    q: "What does ~/.ssh/config provide?",
+    opts: [
+      { id: "a", text: "Short host names with user, key, and port", correct: true },
+      { id: "b", text: "Faster encryption", correct: false },
+      { id: "c", text: "New keys", correct: false },
+      { id: "d", text: "Firewall rules", correct: false },
+    ],
+  },
+  "scp/rsync notes": {
+    q: "When is rsync preferred over scp?",
+    opts: [
+      { id: "a", text: "Trees, repeats, resume, and incremental sync", correct: true },
+      { id: "b", text: "Single small files", correct: false },
+      { id: "c", text: "Never", correct: false },
+      { id: "d", text: "Without SSH", correct: false },
+    ],
+  },
+  "systemctl units": {
+    q: "What does systemctl enable app do?",
+    opts: [
+      { id: "a", text: "Starts app on boot (persists), beyond one start", correct: true },
+      { id: "b", text: "Starts app once right now", correct: false },
+      { id: "c", text: "Installs the app", correct: false },
+      { id: "d", text: "Deletes the unit", correct: false },
+    ],
+  },
+  "Service files": {
+    q: "What does After=network.target declare?",
+    opts: [
+      { id: "a", text: "The service starts only after networking is up", correct: true },
+      { id: "b", text: "It downloads the network", correct: false },
+      { id: "c", text: "It restarts networking", correct: false },
+      { id: "d", text: "Nothing", correct: false },
+    ],
+  },
+  "Logs with journalctl": {
+    q: "How do you read a service's recent logs?",
+    opts: [
+      { id: "a", text: "journalctl -u app --since '1 hour ago'", correct: true },
+      { id: "b", text: "cat the binary", correct: false },
+      { id: "c", text: "ps aux", correct: false },
+      { id: "d", text: "Reboot and watch", correct: false },
+    ],
+  },
+  "Project scaffolding": {
+    q: "What does a scaffolding script produce?",
+    opts: [
+      { id: "a", text: "A consistent runnable project skeleton", correct: true },
+      { id: "b", text: "Documentation only", correct: false },
+      { id: "c", text: "A deployed app", correct: false },
+      { id: "d", text: "Random files", correct: false },
+    ],
+  },
+  "Checklist scripts": {
+    q: "Why store checklist steps in an array?",
+    opts: [
+      { id: "a", text: "The list stays data-driven and uniform", correct: true },
+      { id: "b", text: "Arrays run faster", correct: false },
+      { id: "c", text: "Required syntax", correct: false },
+      { id: "d", text: "To hide steps", correct: false },
+    ],
+  },
+  "Idempotency": {
+    q: "What makes a planner script resumable?",
+    opts: [
+      { id: "a", text: "Every step safe-to-repeat with state checks", correct: true },
+      { id: "b", text: "Deleting state first", correct: false },
+      { id: "c", text: "Skipping verification", correct: false },
+      { id: "d", text: "Running as root", correct: false },
+    ],
+  },
+  "Deploy pipeline": {
+    q: "What gates each deploy stage?",
+    opts: [
+      { id: "a", text: "The previous stage's success check", correct: true },
+      { id: "b", text: "The time of day", correct: false },
+      { id: "c", text: "Nothing", correct: false },
+      { id: "d", text: "A coin flip", correct: false },
+    ],
+  },
+  "Health checks": {
+    q: "What proves a deploy worked?",
+    opts: [
+      { id: "a", text: "Process alive, port open, endpoint returning 200", correct: true },
+      { id: "b", text: "The script exited", correct: false },
+      { id: "c", text: "Logs exist", correct: false },
+      { id: "d", text: "Hope", correct: false },
+    ],
+  },
+  "Rollback plan": {
+    q: "What must exist before shipping forward?",
+    opts: [
+      { id: "a", text: "A tested reverse: prior artifact plus switch-back", correct: true },
+      { id: "b", text: "A press release", correct: false },
+      { id: "c", text: "More features", correct: false },
+      { id: "d", text: "Nothing", correct: false },
+    ],
+  },
 };
 
 /* ─── Content generators ─── */
@@ -925,9 +2785,13 @@ function generateBashTopicContent(topic: string, title: string, day: number): st
  * the real Piston backend (language "bash"), whose sandbox gives no
  * filesystem, environment, network, or cwd guarantees. Only scripts whose
  * stdout depends purely on literals, arithmetic, and literal-driven control
- * flow are gated. Days touching the filesystem (5, 21, 23–28, 35), the
- * environment (30, 36), privileges (37, 38), the network (22), timing
- * (19, 20), interactive stdin (32), or a real deploy (40) stay ungated. */
+ * flow are gated. Days touching the filesystem or home directory (5, 21,
+ * 23, 24, 26–28, 35, 65–69, 76–80, 83), the environment or runtime user
+ * (30, 36, 70, 84), privileges or root (37, 38, 96), the network or
+ * credentials (22, 25, 74, 75, 81, 82, 97), system services or daemons
+ * (20, 73, 98), timing or job control (19, 72, 89), host-specific output
+ * (36, 71, 95), interactive stdin (32, 78), or a real deploy (40, 100)
+ * stay ungated. */
 const BASH_EXPECTED_OUTPUT: Record<number, string> = {
   1: "Hello, Shell!",
   2: "Ada",
@@ -951,6 +2815,40 @@ const BASH_EXPECTED_OUTPUT: Record<number, string> = {
   33: "line one",
   34: "Hello, Ada",
   39: "works in sh and bash",
+  41: "strict mode on",
+  42: "shebang works",
+  43: "Hello, World",
+  44: "report.txt",
+  45: "20 30 40",
+  46: "HELLO-WORLD",
+  47: "five wins",
+  48: "regex match",
+  49: "chain ok",
+  50: "c-loop 1",
+  51: "lines 3",
+  52: "sum 42",
+  53: "shadowed",
+  54: "cleanup ran",
+  55: "trap installed and reset",
+  56: "err-line",
+  57: "streams equal",
+  58: "ada-42",
+  59: "three",
+  60: "disk full",
+  61: "three",
+  62: "FOO FOO",
+  63: "60",
+  64: "ada",
+  85: "answer 42",
+  86: "service stopped",
+  87: "Hello, World",
+  88: "example:8080",
+  90: "pass: math works",
+  91: "quoted safe",
+  92: "valid email",
+  93: "1970-01-01",
+  94: "apple",
+  99: "step: gather",
 };
 
 function generateBashExercises(day: number, blueprint: BashBlueprint): Lesson["exercises"] {
